@@ -1,4 +1,4 @@
-const interactiveItems = document.querySelectorAll('.step, .product');
+const interactiveItems = document.querySelectorAll('.process-card, .product-card');
 const modal = document.getElementById('processModal');
 const closeModal = document.getElementById('closeModal');
 const modalImg = document.getElementById('modalImg');
