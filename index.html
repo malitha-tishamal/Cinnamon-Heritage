@@ -12,23 +12,45 @@
 <body>
   <!-- Header and Navigation -->
   <header>
-    <nav>
-      <div class="logo">Cinnamon&nbsp;Heritage</div>
-      <ul class="nav-links">
-        <li><a href="#about">About&nbsp;Us</a></li>
-        <li><a href="#factory">Factory</a></li>
-        <li><a href="#process">Our&nbsp;Process</a></li>
-        <li><a href="#products">Products</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+      <div class="container">
+        <a class="navbar-brand logo fs-3 text-white" href="#" style="font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: 2px;">Cinnamon&nbsp;Heritage</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+          <ul class="navbar-nav gap-3 text-uppercase nav-links" style="font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.9rem; letter-spacing: 1px;">
+            <li class="nav-item">
+              <a class="nav-link text-white" href="#about">About&nbsp;Us</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="#factory">Factory</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="#process">Our&nbsp;Process</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="#products">Products</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="#contact">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
     </nav>
     <!-- Hero section -->
-    <section class="hero">
-      <div class="hero-content">
-        <h1>PURE CEYLON CINNAMON</h1>
-        <p>From our estates in Galle&nbsp;Unanwitiya to your table &mdash; pure, natural and authentic. Industrial grade quality.</p>
-        <a class="cta" href="#about">Discover Our Heritage</a>
+    <section class="hero d-flex align-items-center position-relative min-vh-100 w-100" style="background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), url('images/cinnamon_spices.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
+      <div class="container position-relative z-2">
+        <div class="row mt-5">
+          <div class="col-lg-8 border-start border-4 ps-4 py-3" style="border-color: var(--accent) !important;">
+            <h1 class="display-3 text-white fw-bold mb-4" style="font-family: 'Oswald', sans-serif;">PURE CEYLON CINNAMON</h1>
+            <p class="lead text-white-50 mb-5 fs-4" style="max-width: 600px;">From our estates in Galle&nbsp;Unanwitiya to your table &mdash; pure, natural and authentic. Industrial grade quality.</p>
+            <a class="btn btn-lg rounded-0 text-white text-uppercase fw-bold px-5 py-3 cta-btn" href="#about" style="background-color: var(--accent); font-family: 'Oswald', sans-serif; letter-spacing: 2px;">Discover Our Heritage</a>
+          </div>
+        </div>
       </div>
+      <div class="position-absolute bottom-0 start-0 w-100 h-25" style="background: linear-gradient(to top, var(--bg-primary), transparent);"></div>
     </section>
   </header>
 
@@ -36,82 +58,118 @@
   <main>
     <!-- About section -->
     <section id="about" class="about">
-      <div class="section-title">
-        <h2>From Our Own Estate</h2>
-      </div>
-      <div class="two-column">
-        <div class="text-content">
-          <p>Our cinnamon is cultivated in the rich soils of Galle&nbsp;Unanwitiya in Sri Lanka. The district of Galle is known as “Cinnamon country” where the coastline quickly rises into hilly highlands that provide the ideal fertile land for Ceylon cinnamon to grow. Generations of local expertise and sustainable farming practices ensure that every tree flourishes.</p>
+      <div class="container">
+        <div class="section-title">
+          <h2>From Our Own Estate</h2>
         </div>
-        <div class="image-content">
-          <img src="images/cinnamon_plantlings.jpg" alt="Cinnamon plantlings in our estate">
+        <div class="row align-items-center gx-lg-5">
+          <div class="col-lg-6 text-content mb-4 mb-lg-0">
+            <p>Our cinnamon is cultivated in the rich soils of Galle&nbsp;Unanwitiya in Sri Lanka. The district of Galle is known as “Cinnamon country” where the coastline quickly rises into hilly highlands that provide the ideal fertile land for Ceylon cinnamon to grow. Generations of local expertise and sustainable farming practices ensure that every tree flourishes.</p>
+          </div>
+          <div class="col-lg-6 image-content">
+            <img src="images/cinnamon_plantlings.jpg" alt="Cinnamon plantlings in our estate" class="img-fluid w-100">
+          </div>
         </div>
       </div>
     </section>
 
     <!-- Factory section -->
     <section id="factory" class="factory">
-      <div class="section-title">
-        <h2>Our Facility</h2>
-      </div>
-      <div class="two-column reverse">
-        <div class="text-content">
-          <p>We process our cinnamon in our own modern manufacturing facility. Skilled artisans and the local community combine traditional Sri Lankan techniques with modern technology to retain the flavour and authenticity of Ceylon cinnamon. Our facilities feature hygienic stainless steel workstations and advanced mechanical dryers to ensure clean and safe production.</p>
+      <div class="container">
+        <div class="section-title">
+          <h2>Our Facility</h2>
         </div>
-        <div class="image-content">
-          <img src="images/cinnamon_srilanka.jpg" alt="Bundles of cinnamon quills">
+        <div class="row align-items-center gx-lg-5 flex-lg-row-reverse">
+          <div class="col-lg-6 text-content mb-4 mb-lg-0">
+            <p>We process our cinnamon in our own modern manufacturing facility. Skilled artisans and the local community combine traditional Sri Lankan techniques with modern technology to retain the flavour and authenticity of Ceylon cinnamon. Our facilities feature hygienic stainless steel workstations and advanced mechanical dryers to ensure clean and safe production.</p>
+          </div>
+          <div class="col-lg-6 image-content">
+            <img src="images/cinnamon_srilanka.jpg" alt="Bundles of cinnamon quills" class="img-fluid w-100">
+          </div>
         </div>
       </div>
     </section>
 
     <!-- Process section -->
     <section id="process" class="process">
-      <div class="section-title">
-        <h2>Industrial Process</h2>
-      </div>
-      <div class="steps">
-        <div class="step" data-num="01" data-title="Harvesting" data-img="images/step1_harvest.png" data-desc="Hand-selected mature stems are harvested from our cinnamon bushes. Our workers carefully select branches of the highest quality, ensuring the perfect balance of age and thickness for premium Ceylon cinnamon production.">
-          <div class="step-img-preview" style="background-image: url('images/step1_harvest.png');"></div>
-          <div class="step-text">
-            <h3><span class="step-num">01</span> Harvesting</h3>
-            <p>Hand-selected mature stems are harvested from our cinnamon bushes...</p>
-            <span class="step-btn">View Details &rarr;</span>
-          </div>
+      <div class="container">
+        <div class="section-title">
+          <h2>Industrial Process</h2>
         </div>
-        
-        <div class="step" data-num="02" data-title="Washing" data-img="images/step2_wash.png" data-desc="Before processing, the quills are thoroughly washed on top of stone or stainless steel tables with clean water. This rigorous industrial cleaning process ensures there is no residual soil or exterior contamination.">
-          <div class="step-img-preview" style="background-image: url('images/step2_wash.png');"></div>
-          <div class="step-text">
-            <h3><span class="step-num">02</span> Washing</h3>
-            <p>Cleaned thoroughly on top of stone or stainless steel tables...</p>
-            <span class="step-btn">View Details &rarr;</span>
+        <div class="row g-4">
+          <div class="col-xl-4 col-lg-4 col-md-6">
+            <div class="card h-100 rounded-0 border shadow-sm process-card" data-num="01" data-title="Harvesting" data-img="images/step1_harvest.png" data-desc="Hand-selected mature stems are harvested from our cinnamon bushes. Our workers carefully select branches of the highest quality, ensuring the perfect balance of age and thickness for premium Ceylon cinnamon production.">
+              <div class="overflow-hidden" style="height: 180px;">
+                <div class="card-img-top h-100 w-100 process-img" style="background-image: url('images/step1_harvest.png'); background-size: cover; background-position: center; transition: transform 0.5s ease;"></div>
+              </div>
+              <div class="card-body d-flex flex-column p-4 border-top">
+                <h3 class="card-title d-flex align-items-center gap-3 fs-4 mb-3" style="font-family: 'Oswald', sans-serif;">
+                  <span class="display-4 fw-bold text-muted lh-1 process-num" style="transition: color 0.3s ease;">01</span> Harvesting
+                </h3>
+                <p class="card-text text-secondary flex-grow-1">Hand-selected mature stems are harvested from our cinnamon bushes...</p>
+                <button class="btn btn-outline-dark rounded-0 fw-bold mt-auto align-self-start text-uppercase process-btn" style="font-family: 'Oswald', sans-serif; font-size: 0.85rem; letter-spacing: 1px; transition: all 0.3s ease;">View Details &rarr;</button>
+              </div>
+            </div>
           </div>
-        </div>
+          
+          <div class="col-xl-4 col-lg-4 col-md-6">
+            <div class="card h-100 rounded-0 border shadow-sm process-card" data-num="02" data-title="Washing" data-img="images/step2_wash.png" data-desc="Before processing, the quills are thoroughly washed on top of stone or stainless steel tables with clean water. This rigorous industrial cleaning process ensures there is no residual soil or exterior contamination.">
+              <div class="overflow-hidden" style="height: 180px;">
+                <div class="card-img-top h-100 w-100 process-img" style="background-image: url('images/step2_wash.png'); background-size: cover; background-position: center; transition: transform 0.5s ease;"></div>
+              </div>
+              <div class="card-body d-flex flex-column p-4 border-top">
+                <h3 class="card-title d-flex align-items-center gap-3 fs-4 mb-3" style="font-family: 'Oswald', sans-serif;">
+                  <span class="display-4 fw-bold text-muted lh-1 process-num" style="transition: color 0.3s ease;">02</span> Washing
+                </h3>
+                <p class="card-text text-secondary flex-grow-1">Cleaned thoroughly on top of stone or stainless steel tables...</p>
+                <button class="btn btn-outline-dark rounded-0 fw-bold mt-auto align-self-start text-uppercase process-btn" style="font-family: 'Oswald', sans-serif; font-size: 0.85rem; letter-spacing: 1px; transition: all 0.3s ease;">View Details &rarr;</button>
+              </div>
+            </div>
+          </div>
 
-        <div class="step" data-num="03" data-title="Peeling" data-img="images/step3_peel.png" data-desc="After removing the outer bark, highly trained peelers loosen the inner bark with specialized brass rods. They then carefully ease the bark off using precision stainless steel knives, showcasing incredible artisan skill combined with industrial efficiency.">
-          <div class="step-img-preview" style="background-image: url('images/step3_peel.png');"></div>
-          <div class="step-text">
-            <h3><span class="step-num">03</span> Peeling</h3>
-            <p>Trained peelers loosen the inner bark with brass rods...</p>
-            <span class="step-btn">View Details &rarr;</span>
+          <div class="col-xl-4 col-lg-4 col-md-6">
+            <div class="card h-100 rounded-0 border shadow-sm process-card" data-num="03" data-title="Peeling" data-img="images/step3_peel.png" data-desc="After removing the outer bark, highly trained peelers loosen the inner bark with specialized brass rods. They then carefully ease the bark off using precision stainless steel knives, showcasing incredible artisan skill combined with industrial efficiency.">
+              <div class="overflow-hidden" style="height: 180px;">
+                <div class="card-img-top h-100 w-100 process-img" style="background-image: url('images/step3_peel.png'); background-size: cover; background-position: center; transition: transform 0.5s ease;"></div>
+              </div>
+              <div class="card-body d-flex flex-column p-4 border-top">
+                <h3 class="card-title d-flex align-items-center gap-3 fs-4 mb-3" style="font-family: 'Oswald', sans-serif;">
+                  <span class="display-4 fw-bold text-muted lh-1 process-num" style="transition: color 0.3s ease;">03</span> Peeling
+                </h3>
+                <p class="card-text text-secondary flex-grow-1">Trained peelers loosen the inner bark with brass rods...</p>
+                <button class="btn btn-outline-dark rounded-0 fw-bold mt-auto align-self-start text-uppercase process-btn" style="font-family: 'Oswald', sans-serif; font-size: 0.85rem; letter-spacing: 1px; transition: all 0.3s ease;">View Details &rarr;</button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="step" data-num="04" data-title="Drying" data-img="images/step4_dry.png" data-desc="The delicately curled quills are initially dried on coir rope racks in shaded areas to preserve essential oils. Finally, they are finished using modern mechanical dryers to lock in deep colors and intense aromas perfectly.">
-          <div class="step-img-preview" style="background-image: url('images/step4_dry.png');"></div>
-          <div class="step-text">
-            <h3><span class="step-num">04</span> Drying</h3>
-            <p>Curled quills are dried on coir racks, finished with mechanical dryers...</p>
-            <span class="step-btn">View Details &rarr;</span>
+          <div class="col-xl-4 col-lg-4 col-md-6">
+            <div class="card h-100 rounded-0 border shadow-sm process-card" data-num="04" data-title="Drying" data-img="images/step4_dry.png" data-desc="The delicately curled quills are initially dried on coir rope racks in shaded areas to preserve essential oils. Finally, they are finished using modern mechanical dryers to lock in deep colors and intense aromas perfectly.">
+              <div class="overflow-hidden" style="height: 180px;">
+                <div class="card-img-top h-100 w-100 process-img" style="background-image: url('images/step4_dry.png'); background-size: cover; background-position: center; transition: transform 0.5s ease;"></div>
+              </div>
+              <div class="card-body d-flex flex-column p-4 border-top">
+                <h3 class="card-title d-flex align-items-center gap-3 fs-4 mb-3" style="font-family: 'Oswald', sans-serif;">
+                  <span class="display-4 fw-bold text-muted lh-1 process-num" style="transition: color 0.3s ease;">04</span> Drying
+                </h3>
+                <p class="card-text text-secondary flex-grow-1">Curled quills are dried on coir racks, finished with mechanical dryers...</p>
+                <button class="btn btn-outline-dark rounded-0 fw-bold mt-auto align-self-start text-uppercase process-btn" style="font-family: 'Oswald', sans-serif; font-size: 0.85rem; letter-spacing: 1px; transition: all 0.3s ease;">View Details &rarr;</button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="step" data-num="05" data-title="Packing" data-img="images/step5_pack.png" data-desc="Quills are strictly graded according to standard thickness and appearance thresholds. Following this, they are hygienically sealed and packed into specialized containers, guaranteeing ultimate freshness and quality upon arrival.">
-          <div class="step-img-preview" style="background-image: url('images/step5_pack.png');"></div>
-          <div class="step-text">
-            <h3><span class="step-num">05</span> Packing</h3>
-            <p>Hygienically graded and packed to preserve freshness and quality...</p>
-            <span class="step-btn">View Details &rarr;</span>
+          <div class="col-xl-4 col-lg-4 col-md-6">
+            <div class="card h-100 rounded-0 border shadow-sm process-card" data-num="05" data-title="Packing" data-img="images/step5_pack.png" data-desc="Quills are strictly graded according to standard thickness and appearance thresholds. Following this, they are hygienically sealed and packed into specialized containers, guaranteeing ultimate freshness and quality upon arrival.">
+              <div class="overflow-hidden" style="height: 180px;">
+                <div class="card-img-top h-100 w-100 process-img" style="background-image: url('images/step5_pack.png'); background-size: cover; background-position: center; transition: transform 0.5s ease;"></div>
+              </div>
+              <div class="card-body d-flex flex-column p-4 border-top">
+                <h3 class="card-title d-flex align-items-center gap-3 fs-4 mb-3" style="font-family: 'Oswald', sans-serif;">
+                  <span class="display-4 fw-bold text-muted lh-1 process-num" style="transition: color 0.3s ease;">05</span> Packing
+                </h3>
+                <p class="card-text text-secondary flex-grow-1">Hygienically graded and packed to preserve freshness and quality...</p>
+                <button class="btn btn-outline-dark rounded-0 fw-bold mt-auto align-self-start text-uppercase process-btn" style="font-family: 'Oswald', sans-serif; font-size: 0.85rem; letter-spacing: 1px; transition: all 0.3s ease;">View Details &rarr;</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -119,48 +177,58 @@
 
     <!-- Products section -->
     <section id="products" class="products">
-      <div class="section-title">
-        <h2>Product Range</h2>
-      </div>
-      <div class="product-grid">
-        <div class="product" data-title="Cinnamon Quills" data-img="images/product1_quills.png" data-desc="Our premium, hand-rolled Ceylon cinnamon quills. Carefully graded and cut to exact specifications. Perfect for culinary applications, brewing, and luxury garnishing.">
-          <div class="product-img-wrapper">
-            <img src="images/product1_quills.png" alt="Cinnamon quills">
-          </div>
-          <div class="product-info">
-            <h3>Cinnamon&nbsp;Quills</h3>
-            <p>Hand-rolled sticks full of aroma.</p>
-            <span class="step-btn" style="margin-top: 15px;">View Details &rarr;</span>
-          </div>
+      <div class="container">
+        <div class="section-title">
+          <h2>Product Range</h2>
         </div>
-        <div class="product" data-title="Cinnamon Powder" data-img="images/cinnamon_spices.jpg" data-desc="Finely ground Ceylon cinnamon powder. Milled precisely to maintain its rich flavor profile and aromatic essential oils without burning during the grinding process.">
-          <div class="product-img-wrapper">
-            <img src="images/cinnamon_spices.jpg" alt="Cinnamon powder">
+        <div class="row g-4">
+          <div class="col-lg-3 col-md-6">
+            <div class="card h-100 rounded-0 border shadow-sm product-card" data-title="Cinnamon Quills" data-img="images/product1_quills.png" data-desc="Our premium, hand-rolled Ceylon cinnamon quills. Carefully graded and cut to exact specifications. Perfect for culinary applications, brewing, and luxury garnishing.">
+              <div class="overflow-hidden" style="height: 200px;">
+                <img src="images/product1_quills.png" alt="Cinnamon quills" class="card-img-top h-100 w-100 object-fit-cover product-img" style="transition: transform 0.6s ease;">
+              </div>
+              <div class="card-body d-flex flex-column p-4 border-top">
+                <h3 class="card-title fs-5 mb-2" style="font-family: 'Oswald', sans-serif;">Cinnamon&nbsp;Quills</h3>
+                <p class="card-text text-secondary flex-grow-1">Hand-rolled sticks full of aroma.</p>
+                <button class="btn btn-outline-dark rounded-0 fw-bold mt-auto align-self-start text-uppercase mt-3 product-btn" style="font-family: 'Oswald', sans-serif; font-size: 0.85rem; letter-spacing: 1px; transition: all 0.3s ease;">View Details &rarr;</button>
+              </div>
+            </div>
           </div>
-          <div class="product-info">
-            <h3>Cinnamon&nbsp;Powder</h3>
-            <p>Finely ground powder for rich flavour.</p>
-            <span class="step-btn" style="margin-top: 15px;">View Details &rarr;</span>
+          <div class="col-lg-3 col-md-6">
+            <div class="card h-100 rounded-0 border shadow-sm product-card" data-title="Cinnamon Powder" data-img="images/cinnamon_spices.jpg" data-desc="Finely ground Ceylon cinnamon powder. Milled precisely to maintain its rich flavor profile and aromatic essential oils without burning during the grinding process.">
+              <div class="overflow-hidden" style="height: 200px;">
+                <img src="images/cinnamon_spices.jpg" alt="Cinnamon powder" class="card-img-top h-100 w-100 object-fit-cover product-img" style="transition: transform 0.6s ease;">
+              </div>
+              <div class="card-body d-flex flex-column p-4 border-top">
+                <h3 class="card-title fs-5 mb-2" style="font-family: 'Oswald', sans-serif;">Cinnamon&nbsp;Powder</h3>
+                <p class="card-text text-secondary flex-grow-1">Finely ground powder for rich flavour.</p>
+                <button class="btn btn-outline-dark rounded-0 fw-bold mt-auto align-self-start text-uppercase mt-3 product-btn" style="font-family: 'Oswald', sans-serif; font-size: 0.85rem; letter-spacing: 1px; transition: all 0.3s ease;">View Details &rarr;</button>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="product" data-title="Cinnamon Chips" data-img="https://images.unsplash.com/photo-1628186175936-a846f481cff4?auto=format&fit=crop&w=800&q=80" data-desc="Ceylon cinnamon bark chips neatly cut into uniform splints. Ideal for brewing robust artisan teas, crafting tinctures, and professional botanical extraction.">
-          <div class="product-img-wrapper">
-            <img src="https://images.unsplash.com/photo-1628186175936-a846f481cff4?auto=format&fit=crop&w=800&q=80" alt="Cinnamon chips" crossorigin="anonymous">
+          <div class="col-lg-3 col-md-6">
+            <div class="card h-100 rounded-0 border shadow-sm product-card" data-title="Cinnamon Chips" data-img="https://images.unsplash.com/photo-1628186175936-a846f481cff4?auto=format&fit=crop&w=800&q=80" data-desc="Ceylon cinnamon bark chips neatly cut into uniform splints. Ideal for brewing robust artisan teas, crafting tinctures, and professional botanical extraction.">
+              <div class="overflow-hidden" style="height: 200px;">
+                <img src="https://images.unsplash.com/photo-1628186175936-a846f481cff4?auto=format&fit=crop&w=800&q=80" alt="Cinnamon chips" class="card-img-top h-100 w-100 object-fit-cover product-img" crossorigin="anonymous" style="transition: transform 0.6s ease;">
+              </div>
+              <div class="card-body d-flex flex-column p-4 border-top">
+                <h3 class="card-title fs-5 mb-2" style="font-family: 'Oswald', sans-serif;">Cinnamon&nbsp;Chips</h3>
+                <p class="card-text text-secondary flex-grow-1">Carefully cut splints for brewing and extracts.</p>
+                <button class="btn btn-outline-dark rounded-0 fw-bold mt-auto align-self-start text-uppercase mt-3 product-btn" style="font-family: 'Oswald', sans-serif; font-size: 0.85rem; letter-spacing: 1px; transition: all 0.3s ease;">View Details &rarr;</button>
+              </div>
+            </div>
           </div>
-          <div class="product-info">
-            <h3>Cinnamon&nbsp;Chips</h3>
-            <p>Carefully cut splints for brewing and extracts.</p>
-            <span class="step-btn" style="margin-top: 15px;">View Details &rarr;</span>
-          </div>
-        </div>
-        <div class="product" data-title="Cinnamon Oil" data-img="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80" data-desc="Pure Ceylon cinnamon essential oil. Highly concentrated and extracted directly from our premium bark, delivering powerful aromatic and therapeutic properties.">
-          <div class="product-img-wrapper">
-            <img src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80" alt="Cinnamon oil" crossorigin="anonymous">
-          </div>
-          <div class="product-info">
-            <h3>Cinnamon&nbsp;Oil</h3>
-            <p>Natural essential oil extracted from pure cinnamon.</p>
-            <span class="step-btn" style="margin-top: 15px;">View Details &rarr;</span>
+          <div class="col-lg-3 col-md-6">
+            <div class="card h-100 rounded-0 border shadow-sm product-card" data-title="Cinnamon Oil" data-img="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80" data-desc="Pure Ceylon cinnamon essential oil. Highly concentrated and extracted directly from our premium bark, delivering powerful aromatic and therapeutic properties.">
+              <div class="overflow-hidden" style="height: 200px;">
+                <img src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80" alt="Cinnamon oil" class="card-img-top h-100 w-100 object-fit-cover product-img" crossorigin="anonymous" style="transition: transform 0.6s ease;">
+              </div>
+              <div class="card-body d-flex flex-column p-4 border-top">
+                <h3 class="card-title fs-5 mb-2" style="font-family: 'Oswald', sans-serif;">Cinnamon&nbsp;Oil</h3>
+                <p class="card-text text-secondary flex-grow-1">Natural essential oil extracted from pure cinnamon.</p>
+                <button class="btn btn-outline-dark rounded-0 fw-bold mt-auto align-self-start text-uppercase mt-3 product-btn" style="font-family: 'Oswald', sans-serif; font-size: 0.85rem; letter-spacing: 1px; transition: all 0.3s ease;">View Details &rarr;</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -168,64 +236,79 @@
 
     <!-- Quality section -->
     <section class="quality">
-      <div class="quality-content">
-        <h2>QUALITY ASSURANCE</h2>
-        <p>We are committed to delivering the purest cinnamon with the highest standards of food safety and quality. Our sustainable practices respect our land, support our community, and ensure that our cinnamon remains natural and free of additives. Precision and care at every step.</p>
+      <div class="container">
+        <div class="quality-content">
+          <h2>QUALITY ASSURANCE</h2>
+          <p>We are committed to delivering the purest cinnamon with the highest standards of food safety and quality. Our sustainable practices respect our land, support our community, and ensure that our cinnamon remains natural and free of additives. Precision and care at every step.</p>
+        </div>
       </div>
     </section>
 
     <!-- Contact section -->
-    <section id="contact" class="contact py-5 bg-light">
-      <div class="container">
-        <div class="section-title mb-5">
-          <h2>Get In Touch</h2>
-        </div>
-        
-        <div class="row justify-content-center mb-5">
-          <div class="col-lg-8 text-center">
-            <p class="lead text-muted">Have questions or want to place a bulk order? We provide premium Ceylon cinnamon directly from our estate to your production line. Connect with our industrial sales team.</p>
+    <section id="contact" class="contact py-5">
+      <div class="container py-4">
+        <div class="row justify-content-center mb-5 text-center">
+          <div class="col-lg-8">
+            <h2 class="text-white mb-3" style="font-size: 2.5rem; font-family: 'Oswald', sans-serif;">Contact Us</h2>
+            <p class="text-white-50" style="font-size: 1.1rem;">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
           </div>
         </div>
 
-        <div class="row g-4 justify-content-center">
-          <!-- Phone Card -->
-          <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm contact-modern-card p-4 text-center rounded-4">
-              <div class="card-body d-flex flex-column align-items-center">
-                <div class="icon-wrapper mb-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 70px; height: 70px; background-color: rgba(176, 92, 29, 0.1); color: var(--accent);">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+        <div class="row g-5 justify-content-center align-items-center">
+          <!-- Contact Info Column -->
+          <div class="col-lg-5">
+            <div class="contact-info-list d-flex flex-column gap-5 px-3">
+              <!-- Address -->
+              <div class="d-flex align-items-center gap-4">
+                <div class="contact-icon bg-white rounded-circle d-flex justify-content-center align-items-center flex-shrink-0" style="width: 60px; height: 60px; color: #1a1a1a;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
                 </div>
-                <h5 class="card-title text-uppercase fw-bold text-muted small mb-2">Phone</h5>
-                <p class="card-text fw-bold fs-5 mb-0 text-dark">+94 77 123 4567</p>
-                <a href="tel:+94771234567" class="stretched-link"></a>
+                <div>
+                  <h5 class="mb-1" style="color: var(--accent); font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600;">Address</h5>
+                  <p class="text-white mb-0" style="font-size: 0.95rem; line-height: 1.5;">Galle Unanwitiya,<br>Sri Lanka</p>
+                </div>
               </div>
-            </div>
-          </div>
-          
-          <!-- Email Card -->
-          <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm contact-modern-card p-4 text-center rounded-4">
-              <div class="card-body d-flex flex-column align-items-center">
-                <div class="icon-wrapper mb-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 70px; height: 70px; background-color: rgba(176, 92, 29, 0.1); color: var(--accent);">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+              
+              <!-- Phone -->
+              <div class="d-flex align-items-center gap-4">
+                <div class="contact-icon bg-white rounded-circle d-flex justify-content-center align-items-center flex-shrink-0" style="width: 60px; height: 60px; color: #1a1a1a;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                 </div>
-                <h5 class="card-title text-uppercase fw-bold text-muted small mb-2">Email</h5>
-                <p class="card-text fw-bold fs-5 mb-0 text-dark" style="word-break: break-word;">info@cinnamonheritage.com</p>
-                <a href="mailto:info@cinnamonheritage.com" class="stretched-link"></a>
+                <div>
+                  <h5 class="mb-1" style="color: var(--accent); font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600;">Phone</h5>
+                  <p class="text-white mb-0" style="font-size: 0.95rem;">+94 77 123 4567</p>
+                </div>
+              </div>
+
+              <!-- Email -->
+              <div class="d-flex align-items-center gap-4">
+                <div class="contact-icon bg-white rounded-circle d-flex justify-content-center align-items-center flex-shrink-0" style="width: 60px; height: 60px; color: #1a1a1a;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                </div>
+                <div>
+                  <h5 class="mb-1" style="color: var(--accent); font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600;">Email</h5>
+                  <p class="text-white mb-0" style="font-size: 0.95rem; word-break: break-all;">info@cinnamonheritage.com</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Address Card -->
-          <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm contact-modern-card p-4 text-center rounded-4">
-              <div class="card-body d-flex flex-column align-items-center">
-                <div class="icon-wrapper mb-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 70px; height: 70px; background-color: rgba(176, 92, 29, 0.1); color: var(--accent);">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          <!-- Form Column -->
+          <div class="col-lg-6">
+            <div class="card border-0 rounded-0 shadow-lg p-5 bg-white">
+              <h3 class="mb-4" style="color: #333; font-family: 'Inter', sans-serif; font-weight: 600; text-transform: none;">Send Message</h3>
+              <form>
+                <div class="mb-4">
+                  <input type="text" class="form-control border-0 border-bottom rounded-0 px-0 shadow-none" placeholder="Full Name" style="border-bottom-color: #333 !important;">
                 </div>
-                <h5 class="card-title text-uppercase fw-bold text-muted small mb-2">Address</h5>
-                <p class="card-text fw-bold fs-5 mb-0 text-dark">Galle Unanwitiya,<br>Sri Lanka</p>
-              </div>
+                <div class="mb-4">
+                  <input type="email" class="form-control border-0 border-bottom rounded-0 px-0 shadow-none" placeholder="Email" style="border-bottom-color: #333 !important;">
+                </div>
+                <div class="mb-4">
+                  <textarea class="form-control border-0 border-bottom rounded-0 px-0 shadow-none" rows="3" placeholder="Type your Message..." style="border-bottom-color: #333 !important; resize: none;"></textarea>
+                </div>
+                <button type="submit" class="btn text-white rounded-0 px-5 py-2 fw-bold" style="background-color: var(--accent);">Send</button>
+              </form>
             </div>
           </div>
         </div>
