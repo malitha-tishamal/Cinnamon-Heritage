@@ -8,6 +8,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/admin.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -80,6 +82,9 @@
         <li data-section="factory"><i class="bi bi-building"></i> Factory</li>
         <li data-section="process"><i class="bi bi-gear"></i> Process Steps</li>
         <li data-section="products"><i class="bi bi-box-seam"></i> Products</li>
+        <li data-section="orders"><i class="bi bi-cart-check"></i> Orders</li>
+        <li data-section="accounts"><i class="bi bi-bank"></i> Accounts & Sales</li>
+        <li data-section="settings"><i class="bi bi-sliders"></i> E-commerce Settings</li>
         <li data-section="quality"><i class="bi bi-shield-check"></i> Quality</li>
         <li data-section="contact-info"><i class="bi bi-telephone"></i> Contact Info</li>
         <li data-section="messages"><i class="bi bi-envelope"></i> Messages <span id="unreadBadge" class="badge bg-danger ms-auto d-none">0</span></li>
@@ -98,16 +103,23 @@
         <div class="row g-4 mb-4">
           <div class="col-md-3">
             <div class="stat-card bg-gradient-1">
-              <i class="bi bi-envelope-fill"></i>
-              <div class="stat-value" id="statMessages">0</div>
-              <div class="stat-label">Total Messages</div>
+              <i class="bi bi-wallet2"></i>
+              <div class="stat-value" id="statEarningsToday">LKR 0</div>
+              <div class="stat-label">Earnings (Today)</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card bg-gradient-4">
+              <i class="bi bi-graph-up-arrow"></i>
+              <div class="stat-value" id="statEarningsMonth">LKR 0</div>
+              <div class="stat-label">Earnings (Month)</div>
             </div>
           </div>
           <div class="col-md-3">
             <div class="stat-card bg-gradient-2">
-              <i class="bi bi-envelope-open-fill"></i>
-              <div class="stat-value" id="statUnread">0</div>
-              <div class="stat-label">Unread Messages</div>
+              <i class="bi bi-cart-check-fill"></i>
+              <div class="stat-value" id="statOrders">0</div>
+              <div class="stat-label">Total Orders</div>
             </div>
           </div>
           <div class="col-md-3">
@@ -117,11 +129,53 @@
               <div class="stat-label">Active Products</div>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="stat-card bg-gradient-4">
-              <i class="bi bi-gear-fill"></i>
-              <div class="stat-value" id="statSteps">0</div>
-              <div class="stat-label">Process Steps</div>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body">
+                <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Product Performance</h5>
+                <div class="table-responsive">
+                  <table class="table table-sm align-middle">
+                    <thead>
+                      <tr class="small text-muted">
+                        <th>Product</th>
+                        <th>Sales</th>
+                        <th>Current Stock</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="productPerformance">
+                      <!-- Loaded via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body">
+                <h5 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Quick Stats</h5>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted small">Total Messages</span>
+                  <span class="fw-bold" id="statMessages">0</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted small">Unread Messages</span>
+                  <span class="badge bg-danger" id="statUnread">0</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted small">Process Steps</span>
+                  <span class="fw-bold" id="statSteps">0</span>
+                </div>
+                <hr>
+                <div class="text-center">
+                  <div class="stat-label mb-1">Lifetime Earnings</div>
+                  <div class="h4 fw-bold text-accent" id="statTotalEarnings">LKR 0</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -255,12 +309,244 @@
         </div>
       </div>
 
+      <!-- Orders -->
+      <div id="sec-orders" class="content-section d-none">
+        <h3 class="section-heading">Orders</h3>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4">ID</th>
+                    <th>Customer</th>
+                    <th>Location</th>
+                    <th>Product</th>
+                    <th>Payment</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th class="text-end pe-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersList">
+                  <!-- Orders will be loaded here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accounts & Sales Analysis -->
+      <div id="sec-accounts" class="content-section d-none">
+        <h3 class="section-heading">Accounts & Sales Analysis</h3>
+        
+        <div class="row g-4 mb-4">
+          <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-4">Revenue Trend (Last 30 Days)</h5>
+                <div style="height: 300px;">
+                  <canvas id="revenueChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-4">Payment Methods</h5>
+                <div style="height: 200px;">
+                  <canvas id="paymentChart"></canvas>
+                </div>
+                <div id="paymentStatsList" class="mt-4 small">
+                  <!-- JS populated -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Best Selling Products (by Revenue)</h5>
+                <div class="table-responsive">
+                  <table class="table table-sm align-middle">
+                    <thead>
+                      <tr class="small text-muted">
+                        <th>Product</th>
+                        <th class="text-center">Qty Sold</th>
+                        <th class="text-end">Revenue</th>
+                      </tr>
+                    </thead>
+                    <tbody id="topProductsByRevenue">
+                      <!-- JS populated -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Top Sales Locations (Districts)</h5>
+                <div class="table-responsive">
+                  <table class="table table-sm align-middle">
+                    <thead>
+                      <tr class="small text-muted">
+                        <th>District</th>
+                        <th class="text-center">Orders</th>
+                        <th class="text-end">Revenue</th>
+                      </tr>
+                    </thead>
+                    <tbody id="topLocations">
+                      <!-- JS populated -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="sec-settings" class="content-section d-none">
+        <h3 class="section-heading">E-commerce Settings</h3>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">General Settings</h5>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Low Stock Threshold</label>
+                  <input type="number" class="form-control" id="settingLowStock" placeholder="10">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Default Delivery Charge (LKR)</label>
+                  <input type="number" class="form-control" id="settingDefaultDelivery" placeholder="350">
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="settingCodEnabled">
+                  <label class="form-check-label fw-bold">Enable Cash on Delivery (COD)</label>
+                </div>
+                <div class="form-check form-switch mb-4">
+                  <input class="form-check-input" type="checkbox" id="settingOnlineEnabled">
+                  <label class="form-check-label fw-bold">Enable Online Payments</label>
+                </div>
+                <button class="btn btn-accent w-100" onclick="saveSettings()">Save General Settings</button>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Delivery Rates by District</h5>
+                <div class="table-responsive" style="max-height: 400px;">
+                  <table class="table table-sm table-hover">
+                    <thead class="sticky-top bg-white">
+                      <tr>
+                        <th>District</th>
+                        <th>Rate (LKR)</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="deliveryRatesList">
+                      <!-- Loaded via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Messages -->
       <div id="sec-messages" class="content-section d-none">
         <h3 class="section-heading">Contact Messages</h3>
         <div id="messagesList"></div>
       </div>
     </main>
+  </div>
+
+  <!-- Add Product Modal -->
+  <div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add New Product</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Title</label>
+              <input type="text" class="form-control" id="newProdTitle">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Image URL / Upload Image</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="newProdImg">
+                <input type="file" class="form-control d-none" id="newProdImgUpload" accept="image/*" onchange="handleNewProductImageUpload()">
+                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('newProdImgUpload').click()"><i class="bi bi-upload"></i></button>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Price (LKR)</label>
+              <input type="number" class="form-control" id="newProdPrice" value="0">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Discount (LKR)</label>
+              <input type="number" class="form-control" id="newProdDiscount" value="0">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Stock Qty</label>
+              <input type="number" class="form-control" id="newProdStock" value="10">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Default Delivery</label>
+              <input type="number" class="form-control" id="newProdDelivery" value="350">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Order</label>
+              <input type="number" class="form-control" id="newProdOrder" value="99">
+            </div>
+            <div class="col-md-12">
+              <label class="form-label small fw-bold">Short Description (card)</label>
+              <textarea class="form-control" id="newProdShort" rows="2"></textarea>
+            </div>
+            <div class="col-md-12">
+              <label class="form-label small fw-bold">Full Description (modal)</label>
+              <textarea class="form-control" id="newProdFull" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-accent" onclick="submitNewProduct()">Save Product</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Details Modal -->
+  <div class="modal fade" id="orderModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Order Details #<span id="modalOrderId"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="modalOrderBody">
+          <!-- Details loaded here -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Toast -->

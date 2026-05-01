@@ -110,16 +110,93 @@ section {
   background: var(--border-color);
 }
 
+/* Immersive Estate Section */
+.estate-immersive {
+  background-image: url('../images/estate_bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.estate-bg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 100%);
+  z-index: 1;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.accent-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--accent);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-family: 'Oswald', sans-serif;
+}
+
+.estate-image-wrapper {
+  position: relative;
+  transition: transform 0.5s ease;
+}
+
+.estate-image-wrapper:hover {
+  transform: translateY(-10px) scale(1.02);
+}
+
+.estate-image-wrapper img {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Immersive Factory Section */
+.factory-immersive {
+  background-image: url('../images/estate_bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.factory-bg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(225deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 100%);
+  z-index: 1;
+}
+
 /* About and Factory sections */
 .text-content h2 {
   font-size: 2.5rem;
   color: var(--text-primary);
 }
 
-.text-content p {
-  font-size: 1.1rem;
+.text-content p:not(.text-white-50):not(.glass-card p) {
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: 1.8;
   color: var(--text-secondary);
   margin-bottom: 20px;
+  letter-spacing: 0.3px;
+}
+.text-content p:not(.text-white-50):not(.glass-card p)::first-line {
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
 .image-content {
@@ -168,6 +245,7 @@ section {
   display: flex;
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
   position: fixed;
   z-index: 1000;
   left: 0;
@@ -178,13 +256,14 @@ section {
   backdrop-filter: blur(5px);
   justify-content: center;
   align-items: center;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
   padding: 20px;
 }
 
 .modal-overlay.active {
   opacity: 1;
   pointer-events: all;
+  visibility: visible;
 }
 
 .modal-content {
@@ -221,10 +300,13 @@ section {
 }
 
 .modal-image {
-  flex: 1;
-  min-height: 400px;
-  background-size: cover;
+  flex: 1.2; /* Slightly larger image area */
+  min-height: 500px;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
+  background-color: #fff;
+  padding: 20px;
 }
 
 .modal-info {
@@ -307,7 +389,7 @@ section {
 }
 
 .contact .form-control::placeholder {
-  color: #999;
+  color: transparent; /* Fixes double font issue with Bootstrap floating labels */
 }
 
 .contact .contact-icon {
@@ -352,4 +434,82 @@ footer {
 @media (max-width: 600px) {
   nav { flex-direction: column; gap: 20px; padding: 20px; }
   .hero-content h1 { font-size: 2.2rem; }
+}
+
+/* WhatsApp Floating Button */
+#whatsappBtn {
+  animation: whatsappPulse 2s infinite;
+}
+
+#whatsappBtn:hover {
+  transform: scale(1.15) !important;
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.5) !important;
+}
+
+@keyframes whatsappPulse {
+  0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
+  70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+}
+
+/* Modern Form Styling */
+.form-floating > .form-control:focus {
+  border-bottom-color: var(--accent) !important;
+  box-shadow: none;
+}
+
+.form-floating > .form-control:focus ~ label {
+  color: var(--accent);
+}
+
+.contact .card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+  border-radius: 15px !important;
+}
+
+.contact .card h3 {
+  color: #fff !important;
+}
+
+.contact .form-floating > label {
+  color: rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.contact .form-floating > .form-control:focus ~ label,
+.contact .form-floating > .form-control:not(:placeholder-shown) ~ label {
+  color: #fff;
+  transform: scale(0.85) translateY(-1.5rem) translateX(0.15rem);
+}
+
+.contact .form-control {
+  color: #fff !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3) !important;
+  position: relative;
+  z-index: 2;
+}
+
+.contact .form-control:focus {
+  border-bottom: 2px solid var(--accent) !important;
+}
+
+.contact .card:hover {
+  transform: translateY(-5px);
+}
+
+/* Navbar Scroll Transition */
+.navbar {
+  transition: background 0.4s ease, padding 0.4s ease !important;
+}
+
+/* Smooth page animations */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }

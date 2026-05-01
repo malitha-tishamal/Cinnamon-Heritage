@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | Cinnamon Heritage</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      background: #121921;
+      color: #fff;
+      padding-top: 50px;
+    }
+    .checkout-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 20px;
+    }
+    .product-img {
+      width: 100%;
+      max-width: 200px;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: rgba(255,255,255,0.7);
+    }
+    .price-row.total {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 15px;
+      margin-top: 15px;
+    }
+    .btn-buy {
+      background: #a65d25;
+      color: white;
+      border: none;
+      padding: 15px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    .btn-buy:hover {
+      background: #8b4e1f;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .qty-input {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      text-align: center;
+      width: 60px;
+    }
+    .form-control {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+    }
+    .form-control:focus {
+      background: rgba(255,255,255,0.1);
+      border-color: #a65d25;
+      color: white;
+      box-shadow: none;
+    }
+    label {
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 5px;
+    }
+    #loadingOverlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container checkout-container">
+    <div class="text-center mb-5">
+      <h1 class="display-5 fw-bold" style="font-family: 'Oswald', sans-serif;">CHECKOUT</h1>
+      <p class="text-white-50">Complete your order for premium Ceylon cinnamon products</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Product Summary Column -->
+      <div class="col-lg-5">
+        <div class="glass-card" id="productSummary">
+          <div class="text-center mb-4">
+            <img id="productImg" src="images/placeholder.jpg" alt="Product" class="product-img">
+          </div>
+          <h3 id="productTitle" class="h4 mb-2">Loading Product...</h3>
+          <p id="productDesc" class="text-white-50 small mb-4"></p>
+          
+          <div class="d-flex align-items-center mb-4">
+            <span class="me-3">Quantity:</span>
+            <div class="input-group" style="width: 140px;">
+              <button class="btn btn-outline-light btn-sm" onclick="changeQty(-1)">-</button>
+              <input type="number" id="quantity" value="1" min="1" class="form-control qty-input" readonly>
+              <button class="btn btn-outline-light btn-sm" onclick="changeQty(1)">+</button>
+            </div>
+            <div class="ms-3 small text-white-50">
+              Available: <span id="stockQty">0</span>
+            </div>
+          </div>
+
+          <div class="price-details mt-4">
+            <div class="price-row">
+              <span>Subtotal</span>
+              <span id="subtotal">LKR 0.00</span>
+            </div>
+            <div class="price-row">
+              <span>Discount</span>
+              <span id="discount" class="text-success">- LKR 0.00</span>
+            </div>
+            <div class="price-row">
+              <span>Delivery Fee</span>
+              <span id="deliveryCharge">LKR 0.00</span>
+            </div>
+            <div class="price-row total">
+              <span>Total</span>
+              <span id="totalAmount">LKR 0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checkout Form Column -->
+      <div class="col-lg-7">
+        <div class="glass-card">
+          <h4 class="mb-4">Shipping Information</h4>
+          <form id="checkoutForm">
+            <div class="row g-3">
+              <div class="col-md-12">
+                <label for="name">Full Name</label>
+                <input type="text" class="form-control" id="name" required placeholder="John Doe">
+              </div>
+              <div class="col-md-6">
+                <label for="email">Email Address</label>
+                <input type="email" class="form-control" id="email" required placeholder="john@example.com">
+              </div>
+              <div class="col-md-6">
+                <label for="phone">Phone Number</label>
+                <input type="tel" class="form-control" id="phone" required placeholder="+94 7X XXX XXXX">
+              </div>
+              <div class="col-md-6">
+                <label for="province">Province</label>
+                <select class="form-control" id="province" required>
+                  <option value="">Select Province</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="district">District</label>
+                <select class="form-control" id="district" required disabled>
+                  <option value="">Select District</option>
+                </select>
+              </div>
+              <div class="col-md-12">
+                <label for="address">Shipping Address</label>
+                <textarea class="form-control" id="address" rows="3" required placeholder="House No, Street, City, ZIP"></textarea>
+              </div>
+            </div>
+
+            <h4 class="mb-3 mt-5">Payment Method</h4>
+            <div id="paymentMethods" class="glass-card p-3">
+              <div class="form-check mb-2 d-none" id="payNowContainer">
+                <input class="form-check-input" type="radio" name="paymentMethod" id="payNow" value="ONLINE">
+                <label class="form-check-label text-white" for="payNow">
+                  <i class="fas fa-credit-card me-2"></i> Pay Now (Card/Online)
+                </label>
+              </div>
+              <div class="form-check d-none" id="codContainer">
+                <input class="form-check-input" type="radio" name="paymentMethod" id="payCod" value="COD" checked>
+                <label class="form-check-label text-white" for="payCod">
+                  <i class="fas fa-truck me-2"></i> Cash on Delivery
+                </label>
+              </div>
+            </div>
+            
+            <div class="mt-4">
+              <button type="submit" class="btn btn-buy" id="submitBtn">Place Order Now</button>
+            </div>
+            <div class="text-center mt-3">
+              <a href="index.html" class="text-white-50 small text-decoration-none"><i class="fas fa-arrow-left me-1"></i> Back to Home</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="loadingOverlay">
+    <div class="text-center">
+      <div class="spinner-border text-light mb-2" role="status"></div>
+      <p>Processing your order...</p>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
+    <div id="checkoutToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body"></div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const API = '';
+    let currentProduct = null;
+    let qty = 1;
+    let deliveryRates = [];
+    let siteSettings = {};
+    let selectedDeliveryCharge = 0;
+
+    // Get product ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('product_id');
+
+    if (!productId) {
+      window.location.href = 'index.html';
+    }
+
+    async function initCheckout() {
+      await Promise.all([
+        fetchProduct(),
+        fetchDeliveryRates(),
+        fetchSettings()
+      ]);
+      setupLocationSelectors();
+      updateCalculations();
+    }
+
+    async function fetchProduct() {
+      try {
+        const res = await fetch(`${API}/api/products/${productId}`);
+        if (!res.ok) throw new Error('Product not found');
+        currentProduct = await res.json();
+        renderProduct();
+      } catch (err) {
+        console.error(err);
+        alert('Product not found. Redirecting to home.');
+        window.location.href = 'index.html';
+      }
+    }
+
+    async function fetchDeliveryRates() {
+      try {
+        const res = await fetch(`${API}/api/delivery-rates`);
+        deliveryRates = await res.json();
+      } catch (err) {
+        console.error('Failed to fetch delivery rates');
+      }
+    }
+
+    async function fetchSettings() {
+      try {
+        const res = await fetch(`${API}/api/settings`);
+        siteSettings = await res.json();
+        
+        // Setup payment methods
+        if (siteSettings.cod_enabled === '1') {
+          document.getElementById('codContainer').classList.remove('d-none');
+        }
+        if (siteSettings.online_pay_enabled === '1') {
+          document.getElementById('payNowContainer').classList.remove('d-none');
+        }
+        
+        selectedDeliveryCharge = parseFloat(siteSettings.default_delivery_charge || 350);
+      } catch (err) {
+        console.error('Failed to fetch settings');
+      }
+    }
+
+    function setupLocationSelectors() {
+      const provinceSelect = document.getElementById('province');
+      const districtSelect = document.getElementById('district');
+      
+      const provinces = [...new Set(deliveryRates.map(r => r.province))];
+      provinces.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        provinceSelect.appendChild(opt);
+      });
+
+      provinceSelect.addEventListener('change', () => {
+        const province = provinceSelect.value;
+        districtSelect.innerHTML = '<option value="">Select District</option>';
+        districtSelect.disabled = !province;
+        
+        if (province) {
+          const districts = deliveryRates.filter(r => r.province === province);
+          districts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.district;
+            opt.textContent = d.district;
+            districtSelect.appendChild(opt);
+          });
+        }
+        updateCalculations();
+      });
+
+      districtSelect.addEventListener('change', () => {
+        const district = districtSelect.value;
+        const rateObj = deliveryRates.find(r => r.district === district);
+        if (rateObj) {
+          selectedDeliveryCharge = parseFloat(rateObj.rate);
+        } else {
+          selectedDeliveryCharge = parseFloat(siteSettings.default_delivery_charge || 350);
+        }
+        updateCalculations();
+      });
+    }
+
+    function renderProduct() {
+      document.getElementById('productImg').src = currentProduct.image_url;
+      document.getElementById('productTitle').innerText = currentProduct.title;
+      document.getElementById('productDesc').innerText = currentProduct.short_desc;
+      document.getElementById('stockQty').innerText = currentProduct.stock_quantity;
+      
+      if (currentProduct.stock_quantity <= 0) {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'OUT OF STOCK';
+        submitBtn.style.background = '#666';
+      }
+    }
+
+    function changeQty(delta) {
+      if (!currentProduct) return;
+      qty = Math.max(1, Math.min(currentProduct.stock_quantity, qty + delta));
+      document.getElementById('quantity').value = qty;
+      updateCalculations();
+    }
+
+    function updateCalculations() {
+      if (!currentProduct) return;
+      
+      const subtotal = currentProduct.price * qty;
+      const discount = (parseFloat(currentProduct.discount) || 0) * qty;
+      const delivery = selectedDeliveryCharge;
+      const total = subtotal - discount + delivery;
+
+      document.getElementById('subtotal').innerText = `LKR ${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      document.getElementById('discount').innerText = `- LKR ${discount.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      document.getElementById('deliveryCharge').innerText = `LKR ${delivery.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      document.getElementById('totalAmount').innerText = `LKR ${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    }
+
+    document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      loadingOverlay.style.display = 'flex';
+
+      const orderData = {
+        customer_name: document.getElementById('name').value,
+        customer_email: document.getElementById('email').value,
+        customer_phone: document.getElementById('phone').value,
+        shipping_address: document.getElementById('address').value,
+        province: document.getElementById('province').value,
+        district: document.getElementById('district').value,
+        payment_method: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD',
+        product_id: currentProduct.id,
+        quantity: qty,
+        subtotal: currentProduct.price * qty,
+        discount_total: (parseFloat(currentProduct.discount) || 0) * qty,
+        delivery_charge: selectedDeliveryCharge,
+        total_amount: (currentProduct.price * qty) - ((parseFloat(currentProduct.discount) || 0) * qty) + selectedDeliveryCharge,
+        product_name: currentProduct.title,
+        unit_price: currentProduct.price
+      };
+
+      try {
+        const res = await fetch(`${API}/api/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          showToast('Order placed successfully! Redirecting...', 'success');
+          setTimeout(() => window.location.href = 'index.html', 3000);
+        } else {
+          showToast(data.error || 'Failed to place order', 'danger');
+        }
+      } catch (err) {
+        showToast('Network error. Please try again.', 'danger');
+      } finally {
+        loadingOverlay.style.display = 'none';
+      }
+    });
+
+    function showToast(message, type = 'info') {
+      const toastEl = document.getElementById('checkoutToast');
+      const toastBody = toastEl.querySelector('.toast-body');
+      toastEl.className = `toast align-items-center border-0 bg-${type} text-white show`;
+      toastBody.innerText = message;
+      new bootstrap.Toast(toastEl).show();
+    }
+
+    initCheckout();
+  </script>
+</body>
+</html>
