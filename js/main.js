@@ -255,7 +255,10 @@ async function loadSiteContent() {
       
       if (heroTitle && content.hero.title) heroTitle.textContent = content.hero.title;
       if (heroSubtitle && content.hero.subtitle) heroSubtitle.textContent = content.hero.subtitle;
-      if (heroCta && content.hero.cta_text) heroCta.textContent = content.hero.cta_text;
+      if (heroCta && content.hero.cta_text) {
+        heroCta.textContent = content.hero.cta_text;
+        heroCta.style.display = 'inline-block';
+      }
     }
   } catch (err) {
     console.error('Failed to load site content:', err);
