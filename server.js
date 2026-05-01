@@ -44,10 +44,10 @@ const upload = multer({ storage: storage });
 // Update these credentials for your MySQL server
 // ============================================
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',  // Your MySQL password
-  database: 'cinnamon_heritage',
+  host: 'mysql-tishamal.alwaysdata.net',
+  user: 'tishamal',
+  password: 'malitha23',  // Your MySQL password
+  database: 'tishamal_pro01',
   waitForConnections: true,
   connectionLimit: 10
 });
