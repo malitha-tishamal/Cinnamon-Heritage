@@ -9,7 +9,7 @@ const API = '';  // Base URL (empty = same origin)
 // ============================================
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  const username = document.getElementById('loginUsername').value;
+  const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const errorDiv = document.getElementById('loginError');
 
@@ -17,7 +17,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     const res = await fetch(`${API}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ email, password })
     });
     const data = await res.json();
 
@@ -67,6 +67,131 @@ document.getElementById('logoutBtn').addEventListener('click', async function() 
   await fetch(`${API}/api/auth/logout`, { method: 'POST' });
   location.reload();
 });
+
+// Password toggles
+function setupPasswordToggle(toggleBtnId, inputId) {
+  const toggleBtn = document.getElementById(toggleBtnId);
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function() {
+      const passwordInput = document.getElementById(inputId);
+      const icon = this.querySelector('i');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+      } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+      }
+    });
+  }
+}
+setupPasswordToggle('toggleLoginPassword', 'loginPassword');
+setupPasswordToggle('toggleSetupPassword', 'setupPassword');
+setupPasswordToggle('toggleRegPassword', 'regPassword');
+
+// Toggle forms logic
+const loginForm = document.getElementById('loginForm');
+const signupForm = document.getElementById('signupForm');
+const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+
+if (document.getElementById('showSignup')) {
+  document.getElementById('showSignup').addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm.classList.add('d-none');
+    signupForm.classList.remove('d-none');
+  });
+}
+
+if (document.getElementById('showForgotPassword')) {
+  document.getElementById('showForgotPassword').addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm.classList.add('d-none');
+    forgotPasswordForm.classList.remove('d-none');
+  });
+}
+
+if (document.getElementById('showLoginFromSignup')) {
+  document.getElementById('showLoginFromSignup').addEventListener('click', (e) => {
+    e.preventDefault();
+    signupForm.classList.add('d-none');
+    loginForm.classList.remove('d-none');
+  });
+}
+
+if (document.getElementById('showLoginFromForgot')) {
+  document.getElementById('showLoginFromForgot').addEventListener('click', (e) => {
+    e.preventDefault();
+    forgotPasswordForm.classList.add('d-none');
+    loginForm.classList.remove('d-none');
+  });
+}
+
+// Signup submission
+if (signupForm) {
+  signupForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const errorDiv = document.getElementById('signupError');
+    const username = document.getElementById('regUsername').value;
+    const email = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPassword').value;
+
+    try {
+      const res = await fetch(`${API}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showAdminToast('Account created! Please log in.', 'success');
+        signupForm.reset();
+        signupForm.classList.add('d-none');
+        loginForm.classList.remove('d-none');
+      } else {
+        errorDiv.textContent = data.error || 'Signup failed';
+        errorDiv.classList.remove('d-none');
+      }
+    } catch (err) {
+      errorDiv.textContent = 'Server connection failed';
+      errorDiv.classList.remove('d-none');
+    }
+  });
+}
+
+// Forgot Password submission
+if (forgotPasswordForm) {
+  forgotPasswordForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const errorDiv = document.getElementById('forgotError');
+    const successDiv = document.getElementById('forgotSuccess');
+    const email = document.getElementById('forgotEmail').value;
+
+    errorDiv.classList.add('d-none');
+    successDiv.classList.add('d-none');
+
+    try {
+      const res = await fetch(`${API}/api/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (data.success) {
+        successDiv.textContent = data.message;
+        successDiv.classList.remove('d-none');
+        forgotPasswordForm.reset();
+      } else {
+        errorDiv.textContent = data.error || 'Request failed';
+        errorDiv.classList.remove('d-none');
+      }
+    } catch (err) {
+      errorDiv.textContent = 'Server connection failed';
+      errorDiv.classList.remove('d-none');
+    }
+  });
+}
 
 // Check auth on load
 (async function checkAuth() {
