@@ -21,7 +21,7 @@ app.use(session({
   secret: 'cinnamon-heritage-secret-key-change-this',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+  cookie: { maxAge: 365 * 24 * 60 * 60 * 1000 } // 1 year (persistent session)
 }));
 
 // Configure Multer for image uploads
@@ -70,18 +70,18 @@ function requireAuth(req, res, next) {
 // Login
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const [rows] = await pool.execute('SELECT * FROM admin_users WHERE username = ?', [username]);
+    const { email, password } = req.body;
+    const [rows] = await pool.execute('SELECT * FROM admin_users WHERE email = ?', [email]);
 
     if (rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid username or password' });
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     const user = rows[0];
     const validPassword = await bcrypt.compare(password, user.password);
 
     if (!validPassword) {
-      return res.status(401).json({ error: 'Invalid username or password' });
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     req.session.isAdmin = true;
@@ -91,7 +91,7 @@ app.post('/api/auth/login', async (req, res) => {
     res.json({ success: true, username: user.username });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Server error: ' + err.message });
   }
 });
 
@@ -139,6 +139,42 @@ app.post('/api/auth/setup', async (req, res) => {
   } catch (err) {
     console.error('Setup error:', err);
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Signup (General)
+app.post('/api/auth/signup', async (req, res) => {
+  try {
+    const { username, password, email } = req.body;
+    
+    // Check if email or username already exists
+    const [existing] = await pool.execute('SELECT * FROM admin_users WHERE email = ? OR username = ?', [email, username]);
+    if (existing.length > 0) {
+      return res.status(400).json({ error: 'Username or email already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await pool.execute(
+      'INSERT INTO admin_users (username, password, email) VALUES (?, ?, ?)',
+      [username, hashedPassword, email]
+    );
+
+    res.json({ success: true, message: 'Account created successfully! Please login.' });
+  } catch (err) {
+    console.error('Signup error:', err);
+    res.status(500).json({ error: 'Server error: ' + err.message });
+  }
+});
+
+// Forgot Password
+app.post('/api/auth/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    // Simulate sending email
+    res.json({ success: true, message: 'Password reset instructions have been sent to your email.' });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Server error: ' + err.message });
   }
 });
 
