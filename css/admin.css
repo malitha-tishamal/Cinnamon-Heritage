@@ -23,14 +23,93 @@ body {
   justify-content: center;
   align-items: center;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-screen::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: var(--accent);
+  border-radius: 50%;
+  top: -150px;
+  left: -150px;
+  filter: blur(100px);
+  opacity: 0.3;
+  z-index: 1;
+}
+
+.login-screen::after {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: #00f2fe;
+  border-radius: 50%;
+  bottom: -100px;
+  right: -100px;
+  filter: blur(100px);
+  opacity: 0.2;
+  z-index: 1;
 }
 
 .login-card {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 40px;
-  width: 400px;
+  width: 420px;
   max-width: 90vw;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+  position: relative;
+  color: #fff;
+}
+
+.login-card .text-muted {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.login-card h2 {
+  color: #fff !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.login-card .form-control {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 0 8px 8px 0;
+}
+
+.login-card .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.login-card .form-control:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1);
+}
+
+.login-card .input-group-text {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+}
+
+.login-card .btn-accent {
+  background: var(--accent);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* ===== Button Accent ===== */
