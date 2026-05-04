@@ -10,9 +10,14 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <!-- Preloader -->
+  <div id="preloader" class="preloader">
+    <div class="preloader-spinner"></div>
+    <div class="preloader-text">Loading...</div>
+  </div>
   <!-- Header and Navigation -->
   <header>
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: rgba(0,0,0,0.3); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 20px 0;">
       <div class="container">
         <a class="navbar-brand logo fs-3 text-white" href="#" style="font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: 2px;">Cinnamon&nbsp;Heritage</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,10 +45,10 @@
       </div>
     </nav>
     <!-- Hero section -->
-    <section class="hero d-flex align-items-center position-relative min-vh-100 w-100" style="background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), url('images/cinnamon_spices.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
+    <section class="hero d-flex align-items-center position-relative min-vh-100 w-100" style="background: linear-gradient(rgba(10,10,15,0.55), rgba(10,10,15,0.7)), url('images/cinnamon_spices.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
       <div class="container position-relative z-2">
         <div class="row mt-5">
-          <div class="col-lg-8 border-start border-4 ps-4 py-3" style="border-color: var(--accent) !important;">
+          <div class="col-lg-8 border-start border-4 ps-4 py-3" style="border-color: var(--accent) !important; border-image: linear-gradient(to bottom, var(--accent), transparent) 1;">
             <h1 id="hero-title" class="display-3 text-white fw-bold mb-4" style="font-family: 'Oswald', sans-serif;"></h1>
             <p id="hero-subtitle" class="lead text-white-50 mb-5 fs-4" style="max-width:600px;"></p>
             <a id="hero-cta" class="btn btn-lg rounded-0 text-white text-uppercase fw-bold px-5 py-3 cta-btn" href="#about" style="background-color: var(--accent); font-family: 'Oswald', sans-serif; letter-spacing: 2px; display: none;"></a>
@@ -57,11 +62,11 @@
   <!-- Main content -->
   <main>
     <!-- About section -->
-    <section id="about" class="about estate-immersive position-relative overflow-hidden py-0">
+    <section id="about" class="about estate-immersive position-relative overflow-hidden py-0 reveal">
       <div class="estate-bg-overlay"></div>
       <div class="container position-relative z-2 py-5 my-5">
         <div class="row align-items-center gx-lg-5">
-          <div class="col-lg-6 text-content mb-4 mb-lg-0">
+          <div class="col-lg-6 text-content mb-4 mb-lg-0 reveal-left">
             <div class="glass-card p-4 p-md-5">
               <div class="accent-badge mb-3">Since 1982</div>
               <h2 class="display-5 fw-bold mb-4" style="font-family: 'Oswald', sans-serif; color: #fff;">From Our Own Estate</h2>
@@ -73,7 +78,7 @@
               </p>
             </div>
           </div>
-          <div class="col-lg-6 image-content">
+          <div class="col-lg-6 image-content reveal-right">
             <div class="estate-image-wrapper p-2 bg-white shadow-lg">
               <img src="images/cinnamon_plantlings.jpg" alt="Cinnamon plantlings in our estate" class="img-fluid w-100">
             </div>
@@ -83,11 +88,11 @@
     </section>
 
     <!-- Factory section -->
-    <section id="factory" class="factory factory-immersive position-relative overflow-hidden py-0">
+    <section id="factory" class="factory factory-immersive position-relative overflow-hidden py-0 reveal">
       <div class="factory-bg-overlay"></div>
       <div class="container position-relative z-2 py-5 my-5">
         <div class="row align-items-center gx-lg-5 flex-lg-row-reverse">
-          <div class="col-lg-6 text-content mb-4 mb-lg-0">
+          <div class="col-lg-6 text-content mb-4 mb-lg-0 reveal-right">
             <div class="glass-card p-4 p-md-5">
               <div class="accent-badge mb-3">ISO 22000 & HACCP</div>
               <h2 class="display-5 fw-bold mb-4" style="font-family: 'Oswald', sans-serif; color: #fff;">Our Modern Facility</h2>
@@ -99,7 +104,7 @@
               </p>
             </div>
           </div>
-          <div class="col-lg-6 image-content">
+          <div class="col-lg-6 image-content reveal-left">
             <div class="estate-image-wrapper p-2 bg-white shadow-lg">
               <img src="images/cinnamon_srilanka.jpg" alt="Bundles of cinnamon quills" class="img-fluid w-100">
             </div>
@@ -109,12 +114,12 @@
     </section>
 
     <!-- Process section -->
-    <section id="process" class="process">
+    <section id="process" class="process reveal">
       <div class="container">
         <div class="section-title">
           <h2>Industrial Process</h2>
         </div>
-        <div class="row g-4">
+        <div class="row g-4 stagger-children">
           <div class="col-xl-4 col-lg-4 col-md-6">
             <div class="card h-100 rounded-0 border shadow-sm process-card" data-num="01" data-title="Harvesting" data-img="images/step1_harvest.png" data-desc="Hand-selected mature stems are harvested from our cinnamon bushes. Our workers carefully select branches of the highest quality, ensuring the perfect balance of age and thickness for premium Ceylon cinnamon production.">
               <div class="overflow-hidden" style="height: 180px;">
@@ -194,7 +199,7 @@
     </section>
 
     <!-- Products section -->
-    <section id="products" class="products">
+    <section id="products" class="products reveal">
       <div class="container">
         <div class="section-title">
           <h2>Product Range</h2>
@@ -207,7 +212,7 @@
     </section>
 
     <!-- Quality section -->
-    <section class="quality">
+    <section class="quality reveal-scale">
       <div class="container">
         <div class="quality-content">
           <h2>QUALITY ASSURANCE</h2>
@@ -217,7 +222,7 @@
     </section>
 
     <!-- Contact section -->
-    <section id="contact" class="contact py-5">
+    <section id="contact" class="contact py-5 reveal">
       <div class="container py-4">
         <div class="row justify-content-center mb-5 text-center">
           <div class="col-lg-8">
