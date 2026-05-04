@@ -277,7 +277,7 @@ app.post('/api/orders', async (req, res) => {
     const { 
       customer_name, customer_email, customer_phone, shipping_address,
       product_id, quantity, subtotal, discount_total, delivery_charge, total_amount,
-      product_name, unit_price, payment_method, district, province
+      product_name, unit_price, payment_method, district, province, bank_reference
     } = req.body;
 
     // Check stock
@@ -288,9 +288,9 @@ app.post('/api/orders', async (req, res) => {
 
     // 1. Create order
     const [orderResult] = await connection.execute(
-      `INSERT INTO orders (customer_name, customer_email, customer_phone, shipping_address, subtotal, discount_total, delivery_charge, total_amount, payment_method, district, province) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [customer_name, customer_email, customer_phone, shipping_address, subtotal, discount_total, delivery_charge, total_amount, payment_method || 'COD', district || '', province || '']
+      `INSERT INTO orders (customer_name, customer_email, customer_phone, shipping_address, subtotal, discount_total, delivery_charge, total_amount, payment_method, district, province, bank_reference) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [customer_name, customer_email, customer_phone, shipping_address, subtotal, discount_total, delivery_charge, total_amount, payment_method || 'COD', district || '', province || '', bank_reference || null]
     );
 
     const orderId = orderResult.insertId;
