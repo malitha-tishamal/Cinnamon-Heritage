@@ -16,7 +16,8 @@ const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
 // ============================================
 const dataPromises = {
   content: fetch('/api/content').then(r => r.ok ? r.json() : null).catch(() => null),
-  products: fetch('/api/products').then(r => r.ok ? r.json() : []).catch(() => [])
+  products: fetch('/api/products').then(r => r.ok ? r.json() : []).catch(() => []),
+  settings: fetch('/api/settings').then(r => r.ok ? r.json() : {}).catch(() => ({}))
 };
 
 // Fallback content if DB is slow/unavailable
@@ -141,6 +142,38 @@ function showSkeletons() {
   productsRow.innerHTML = html;
 }
 
+function applySettings(settings) {
+  // Footer settings
+  if (settings.footer_about) {
+    const el = document.getElementById('footerAboutText');
+    if (el) el.textContent = settings.footer_about;
+  }
+  if (settings.footer_address) {
+    const el = document.getElementById('footerAddress');
+    if (el) el.textContent = settings.footer_address;
+  }
+  if (settings.footer_phone) {
+    const el = document.getElementById('footerPhone');
+    if (el) el.textContent = settings.footer_phone;
+  }
+  if (settings.footer_email) {
+    const el = document.getElementById('footerEmail');
+    if (el) el.textContent = settings.footer_email;
+  }
+  if (settings.social_facebook) {
+    const el = document.getElementById('socialFacebook');
+    if (el) el.href = settings.social_facebook;
+  }
+  if (settings.social_instagram) {
+    const el = document.getElementById('socialInstagram');
+    if (el) el.href = settings.social_instagram;
+  }
+  if (settings.social_twitter) {
+    const el = document.getElementById('socialTwitter');
+    if (el) el.href = settings.social_twitter;
+  }
+}
+
 // ============================================
 // DOM Ready - Apply everything
 // ============================================
@@ -148,11 +181,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Show skeleton loaders immediately
   showSkeletons();
 
-  // Wait for both promises (already started above)
-  const [content, products] = await Promise.all([dataPromises.content, dataPromises.products]);
+  // Wait for all promises (already started above)
+  const [content, products, settings] = await Promise.all([dataPromises.content, dataPromises.products, dataPromises.settings]);
 
   // Apply hero content
   applyHeroContent(content);
+
+  // Apply settings (footer etc)
+  applySettings(settings);
 
   // Render products
   renderProducts(products);
