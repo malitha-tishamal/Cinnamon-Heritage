@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinnamon Heritage | Ultimate System Breakdown</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; color: #333; }
+        .container-box { max-width: 1200px; margin: 40px auto; background: white; padding: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-radius: 10px; border-top: 8px solid #a65d25; }
+        h1 { color: #4a2c1d; border-bottom: 2px solid #a65d25; padding-bottom: 10px; margin-bottom: 30px; font-weight: bold; }
+        h2 { color: #a65d25; margin-top: 40px; padding: 10px; background: #fdfaf6; border-left: 5px solid #a65d25; font-size: 1.5rem; font-weight: bold; }
+        h3 { color: #4a2c1d; margin-top: 25px; font-size: 1.2rem; font-weight: bold; }
+        .section-box { border: 1px solid #eee; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #4a2c1d; color: white; }
+        .func-name { font-family: monospace; color: #d4873a; font-weight: bold; background: #fff8f0; padding: 2px 6px; border-radius: 4px; }
+        .badge-tag { background: #e9ecef; color: #495057; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container-box">
+    <h1>Cinnamon Heritage: Ultimate System Breakdown</h1>
+    <p class="lead">Complete documentation of every page, every section, and every function across the User, Admin, and Backend environments.</p>
+
+    <!-- ========================================== -->
+    <!-- 1. PUBLIC USER PAGES -->
+    <!-- ========================================== -->
+    <h2>1. Public Facing / User Pages</h2>
+
+    <h3>1.1 Main Landing Page (<code>index.html</code>)</h3>
+    <div class="section-box">
+        <p><strong>Purpose:</strong> The primary storefront and brand showcase for customers.</p>
+        
+        <h4>Sections Breakdown:</h4>
+        <ul>
+            <li><strong>Preloader:</strong> A spinning loader that masks the screen while data is fetched.</li>
+            <li><strong>Navbar:</strong> Sticky glassmorphism header with smooth-scroll anchor links.</li>
+            <li><strong>Hero (Slider/Banner):</strong> The main visual entrance. Contains dynamic titles and subtitles loaded from the database.</li>
+            <li><strong>About Us:</strong> Details the history of the Galle estate with an immersive background.</li>
+            <li><strong>Factory:</strong> Highlights processing capabilities and ISO certifications.</li>
+            <li><strong>Process Steps:</strong> 5 interactive cards (Harvesting, Washing, Peeling, Drying, Packing).</li>
+            <li><strong>Products (Shop):</strong> The core e-commerce grid showing available cinnamon products.</li>
+            <li><strong>Quality Assurance:</strong> Static section detailing lab testing and purity.</li>
+            <li><strong>Contact:</strong> A communication form and contact details (Address, Phone, Email).</li>
+            <li><strong>Floating WhatsApp:</strong> A fixed button for instant chat routing.</li>
+        </ul>
+
+        <h4>Frontend Functions (<code>js/main.js</code>):</h4>
+        <table>
+            <tr><th>Function Name</th><th>Detailed Explanation</th></tr>
+            <tr><td><span class="func-name">dataPromises</span></td><td>Fires immediately on load to fetch `/api/content`, `/api/products`, and `/api/settings` concurrently to speed up rendering.</td></tr>
+            <tr><td><span class="func-name">applyHeroContent()</span></td><td>Extracts text from the DB content payload, injects it into the Hero DOM elements, and triggers CSS fade-in animations. Uses fallback text if DB fails.</td></tr>
+            <tr><td><span class="func-name">renderProducts(products)</span></td><td>Iterates through inventory data. Builds HTML cards dynamically. Calculates original prices if discounts exist. Appends "Low Stock" or "Out of Stock" badges based on `stock_quantity`.</td></tr>
+            <tr><td><span class="func-name">showSkeletons()</span></td><td>Renders placeholder UI cards while waiting for product data from the server.</td></tr>
+            <tr><td><span class="func-name">applySettings(settings)</span></td><td>Injects dynamic Footer details (Social media links, physical addresses) fetched from site settings.</td></tr>
+            <tr><td><span class="func-name">Modal Listeners</span></td><td>Attaches click events to Process Cards and Product Cards. When clicked, it populates `processModal` with full descriptions, high-res images, and pricing info, then displays the overlay.</td></tr>
+            <tr><td><span class="func-name">Contact Form Submit</span></td><td>Intercepts the standard HTML form submission. Collects name, email, and message. Sends a POST request to `/api/contact` (or EmailJS). Displays a success/error Toast notification.</td></tr>
+            <tr><td><span class="func-name">showToast()</span></td><td>Utility function utilizing Bootstrap's Toast API to show temporary alerts on screen.</td></tr>
+            <tr><td><span class="func-name">initScrollAnimations()</span></td><td>Uses JavaScript `IntersectionObserver`. It watches specific DOM elements and adds a `visible` class when they enter the viewport, triggering CSS slide-up/fade-in effects.</td></tr>
+        </table>
+    </div>
+
+    <h3>1.2 Order & Checkout Page (<code>checkout.html</code>)</h3>
+    <div class="section-box">
+        <p><strong>Purpose:</strong> The transactional portal where users finalize purchases.</p>
+        
+        <h4>Sections Breakdown:</h4>
+        <ul>
+            <li><strong>Product Summary:</strong> Displays the selected item, image, available stock, and a quantity selector (+/-).</li>
+            <li><strong>Financial Breakdown:</strong> Shows Subtotal, Discount deductions, Delivery Fee, and Final Total.</li>
+            <li><strong>Shipping Form:</strong> Captures critical customer data (Name, Email, Phone, Province, District, Address).</li>
+            <li><strong>Payment Selector:</strong> Radio buttons to choose between Cash on Delivery (COD), Bank Transfer, or Online Pay.</li>
+            <li><strong>Bank Details Panel:</strong> Appears only if "Bank Transfer" is selected. Displays account numbers and a field for a reference slip.</li>
+        </ul>
+
+        <h4>Frontend Functions (Inline Script):</h4>
+        <table>
+            <tr><th>Function Name</th><th>Detailed Explanation</th></tr>
+            <tr><td><span class="func-name">initCheckout()</span></td><td>The master bootstrapper. Parses the `product_id` from the URL, then fetches product details, delivery rates, and site settings simultaneously.</td></tr>
+            <tr><td><span class="func-name">fetchProduct()</span></td><td>Calls `/api/products/:id`. If the product doesn't exist, it alerts the user and redirects back to `index.html`.</td></tr>
+            <tr><td><span class="func-name">setupLocationSelectors()</span></td><td>Populates the Province dropdown. When a Province is chosen, it filters the `deliveryRates` array to populate the District dropdown specific to that province.</td></tr>
+            <tr><td><span class="func-name">selectPayment(method)</span></td><td>Toggles UI elements based on the payment choice. If `BANK` is selected, it unhides the Bank Details panel and changes the submit button text.</td></tr>
+            <tr><td><span class="func-name">changeQty(delta)</span></td><td>Fired by +/- buttons. Increases or decreases the order quantity. Enforces rules: Quantity cannot be less than 1, and cannot exceed `stock_quantity`. Triggers recalculation.</td></tr>
+            <tr><td><span class="func-name">updateCalculations()</span></td><td>The financial engine. Multiplies price by quantity, subtracts discounts, reads the delivery charge based on the selected District, and calculates the Final Total. Updates the UI immediately.</td></tr>
+            <tr><td><span class="func-name">Form Submission</span></td><td>Intercepts the "Place Order" click. Validates inputs (like Bank Reference if applicable). Constructs a JSON payload. Sends POST to `/api/orders`. Shows loading spinner. Redirects to Home on success.</td></tr>
+            <tr><td><span class="func-name">copyToClipboard()</span></td><td>Utility allowing users to click a button to copy the Bank Account Number directly to their device clipboard.</td></tr>
+        </table>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. ADMIN PAGES -->
+    <!-- ========================================== -->
+    <h2>2. Admin Portal & Management Pages</h2>
+
+    <h3>2.1 Dashboard (<code>admin.html</code>)</h3>
+    <div class="section-box">
+        <p><strong>Purpose:</strong> The secure backend interface for the factory owner to manage all operations.</p>
+        
+        <h4>Sections Breakdown:</h4>
+        <ul>
+            <li><strong>Auth Screens:</strong> Independent views for Login, Initial Setup, and Password Recovery.</li>
+            <li><strong>Sidebar Navigation:</strong> The main menu to switch between management modules.</li>
+            <li><strong>Stats Dashboard:</strong> Displays total earnings, order counts, unread messages, and a table showing best-selling products.</li>
+            <li><strong>CMS Editor:</strong> Input forms corresponding to every text section on the public site (Hero, About, Factory, etc.).</li>
+            <li><strong>Process Manager:</strong> Interface to alter the 5-step industrial process descriptions and images.</li>
+            <li><strong>Inventory/Product Manager:</strong> The core CRUD interface to add new cinnamon products, set prices, apply discounts, and update stock limits.</li>
+            <li><strong>Order Tracking:</strong> A tabular view of all historical and pending orders. Includes tools to view customer details and update delivery status.</li>
+            <li><strong>Message Center:</strong> An inbox to read and resolve inquiries sent via the public Contact form.</li>
+        </ul>
+
+        <h4>Admin Functions (<code>js/admin.js</code>):</h4>
+        <table>
+            <tr><th>Function Name</th><th>Detailed Explanation</th></tr>
+            <tr><td><span class="func-name">checkAuth()</span></td><td>An IIFE (Immediately Invoked Function Expression) that fires on load. Pings `/api/auth/status`. If valid, it reveals the dashboard. If not, it checks if the DB is empty (`/needs-setup`) to show the Setup screen or Login screen.</td></tr>
+            <tr><td><span class="func-name">Login/Setup Submit</span></td><td>Sends credentials to `/api/auth/login`. If success, stores data in memory and reveals dashboard.</td></tr>
+            <tr><td><span class="func-name">loadDashboard()</span></td><td>Fetches `/api/admin/stats`. Updates the UI cards for "Earnings Today", "Earnings Month". Maps the `productSales` array to a table, calculating "Low Stock" warnings dynamically based on settings.</td></tr>
+            <tr><td><span class="func-name">loadSection(section)</span></td><td>Fired by sidebar clicks. Hides all panels and shows the requested one. Fetches the required data (e.g., if "Products" is clicked, it calls `loadProducts()`).</td></tr>
+            <tr><td><span class="func-name">saveContent(section)</span></td><td>The CMS engine. Reads values from the input forms. Loops through each field and sends a PUT request to `/api/admin/content` to update the DB.</td></tr>
+            <tr><td><span class="func-name">uploadImage(fileInput)</span></td><td>Reads a selected file, appends it to a `FormData` object, and sends a POST to `/api/admin/upload` (handled by Multer backend). Returns the URL path to save in the DB.</td></tr>
+            <tr><td><span class="func-name">loadProducts()</span></td><td>Fetches all inventory. Generates complex HTML blocks for each product containing editable input fields for Title, Price, Discount, Stock, and Descriptions.</td></tr>
+            <tr><td><span class="func-name">saveProduct(id) / submitNewProduct()</span></td><td>Gathers data from the generated product forms. Sends PUT (for update) or POST (for new) requests to the products API endpoint.</td></tr>
+            <tr><td><span class="func-name">deleteProduct(id)</span></td><td>Issues a DELETE request to remove a product from the database permanently. Requires confirmation.</td></tr>
+            <tr><td><span class="func-name">loadOrders()</span></td><td>Fetches all orders. Builds a table. Dynamically applies CSS classes based on status (e.g., Green for Delivered, Yellow for Pending).</td></tr>
+            <tr><td><span class="func-name">updateOrderStatus(id, val)</span></td><td>Triggered by a dropdown change in the order view. Sends a PUT request to update the order's state (Pending -> Shipped).</td></tr>
+        </table>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. BACKEND & SERVER LOGIC -->
+    <!-- ========================================== -->
+    <h2>3. Backend Infrastructure & API (<code>server.js</code>)</h2>
+    <div class="section-box">
+        <p><strong>Purpose:</strong> The Node.js/Express engine that processes logic, connects to MySQL, and enforces security.</p>
+
+        <h4>Core Middlewares:</h4>
+        <ul>
+            <li><span class="badge-tag">express.json()</span> Parses incoming request bodies (like order forms) into readable JSON.</li>
+            <li><span class="badge-tag">express-session</span> Generates a secure cookie (`maxAge: 1 year`) to keep the admin logged in safely without passing passwords continually.</li>
+            <li><span class="badge-tag">multer</span> Configured via `diskStorage` to intercept file uploads, rename them with timestamps to prevent overwrites, and save them to the `/images` folder.</li>
+        </ul>
+
+        <h4>Backend Functions & Routes:</h4>
+        <table>
+            <tr><th>Route / Function</th><th>Detailed Backend Logic Execution</th></tr>
+            <tr><td><span class="func-name">requireAuth()</span></td><td>Custom middleware. Checks if `req.session.isAdmin` is true. If false, returns HTTP 401 Unauthorized, blocking access to all `/api/admin/*` routes.</td></tr>
+            <tr><td><span class="func-name">POST /api/auth/login</span></td><td>Queries the `admin_users` table by email. If found, uses `bcrypt.compare()` to securely verify the hashed password. If true, sets `req.session.isAdmin = true`.</td></tr>
+            <tr><td><span class="func-name">POST /api/auth/setup</span></td><td>Uses `bcrypt.hash(password, 10)` to encrypt the master password before inserting the first administrator into the database.</td></tr>
+            <tr><td><span class="func-name">GET /api/content</span></td><td>Queries `SELECT * FROM site_content`. Restructures the flat SQL rows into a nested JSON object categorized by `section_name` for easy frontend parsing.</td></tr>
+            <tr><td><span class="func-name">GET /api/products</span></td><td>Executes an advanced SQL query featuring a `LEFT JOIN` on the `order_items` table. It uses `SUM(quantity)` to dynamically calculate how many units of a product have been sold (`total_sales`) alongside basic product data.</td></tr>
+            <tr><td><span class="func-name">POST /api/orders</span></td><td><strong>The most complex logic:</strong> 
+                1. Requests a dedicated connection (`pool.getConnection`). <br>
+                2. Starts a MySQL `beginTransaction()`. <br>
+                3. Checks `products` table to ensure `stock_quantity >= requested_quantity`. <br>
+                4. Inserts into `orders` table to get the master `order_id`. <br>
+                5. Inserts into `order_items` table for itemized tracking. <br>
+                6. Executes `UPDATE products SET stock_quantity = stock_quantity - qty`. <br>
+                7. Calls `connection.commit()`. If any step fails, calls `connection.rollback()` to prevent ghost data.</td></tr>
+            <tr><td><span class="func-name">PUT /api/admin/content</span></td><td>Uses a dual approach: Attempts an `UPDATE` query. If `affectedRows === 0` (meaning the content key doesn't exist yet), it executes an `INSERT` query. Ensures data always saves.</td></tr>
+            <tr><td><span class="func-name">GET /api/admin/stats</span></td><td>Runs 6 separate SQL queries concurrently to count total messages, active products, and total orders. Calculates earnings specifically for "Today" (`CURDATE()`), "This Month", and "Total Lifetime" while excluding "Cancelled" orders.</td></tr>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>
