@@ -694,6 +694,15 @@ async function loadSettings() {
     document.getElementById('settingCodEnabled').checked     = siteSettings.cod_enabled    === '1';
     document.getElementById('settingOnlineEnabled').checked  = siteSettings.online_pay_enabled === '1';
 
+    // Footer Settings
+    document.getElementById('settingFooterAbout').value     = siteSettings.footer_about || '';
+    document.getElementById('settingFooterAddress').value   = siteSettings.footer_address || '';
+    document.getElementById('settingFooterPhone').value     = siteSettings.footer_phone || '';
+    document.getElementById('settingFooterEmail').value     = siteSettings.footer_email || '';
+    document.getElementById('settingSocialFacebook').value  = siteSettings.social_facebook || '';
+    document.getElementById('settingSocialInstagram').value = siteSettings.social_instagram || '';
+    document.getElementById('settingSocialTwitter').value   = siteSettings.social_twitter || '';
+
     loadDeliveryRates();
   } catch (err) {
     console.error('Settings load error:', err);
@@ -715,6 +724,27 @@ async function saveSettings() {
     siteSettings = { ...siteSettings, ...settings };
   } catch (err) {
     showAdminToast('Failed to save settings', 'error');
+  }
+}
+
+async function saveFooterSettings() {
+  try {
+    const settings = {
+      footer_about:     document.getElementById('settingFooterAbout').value,
+      footer_address:   document.getElementById('settingFooterAddress').value,
+      footer_phone:     document.getElementById('settingFooterPhone').value,
+      footer_email:     document.getElementById('settingFooterEmail').value,
+      social_facebook:  document.getElementById('settingSocialFacebook').value,
+      social_instagram: document.getElementById('settingSocialInstagram').value,
+      social_twitter:   document.getElementById('settingSocialTwitter').value
+    };
+    for (const [key, value] of Object.entries(settings)) {
+      await saveSetting(key, value); 
+    }
+    showAdminToast('Footer settings saved successfully!', 'success');
+    siteSettings = { ...siteSettings, ...settings };
+  } catch (err) {
+    showAdminToast('Failed to save footer settings', 'error');
   }
 }
 
