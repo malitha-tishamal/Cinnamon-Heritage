@@ -1,26 +1,30 @@
-// ============================================
-// EmailJS Configuration
-// ============================================
-const EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
-const EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID';
+// ============================================================
+// main.js — Supabase Edition
+// All fetch('/api/...') calls replaced with Supabase helpers
+// ============================================================
+
+// EmailJS config (optional — keep if you use it)
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
 const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
 
 (function() {
-  if (typeof emailjs !== 'undefined') {
+  if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
     emailjs.init(EMAILJS_PUBLIC_KEY);
   }
 })();
 
-// ============================================
-// IMMEDIATE DATA LOADING - Fires ASAP
-// ============================================
+// ============================================================
+// IMMEDIATE DATA LOADING — fires before DOMContentLoaded
+// Using Supabase helpers from supabase.js
+// ============================================================
 const dataPromises = {
-  content: fetch('/api/content').then(r => r.ok ? r.json() : null).catch(() => null),
-  products: fetch('/api/products').then(r => r.ok ? r.json() : []).catch(() => []),
-  settings: fetch('/api/settings').then(r => r.ok ? r.json() : {}).catch(() => ({}))
+  content:  getContent().catch(() => null),
+  products: getProducts().catch(() => []),
+  settings: getSettings().catch(() => ({}))
 };
 
-// Fallback content if DB is slow/unavailable
+// Fallback content if Supabase is slow or unavailable
 const FALLBACK = {
   hero: {
     title: 'Pure Ceylon Cinnamon',
@@ -29,14 +33,13 @@ const FALLBACK = {
   }
 };
 
-// ============================================
-// Apply content as soon as DOM is ready
-// ============================================
+// ============================================================
+// Apply hero content
+// ============================================================
 function applyHeroContent(content) {
-  const heroTitle = document.getElementById('hero-title');
+  const heroTitle    = document.getElementById('hero-title');
   const heroSubtitle = document.getElementById('hero-subtitle');
-  const heroCta = document.getElementById('hero-cta');
-
+  const heroCta      = document.getElementById('hero-cta');
   const hero = (content && content.hero) ? content.hero : FALLBACK.hero;
 
   if (heroTitle) {
@@ -54,6 +57,9 @@ function applyHeroContent(content) {
   }
 }
 
+// ============================================================
+// Render Products
+// ============================================================
 function renderProducts(products) {
   const productsRow = document.getElementById('productsRow');
   if (!productsRow) return;
@@ -65,28 +71,26 @@ function renderProducts(products) {
 
   productsRow.innerHTML = '';
   products.forEach((p, i) => {
-    const hasDiscount = p.discount > 0;
+    const hasDiscount  = p.discount > 0;
     const displayPrice = parseFloat(p.price);
-    const oldPrice = displayPrice + (parseFloat(p.discount) || 0);
-    const isLowStock = p.stock_quantity > 0 && p.stock_quantity <= 10;
+    const oldPrice     = displayPrice + (parseFloat(p.discount) || 0);
+    const isLowStock   = p.stock_quantity > 0 && p.stock_quantity <= 10;
     const isOutOfStock = p.stock_quantity <= 0;
-    const isTopSeller = p.total_sales >= 50;
+    const isTopSeller  = p.total_sales >= 50;
 
     const col = document.createElement('div');
     col.className = 'col-lg-3 col-md-6';
-    col.style.opacity = '0';
-    col.style.transform = 'translateY(30px)';
-    col.style.transition = `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s`;
+    col.style.cssText = `opacity:0;transform:translateY(30px);transition:opacity 0.5s ease ${i * 0.1}s,transform 0.5s ease ${i * 0.1}s`;
 
     col.innerHTML = `
-      <div class="card h-100 product-card ${isOutOfStock ? 'opacity-75' : ''}" 
-           data-id="${p.id}" data-title="${p.title}" data-img="${p.image_url}" 
+      <div class="card h-100 product-card ${isOutOfStock ? 'opacity-75' : ''}"
+           data-id="${p.id}" data-title="${p.title}" data-img="${p.image_url}"
            data-desc="${p.short_desc}" data-price="${p.price}"
            data-discount="${p.discount}" data-stock="${p.stock_quantity}">
-        <div class="overflow-hidden" style="height: 200px; position: relative;">
-          ${hasDiscount ? '<span class="badge bg-danger position-absolute top-0 end-0 m-2" style="z-index:1;border-radius:6px;">OFFER</span>' : ''}
-          ${isTopSeller ? '<span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2" style="z-index:1;border-radius:6px;">TOP SELLER</span>' : ''}
-          <img src="${p.image_url}" alt="${p.title}" class="card-img-top h-100 w-100 object-fit-cover product-img" style="transition: transform 0.6s ease;">
+        <div class="overflow-hidden" style="height:200px;position:relative;">
+          ${hasDiscount  ? '<span class="badge bg-danger position-absolute top-0 end-0 m-2" style="z-index:1;border-radius:6px;">OFFER</span>' : ''}
+          ${isTopSeller  ? '<span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2" style="z-index:1;border-radius:6px;">TOP SELLER</span>' : ''}
+          <img src="${p.image_url}" alt="${p.title}" class="card-img-top h-100 w-100 object-fit-cover product-img" style="transition:transform 0.6s ease;">
         </div>
         <div class="card-body d-flex flex-column p-4">
           <div class="d-flex justify-content-between align-items-start mb-1">
@@ -98,14 +102,14 @@ function renderProducts(products) {
             ${hasDiscount ? `<small class="text-decoration-line-through ms-1" style="color:var(--text-secondary);font-size:0.8rem;">LKR ${oldPrice.toLocaleString()}</small>` : ''}
           </div>
           <div class="mb-3">
-            ${isOutOfStock ? '<span class="badge bg-secondary w-100" style="border-radius:6px;">OUT OF STOCK</span>' : 
-              isLowStock ? `<span class="badge bg-warning text-dark w-100" style="border-radius:6px;">LOW STOCK: ${p.stock_quantity} LEFT</span>` : 
-              `<small class="text-success" style="font-size:0.75rem;">✓ In Stock (${p.stock_quantity})</small>`}
+            ${isOutOfStock ? '<span class="badge bg-secondary w-100" style="border-radius:6px;">OUT OF STOCK</span>' :
+              isLowStock   ? `<span class="badge bg-warning text-dark w-100" style="border-radius:6px;">LOW STOCK: ${p.stock_quantity} LEFT</span>` :
+                             `<small class="text-success" style="font-size:0.75rem;">✓ In Stock (${p.stock_quantity})</small>`}
           </div>
           <p class="card-text small flex-grow-1" style="color:var(--text-secondary);">${p.short_desc}</p>
           <div class="mt-3 d-flex gap-2">
             <span class="btn btn-outline-dark product-btn fw-bold flex-grow-1 text-uppercase" style="font-family:'Oswald',sans-serif;font-size:0.75rem;letter-spacing:1px;">Details</span>
-            ${isOutOfStock ? 
+            ${isOutOfStock ?
               '<button class="btn btn-secondary fw-bold flex-grow-1 text-uppercase disabled" style="font-family:\'Oswald\',sans-serif;font-size:0.75rem;border-radius:8px;">Sold Out</button>' :
               `<a href="checkout.html?product_id=${p.id}" class="btn fw-bold flex-grow-1 text-uppercase" style="background:var(--accent);border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:0.75rem;border-radius:8px;">Buy</a>`}
           </div>
@@ -113,15 +117,16 @@ function renderProducts(products) {
       </div>`;
 
     productsRow.appendChild(col);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        col.style.opacity = '1';
-        col.style.transform = 'translateY(0)';
-      });
-    });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      col.style.opacity = '1';
+      col.style.transform = 'translateY(0)';
+    }));
   });
 }
 
+// ============================================================
+// Skeleton loaders
+// ============================================================
 function showSkeletons() {
   const productsRow = document.getElementById('productsRow');
   if (!productsRow) return;
@@ -142,77 +147,63 @@ function showSkeletons() {
   productsRow.innerHTML = html;
 }
 
+// ============================================================
+// Apply settings (footer etc.)
+// ============================================================
 function applySettings(settings) {
-  // Footer settings
-  if (settings.footer_about) {
-    const el = document.getElementById('footerAboutText');
-    if (el) el.textContent = settings.footer_about;
+  const map = {
+    footer_about:   'footerAboutText',
+    footer_address: 'footerAddress',
+    footer_phone:   'footerPhone',
+    footer_email:   'footerEmail'
+  };
+  for (const [key, elId] of Object.entries(map)) {
+    if (settings[key]) {
+      const el = document.getElementById(elId);
+      if (el) el.textContent = settings[key];
+    }
   }
-  if (settings.footer_address) {
-    const el = document.getElementById('footerAddress');
-    if (el) el.textContent = settings.footer_address;
-  }
-  if (settings.footer_phone) {
-    const el = document.getElementById('footerPhone');
-    if (el) el.textContent = settings.footer_phone;
-  }
-  if (settings.footer_email) {
-    const el = document.getElementById('footerEmail');
-    if (el) el.textContent = settings.footer_email;
-  }
-  if (settings.social_facebook) {
-    const el = document.getElementById('socialFacebook');
-    if (el) el.href = settings.social_facebook;
-  }
-  if (settings.social_instagram) {
-    const el = document.getElementById('socialInstagram');
-    if (el) el.href = settings.social_instagram;
-  }
-  if (settings.social_twitter) {
-    const el = document.getElementById('socialTwitter');
-    if (el) el.href = settings.social_twitter;
+  const socials = { social_facebook: 'socialFacebook', social_instagram: 'socialInstagram', social_twitter: 'socialTwitter' };
+  for (const [key, elId] of Object.entries(socials)) {
+    if (settings[key]) {
+      const el = document.getElementById(elId);
+      if (el) el.href = settings[key];
+    }
   }
 }
 
-// ============================================
-// DOM Ready - Apply everything
-// ============================================
+// ============================================================
+// DOM Ready
+// ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  // Show skeleton loaders immediately
   showSkeletons();
 
-  // Wait for all promises (already started above)
-  const [content, products, settings] = await Promise.all([dataPromises.content, dataPromises.products, dataPromises.settings]);
+  const [content, products, settings] = await Promise.all([
+    dataPromises.content, dataPromises.products, dataPromises.settings
+  ]);
 
-  // Apply hero content
   applyHeroContent(content);
-
-  // Apply settings (footer etc)
   applySettings(settings);
-
-  // Render products
   renderProducts(products);
 
-  // Hide preloader
   const preloader = document.getElementById('preloader');
   if (preloader) {
     preloader.classList.add('hidden');
     setTimeout(() => preloader.remove(), 600);
   }
 
-  // Init scroll animations
   initScrollAnimations();
 });
 
-// ============================================
-// Modal Elements & Click Handler
-// ============================================
-const modal = document.getElementById('processModal');
+// ============================================================
+// Modal — Process & Product click handler (unchanged)
+// ============================================================
+const modal     = document.getElementById('processModal');
 const closeModal = document.getElementById('closeModal');
-const modalImg = document.getElementById('modalImg');
-const modalNum = document.getElementById('modalNum');
+const modalImg   = document.getElementById('modalImg');
+const modalNum   = document.getElementById('modalNum');
 const modalTitle = document.getElementById('modalTitle');
-const modalDesc = document.getElementById('modalDesc');
+const modalDesc  = document.getElementById('modalDesc');
 
 document.addEventListener('click', function(e) {
   const card = e.target.closest('.process-card, .product-card');
@@ -220,33 +211,33 @@ document.addEventListener('click', function(e) {
   e.preventDefault();
   e.stopPropagation();
 
-  const title = card.getAttribute('data-title');
-  const desc = card.getAttribute('data-desc');
-  const img = card.getAttribute('data-img');
-  const num = card.getAttribute('data-num');
+  const title     = card.getAttribute('data-title');
+  const desc      = card.getAttribute('data-desc');
+  const img       = card.getAttribute('data-img');
+  const num       = card.getAttribute('data-num');
   const isProduct = card.classList.contains('product-card');
   const productId = card.getAttribute('data-id');
-  const price = card.getAttribute('data-price');
-  const discount = card.getAttribute('data-discount');
-  const stock = card.getAttribute('data-stock');
+  const price     = card.getAttribute('data-price');
+  const discount  = card.getAttribute('data-discount');
+  const stock     = card.getAttribute('data-stock');
 
   modalTitle.textContent = title;
-  modalDesc.textContent = desc;
+  modalDesc.textContent  = desc;
 
   if (num) { modalNum.textContent = num; modalNum.style.display = 'block'; }
   else { modalNum.style.display = 'none'; }
 
-  const priceContainer = document.getElementById('modalPriceContainer');
-  const stockContainer = document.getElementById('modalStockContainer');
+  const priceContainer  = document.getElementById('modalPriceContainer');
+  const stockContainer  = document.getElementById('modalStockContainer');
   const actionContainer = document.getElementById('modalActionContainer');
-  const buyBtn = document.getElementById('modalBuyBtn');
+  const buyBtn          = document.getElementById('modalBuyBtn');
 
   if (isProduct && price) {
     priceContainer.classList.remove('d-none');
     stockContainer.classList.remove('d-none');
     actionContainer.classList.remove('d-none');
     const currentPrice = parseFloat(price);
-    const discAmt = parseFloat(discount || 0);
+    const discAmt      = parseFloat(discount || 0);
     document.getElementById('modalPrice').textContent = `LKR ${currentPrice.toLocaleString()}`;
     if (discAmt > 0) {
       document.getElementById('modalOldPrice').textContent = `LKR ${(currentPrice + discAmt).toLocaleString()}`;
@@ -287,62 +278,72 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// ============================================
-// Contact Form Handler
-// ============================================
+// ============================================================
+// Contact Form — now uses Supabase submitContact()
+// ============================================================
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
-  contactForm.addEventListener('submit', function(e) {
+  contactForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     e.stopPropagation();
     if (!contactForm.checkValidity()) { contactForm.classList.add('was-validated'); return; }
 
     const submitBtn = document.getElementById('contactSubmitBtn');
-    const btnText = document.getElementById('submitBtnText');
-    const spinner = document.getElementById('submitBtnSpinner');
+    const btnText   = document.getElementById('submitBtnText');
+    const spinner   = document.getElementById('submitBtnSpinner');
     submitBtn.disabled = true;
     btnText.textContent = 'Sending...';
     spinner.classList.remove('d-none');
 
     const formData = {
-      from_name: document.getElementById('contactName').value,
+      from_name:  document.getElementById('contactName').value,
       from_email: document.getElementById('contactEmail').value,
-      phone: document.getElementById('contactPhone').value || 'Not provided',
-      subject: document.getElementById('contactSubject').value || 'General Enquiry',
-      message: document.getElementById('contactMessage').value
+      phone:      document.getElementById('contactPhone').value || 'Not provided',
+      subject:    document.getElementById('contactSubject').value || 'General Enquiry',
+      message:    document.getElementById('contactMessage').value
     };
 
+    // Try EmailJS first (if configured), then Supabase
     if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
       emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, formData)
         .then(() => { showToast('Message sent successfully!', 'success'); contactForm.reset(); contactForm.classList.remove('was-validated'); })
         .catch(() => { showToast('Failed to send. Please try again.', 'error'); })
         .finally(() => { submitBtn.disabled = false; btnText.textContent = 'Send Message'; spinner.classList.add('d-none'); });
     } else {
-      fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) })
-        .then(r => { if (r.ok) return r.json(); throw new Error(); })
-        .then(() => { showToast('Message sent successfully!', 'success'); contactForm.reset(); contactForm.classList.remove('was-validated'); })
-        .catch(() => { console.log('Contact Form Data:', formData); showToast('Thank you! Message received.', 'success'); contactForm.reset(); contactForm.classList.remove('was-validated'); })
-        .finally(() => { submitBtn.disabled = false; btnText.textContent = 'Send Message'; spinner.classList.add('d-none'); });
+      // *** SUPABASE: replaces fetch('/api/contact', ...) ***
+      try {
+        await submitContact(formData);
+        showToast('Message sent successfully!', 'success');
+        contactForm.reset();
+        contactForm.classList.remove('was-validated');
+      } catch (err) {
+        showToast('Thank you! Message received.', 'success');
+        contactForm.reset();
+        contactForm.classList.remove('was-validated');
+      } finally {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Send Message';
+        spinner.classList.add('d-none');
+      }
     }
   });
 }
 
-// ============================================
-// Toast Notification
-// ============================================
+// ============================================================
+// Toast
+// ============================================================
 function showToast(message, type) {
-  const toastEl = document.getElementById('contactToast');
+  const toastEl  = document.getElementById('contactToast');
   const toastMsg = document.getElementById('toastMessage');
   toastMsg.textContent = message;
   toastEl.classList.remove('bg-success', 'bg-danger', 'text-white');
   toastEl.classList.add(type === 'success' ? 'bg-success' : 'bg-danger', 'text-white');
-  const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
-  toast.show();
+  new bootstrap.Toast(toastEl, { delay: 5000 }).show();
 }
 
-// ============================================
+// ============================================================
 // Smooth Scroll
-// ============================================
+// ============================================================
 document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
   anchor.addEventListener('click', function(e) {
     const targetId = this.getAttribute('href');
@@ -358,9 +359,9 @@ document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
   });
 });
 
-// ============================================
-// Scroll Animations (IntersectionObserver)
-// ============================================
+// ============================================================
+// Scroll Animations
+// ============================================================
 function initScrollAnimations() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -371,23 +372,22 @@ function initScrollAnimations() {
     });
   }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
 
-  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger-children').forEach(el => {
-    observer.observe(el);
-  });
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger-children')
+    .forEach(el => observer.observe(el));
 }
 
-// ============================================
-// Navbar Background on Scroll
-// ============================================
+// ============================================================
+// Navbar scroll behaviour
+// ============================================================
 window.addEventListener('scroll', function() {
   const navbar = document.querySelector('.navbar');
   if (navbar) {
     if (window.scrollY > 100) {
-      navbar.style.background = 'rgba(10, 10, 15, 0.95)';
-      navbar.style.padding = '10px 0';
+      navbar.style.background = 'rgba(10,10,15,0.95)';
+      navbar.style.padding    = '10px 0';
     } else {
-      navbar.style.background = 'rgba(0, 0, 0, 0.3)';
-      navbar.style.padding = '20px 0';
+      navbar.style.background = 'rgba(0,0,0,0.3)';
+      navbar.style.padding    = '20px 0';
     }
   }
 });

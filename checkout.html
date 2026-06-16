@@ -359,8 +359,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
   <script>
-    const API = '';
     let currentProduct = null;
     let qty = 1;
     let deliveryRates = [];
@@ -379,9 +380,8 @@
 
     async function fetchProduct() {
       try {
-        const res = await fetch(`${API}/api/products/${productId}`);
-        if (!res.ok) throw new Error('Not found');
-        currentProduct = await res.json();
+        currentProduct = await getProduct(productId);
+        if (!currentProduct) throw new Error('Not found');
         renderProduct();
       } catch (err) {
         alert('Product not found. Redirecting...');
@@ -390,13 +390,13 @@
     }
 
     async function fetchDeliveryRates() {
-      try { deliveryRates = await (await fetch(`${API}/api/delivery-rates`)).json(); }
+      try { deliveryRates = await getDeliveryRates(); }
       catch (e) { console.error('Failed to fetch delivery rates'); }
     }
 
     async function fetchSettings() {
       try {
-        siteSettings = await (await fetch(`${API}/api/settings`)).json();
+        siteSettings = await getSettings();
         if (siteSettings.cod_enabled === '1') document.getElementById('codContainer').classList.remove('d-none');
         if (siteSettings.online_pay_enabled === '1') document.getElementById('payNowContainer').classList.remove('d-none');
         // Bank transfer - always show (or check setting)
@@ -558,17 +558,12 @@
       };
 
       try {
-        const res = await fetch(`${API}/api/orders`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(orderData)
-        });
-        const data = await res.json();
-        if (data.success) {
+        const result = await placeOrder(orderData);
+        if (result.success) {
           showToast('Order placed successfully! Redirecting...', 'success');
           setTimeout(() => window.location.href = 'index.html', 3000);
         } else {
-          showToast(data.error || 'Failed to place order', 'danger');
+          showToast(result.error || 'Failed to place order', 'danger');
         }
       } catch (err) {
         showToast('Network error. Please try again.', 'danger');
