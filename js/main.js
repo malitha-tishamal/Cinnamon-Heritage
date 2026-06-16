@@ -18,10 +18,28 @@ const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
 // IMMEDIATE DATA LOADING — fires before DOMContentLoaded
 // Using Supabase helpers from supabase.js
 // ============================================================
+// Caching wrapper for instant loads
+async function fetchWithCache(key, fetcher, fallback) {
+  const cached = sessionStorage.getItem(key);
+  let initialData = fallback;
+  if (cached) {
+    try { initialData = JSON.parse(cached); } catch(e){}
+  }
+  
+  // Always fetch fresh data in background to update cache for next time
+  const promise = fetcher().then(data => {
+    if (data) sessionStorage.setItem(key, JSON.stringify(data));
+    return data;
+  }).catch(() => fallback);
+
+  // If we had cached data, return it immediately, otherwise wait for network
+  return cached ? initialData : promise;
+}
+
 const dataPromises = {
-  content:  getContent().catch(() => null),
-  products: getProducts().catch(() => []),
-  settings: getSettings().catch(() => ({}))
+  content:  fetchWithCache('cache_content', getContent, null),
+  products: fetchWithCache('cache_products', getProducts, []),
+  settings: fetchWithCache('cache_settings', getSettings, {})
 };
 
 // Fallback content if Supabase is slow or unavailable

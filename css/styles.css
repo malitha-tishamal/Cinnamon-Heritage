@@ -21,6 +21,18 @@
 
 html { scroll-behavior: smooth; }
 
+/* Tactile button feedback & Animation Performance */
+.btn {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.btn:active {
+  transform: scale(0.95) !important;
+}
+
+.reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger-children > * {
+  will-change: transform, opacity;
+}
+
 body {
   font-family: "Inter", sans-serif;
   line-height: 1.6;
