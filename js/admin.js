@@ -231,6 +231,9 @@ async function loadSection(section) {
     if (section === 'about' && content?.about) {
       document.getElementById('aboutTitle').value = content.about.title || '';
       document.getElementById('aboutText').value  = content.about.text  || '';
+      const bgUrl = content.about.background_image || 'images/estate_bg.png';
+      document.getElementById('aboutBackgroundImage').value = bgUrl;
+      document.getElementById('aboutBgPreviewImg').src = bgUrl;
     }
     if (section === 'factory' && content?.factory) {
       document.getElementById('factoryTitle').value = content.factory.title || '';
@@ -266,7 +269,11 @@ async function saveContent(section) {
         background_image: document.getElementById('heroBackgroundImage').value || 'images/cinnamon_spices.jpg'
       };
     } else if (section === 'about') {
-      fields = { title: document.getElementById('aboutTitle').value, text: document.getElementById('aboutText').value };
+      fields = {
+        title:            document.getElementById('aboutTitle').value,
+        text:             document.getElementById('aboutText').value,
+        background_image: document.getElementById('aboutBackgroundImage').value || 'images/estate_bg.png'
+      };
     } else if (section === 'factory') {
       fields = { title: document.getElementById('factoryTitle').value, text: document.getElementById('factoryText').value };
     } else if (section === 'quality') {
@@ -299,6 +306,48 @@ document.getElementById('heroBgUpload')?.addEventListener('change', async functi
   const successBadge = document.getElementById('heroUploadSuccess');
   const previewImg   = document.getElementById('heroBgPreviewImg');
   const bgInput      = document.getElementById('heroBackgroundImage');
+
+  progressWrap.classList.remove('d-none');
+  successBadge.classList.add('d-none');
+  progressBar.style.width = '0%';
+  progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(this.files[0], (pct) => {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    });
+
+    bgInput.value = url;
+    previewImg.src = url;
+    previewImg.classList.add('preview-flash');
+
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      progressWrap.classList.add('d-none');
+      successBadge.classList.remove('d-none');
+      previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    progressWrap.classList.add('d-none');
+    showAdminToast('Upload failed: ' + err.message, 'error');
+  } finally {
+    this.value = '';
+  }
+});
+
+// About background upload with Cloudinary progress
+document.getElementById('aboutBgUpload')?.addEventListener('change', async function() {
+  if (!this.files || !this.files.length) return;
+
+  const progressWrap = document.getElementById('aboutUploadProgress');
+  const progressBar  = document.getElementById('aboutUploadBar');
+  const progressPct  = document.getElementById('aboutUploadPercent');
+  const successBadge = document.getElementById('aboutUploadSuccess');
+  const previewImg   = document.getElementById('aboutBgPreviewImg');
+  const bgInput      = document.getElementById('aboutBackgroundImage');
 
   progressWrap.classList.remove('d-none');
   successBadge.classList.add('d-none');
