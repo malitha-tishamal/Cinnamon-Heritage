@@ -119,19 +119,190 @@ h1,h2,h3,h4,h5,h6 {
 /* ========== CTA Button ========== */
 .cta-btn {
   position: relative; overflow: hidden; z-index: 1;
-  transition: all 0.4s ease !important;
+  transition: all 0.45s cubic-bezier(0.23, 1, 0.32, 1) !important;
   border: 2px solid var(--accent) !important;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover)) !important;
+  box-shadow: 0 4px 24px rgba(212,135,58,0.25);
+  cursor: pointer;
 }
+
+/* Ripple sweep layer */
 .cta-btn::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  z-index: -1; transition: opacity 0.4s ease; opacity: 1;
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 60%);
+  z-index: 0;
+  transform: translateX(-110%) skewX(-12deg);
+  transition: transform 0.55s cubic-bezier(0.23, 1, 0.32, 1);
 }
-.cta-btn:hover::before { opacity: 0; }
+.cta-btn:hover::before {
+  transform: translateX(110%) skewX(-12deg);
+}
+
+/* Arrow icon that slides in on hover */
+.cta-btn::after {
+  content: '\203A';
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: rgba(255,255,255,0.9);
+  transition: right 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.4s ease;
+  opacity: 0;
+  line-height: 1;
+  z-index: 2;
+}
+.cta-btn:hover::after {
+  right: 18px;
+  opacity: 1;
+}
+
 .cta-btn:hover {
-  color: var(--accent) !important;
-  box-shadow: 0 0 25px var(--accent-glow);
-  transform: translateY(-2px);
+  padding-right: 3.5rem !important;
+  color: #fff !important;
+  box-shadow:
+    0 0 0 3px rgba(212,135,58,0.25),
+    0 8px 32px rgba(212,135,58,0.45),
+    0 0 60px rgba(212,135,58,0.15);
+  transform: translateY(-3px) scale(1.025);
+}
+.cta-btn:active {
+  transform: translateY(0px) scale(0.975) !important;
+  box-shadow: 0 2px 12px rgba(212,135,58,0.3) !important;
+}
+
+/* ========== Hero Content Box ========== */
+.hero-content-box {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-left: 4px solid var(--accent);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 0 24px 24px 0;
+  padding: 45px 50px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4),
+              inset 0 0 30px rgba(255, 255, 255, 0.02);
+  animation: heroBoxFadeIn 1s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes heroBoxFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+.hero-content-box h1 {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, #ffffff 60%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 25px;
+  animation: heroTitleReveal 1s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes heroTitleReveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-content-box .lead-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.15rem;
+  line-height: 1.85;
+  color: rgba(240, 240, 245, 0.85);
+  margin-bottom: 35px;
+  animation: heroTextReveal 1.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation-delay: 0.15s;
+}
+
+@keyframes heroTextReveal {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== Product Card Premium Styling & Animations ========== */
+.product-card {
+  position: relative;
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+  transition: transform 0.45s cubic-bezier(0.23, 1, 0.32, 1),
+              box-shadow 0.45s cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 0.45s cubic-bezier(0.23, 1, 0.32, 1) !important;
+}
+
+.product-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
+              0 0 20px rgba(212, 135, 58, 0.15) !important;
+  border-color: var(--accent) !important;
+}
+
+.discount-badge {
+  background: linear-gradient(135deg, #d32f2f, #ef5350);
+  color: #fff;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(211, 47, 47, 0.35);
+  animation: badgePulse 2.5s infinite;
+}
+
+@keyframes badgePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.topseller-badge {
+  background: linear-gradient(135deg, #ffb300, #ffa000);
+  color: #000;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(255, 179, 0, 0.3);
+}
+
+.product-img {
+  transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1) !important;
+}
+
+.product-card:hover .product-img {
+  transform: scale(1.1);
 }
 
 /* ========== Accent Badge ========== */
@@ -550,3 +721,100 @@ footer {
   color: rgba(255,255,255,0.7);
 }
 .hover-accent:hover { color: var(--accent) !important; }
+
+/* ========== Floating Promo Alert Card ========== */
+.promo-alert-card {
+  position: fixed;
+  bottom: 25px;
+  left: 25px;
+  z-index: 1050;
+  width: 320px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(212, 135, 58, 0.25);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 16px 16px 0;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5),
+              0 0 20px rgba(212, 135, 58, 0.15);
+  padding: 18px 20px;
+  transform: translateY(120px) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.promo-alert-card.active {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: all;
+}
+
+.promo-alert-header {
+  font-family: 'Oswald', sans-serif;
+  color: var(--accent);
+  font-size: 0.85rem;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.promo-alert-title {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 400;
+  margin-bottom: 15px;
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+}
+
+.promo-alert-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff !important;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-align: center;
+}
+
+.promo-alert-btn:hover {
+  box-shadow: 0 4px 15px rgba(212, 135, 58, 0.4);
+  transform: translateY(-2px);
+}
+
+.promo-close-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.promo-close-btn:hover {
+  color: #fff;
+}
+
+/* Pulse Highlight Effect */
+.pulse-highlight {
+  animation: pulseCardHighlight 1.5s ease-out 2;
+}
+
+@keyframes pulseCardHighlight {
+  0% { box-shadow: 0 0 0 0 rgba(212, 135, 58, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(212, 135, 58, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(212, 135, 58, 0); }
+}
