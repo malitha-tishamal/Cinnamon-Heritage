@@ -455,6 +455,15 @@ footer {
   to { opacity: 1; transform: translateY(0); }
 }
 
+#hero-section.hero-bg-updated {
+  animation: heroBgFade 0.8s ease;
+}
+
+@keyframes heroBgFade {
+  0%   { opacity: 0.85; }
+  100% { opacity: 1; }
+}
+
 /* ========== Product Skeleton Loader ========== */
 .skeleton {
   background: linear-gradient(90deg, var(--glass-bg) 25%, rgba(255,255,255,0.08) 50%, var(--glass-bg) 75%);
