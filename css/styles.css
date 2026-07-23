@@ -177,7 +177,7 @@ h1,h2,h3,h4,h5,h6 {
 /* ========== Hero Content Box ========== */
 .hero-content-box {
   background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(28px);
+  backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(28px);
   border-left: 4px solid var(--accent);
   border-top: 1px solid rgba(255, 255, 255, 0.15);
@@ -344,7 +344,7 @@ section {
 
 .estate-bg-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(10,10,15,0.92) 0%, rgba(10,10,15,0.6) 100%);
+  background: linear-gradient(135deg, rgba(10,10,15,0.65) 0%, rgba(10,10,15,0.45) 100%);
   z-index: 1;
 }
 .factory-bg-overlay {
@@ -817,4 +817,80 @@ footer {
   0% { box-shadow: 0 0 0 0 rgba(212, 135, 58, 0.7); }
   70% { box-shadow: 0 0 0 15px rgba(212, 135, 58, 0); }
   100% { box-shadow: 0 0 0 0 rgba(212, 135, 58, 0); }
+}
+
+/* ========== Enhanced Promo Alert — with product image ========== */
+.promo-alert-body {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 2px;
+}
+
+.promo-product-img {
+  flex-shrink: 0;
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(212, 135, 58, 0.25);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+}
+
+.promo-product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.promo-product-img:hover img {
+  transform: scale(1.1);
+}
+
+.promo-product-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.promo-prices {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.promo-new-price {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+}
+
+.promo-old-price {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.4);
+  text-decoration: line-through;
+}
+
+.promo-counter {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.5px;
+  background: rgba(255,255,255,0.06);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+/* Preview-flash for image uploads in admin */
+.preview-flash {
+  animation: imgFlash 0.5s ease;
+}
+
+@keyframes imgFlash {
+  0%   { opacity: 0.3; transform: scale(0.97); }
+  100% { opacity: 1;   transform: scale(1); }
 }
