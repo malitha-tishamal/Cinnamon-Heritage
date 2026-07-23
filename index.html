@@ -49,7 +49,7 @@
       </div>
     </nav>
     <!-- Hero section -->
-    <section class="hero d-flex align-items-center position-relative min-vh-100 w-100" style="background: linear-gradient(rgba(10,10,15,0.55), rgba(10,10,15,0.7)), url('images/cinnamon_spices.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
+    <section id="hero-section" class="hero d-flex align-items-center position-relative min-vh-100 w-100" style="background: linear-gradient(rgba(10,10,15,0.55), rgba(10,10,15,0.7)), url('images/cinnamon_spices.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
       <div class="container position-relative z-2">
         <div class="row mt-5">
           <div class="col-lg-8 border-start border-4 ps-4 py-3" style="border-color: var(--accent) !important; border-image: linear-gradient(to bottom, var(--accent), transparent) 1;">
@@ -410,8 +410,11 @@
   <!-- EmailJS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <!-- Custom Script -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
