@@ -92,6 +92,182 @@ function applyHeroContent(content) {
   applyHeroBackground(content);
 }
 
+function applyAboutContent(content) {
+  const aboutTitle = document.getElementById('about-title');
+  const aboutTextContainer = document.getElementById('about-text-container');
+  const aboutSection = document.getElementById('about');
+
+  if (!content || !content.about) return;
+
+  const about = content.about;
+  if (aboutTitle && about.title) {
+    aboutTitle.textContent = about.title;
+  }
+
+  if (aboutTextContainer && about.text) {
+    const paragraphs = about.text.split('\n\n').filter(p => p.trim());
+    aboutTextContainer.innerHTML = paragraphs.map((p, idx) => {
+      const cls = idx === 0 ? 'lead mb-0' : 'mt-3';
+      const colorStyle = idx === 0 ? '' : 'color: #e0e0e0 !important; font-size: 1.05rem;';
+      return `<p class="${cls}" style="${colorStyle}">${p}</p>`;
+    }).join('');
+  }
+
+  if (aboutSection && about.background_image) {
+    aboutSection.style.backgroundImage = `url('${about.background_image}')`;
+    aboutSection.style.backgroundSize = 'cover';
+    aboutSection.style.backgroundPosition = 'center';
+    aboutSection.style.backgroundAttachment = 'fixed';
+  }
+}
+
+function applyFactoryContent(content) {
+  if (!content || !content.factory) return;
+  const factory = content.factory;
+
+  const factoryTitle = document.getElementById('factory-title');
+  const factoryTextContainer = document.getElementById('factory-text-container');
+  const factorySection = document.getElementById('factory');
+  const factoryImage = document.getElementById('factory-image');
+
+  if (factoryTitle && factory.title) {
+    factoryTitle.textContent = factory.title;
+  }
+  if (factoryTextContainer && factory.text) {
+    const paragraphs = factory.text.split('\n\n').filter(p => p.trim());
+    factoryTextContainer.innerHTML = paragraphs.map((p, idx) => {
+      const cls = idx === 0 ? 'lead mb-0' : 'mt-3';
+      const colorStyle = idx === 0 ? '' : 'color: #e0e0e0 !important; font-size: 1.05rem;';
+      return `<p class="${cls}" style="${colorStyle}">${p}</p>`;
+    }).join('');
+  }
+  if (factorySection && factory.background_image) {
+    factorySection.style.backgroundImage = `url('${factory.background_image}')`;
+    factorySection.style.backgroundSize = 'cover';
+    factorySection.style.backgroundPosition = 'center';
+    factorySection.style.backgroundAttachment = 'fixed';
+  }
+  if (factoryImage && factory.image_url) {
+    factoryImage.src = factory.image_url;
+    factoryImage.alt = factory.title || 'Factory';
+  }
+}
+
+// ============================================================
+// Sequential Multi-Product Promo Popup System
+// ============================================================
+let promoAlertInitialized = false;
+let promoQueue = [];         // Array of discounted products to cycle through
+let promoQueueIndex = 0;    // Current position in queue
+let promoTimeout = null;    // Timeout handle for auto-advance
+
+function initPromoAlert(products) {
+  if (promoAlertInitialized) return;
+
+  // Filter products that have a discount and stock
+  const discounted = products.filter(p => parseFloat(p.discount) > 0 && p.stock_quantity > 0);
+  if (discounted.length === 0) return;
+
+  // Sort by discount percentage (highest first) so best deals show first
+  discounted.sort((a, b) => {
+    const pctA = (parseFloat(a.discount) / (parseFloat(a.price) + parseFloat(a.discount))) * 100;
+    const pctB = (parseFloat(b.discount) / (parseFloat(b.price) + parseFloat(b.discount))) * 100;
+    return pctB - pctA;
+  });
+
+  promoQueue = discounted;
+  promoQueueIndex = 0;
+
+  const promoAlert   = document.getElementById('promoAlert');
+  const closePromoBtn = document.getElementById('closePromoBtn');
+  const claimPromoBtn = document.getElementById('claimPromoBtn');
+
+  if (!promoAlert) return;
+
+  // Show a specific product promo in the popup
+  function showPromoForProduct(product) {
+    const displayPrice = parseFloat(product.price);
+    const oldPrice     = displayPrice + parseFloat(product.discount);
+    const pct          = oldPrice > 0 ? Math.round((parseFloat(product.discount) / oldPrice) * 100) : 0;
+
+    // Build the popup HTML with image + text
+    promoAlert.innerHTML = `
+      <div class="promo-alert-header">
+        <span><i class="fa-solid fa-fire text-danger me-1"></i> SPECIAL OFFER</span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="promo-counter">${promoQueueIndex + 1}/${promoQueue.length}</span>
+          <button class="promo-close-btn" id="closePromoBtn">&times;</button>
+        </div>
+      </div>
+      <div class="promo-alert-body">
+        ${ product.image_url ? `<div class="promo-product-img"><img src="${product.image_url}" alt="${product.title}" loading="lazy"></div>` : '' }
+        <div class="promo-product-info">
+          <div class="promo-alert-title" id="promoAlertText">
+            Save <strong>${pct}%</strong> on <strong>${product.title}</strong>! Special seasonal offer.
+          </div>
+          <div class="promo-prices">
+            <span class="promo-new-price">LKR ${displayPrice.toLocaleString()}</span>
+            <span class="promo-old-price">LKR ${oldPrice.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+      <button class="promo-alert-btn w-100 mt-2" id="claimPromoBtn">Claim Deal &rarr;</button>
+    `;
+
+    // Re-bind claim button
+    document.getElementById('claimPromoBtn').onclick = () => {
+      clearTimeout(promoTimeout);
+      promoAlert.classList.remove('active');
+      const target = document.getElementById('products');
+      if (target) {
+        const navHeight = document.querySelector('.navbar')?.offsetHeight || 80;
+        window.scrollTo({
+          top: target.getBoundingClientRect().top + window.pageYOffset - navHeight,
+          behavior: 'smooth'
+        });
+        setTimeout(() => {
+          const card = document.querySelector(`.product-card[data-id="${product.id}"]`);
+          if (card) {
+            card.classList.add('pulse-highlight');
+            card.click();
+            setTimeout(() => card.classList.remove('pulse-highlight'), 2000);
+          }
+        }, 800);
+      }
+    };
+
+    // Re-bind close button — on close, show NEXT product after delay
+    document.getElementById('closePromoBtn').onclick = (e) => {
+      e.stopPropagation();
+      clearTimeout(promoTimeout);
+      promoAlert.classList.remove('active');
+      // Advance to next product
+      promoQueueIndex = (promoQueueIndex + 1) % promoQueue.length;
+      if (promoQueueIndex !== 0 || promoQueue.length === 1) {
+        // Show next popup after short pause (only cycle through once)
+        if (promoQueueIndex > 0) {
+          promoTimeout = setTimeout(() => showAndActivate(), 8000);
+        }
+      }
+    };
+
+    // Show the popup
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => promoAlert.classList.add('active'));
+    });
+  }
+
+  function showAndActivate() {
+    if (promoQueueIndex >= promoQueue.length) return;
+    promoAlert.classList.remove('active');
+    setTimeout(() => showPromoForProduct(promoQueue[promoQueueIndex]), 350);
+  }
+
+  // Initial show after 3 seconds
+  promoTimeout = setTimeout(() => showAndActivate(), 3000);
+  promoAlertInitialized = true;
+}
+
 // ============================================================
 // Render Products
 // ============================================================
@@ -161,6 +337,9 @@ function renderProducts(products) {
       col.style.transform = 'translateY(0)';
     }));
   });
+
+  // Trigger dynamic promo alert for products with discounts
+  initPromoAlert(products);
 }
 
 // ============================================================
@@ -222,6 +401,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   ]);
 
   applyHeroContent(content);
+  applyAboutContent(content);
+  applyFactoryContent(content);
   applySettings(settings);
   renderProducts(products);
 
@@ -243,6 +424,8 @@ function initRealtimeUpdates() {
 
   subscribeToContent(content => {
     applyHeroContent(content);
+    applyAboutContent(content);
+    applyFactoryContent(content);
   });
 
   subscribeToProducts(products => {
