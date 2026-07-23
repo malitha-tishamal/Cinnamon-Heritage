@@ -304,6 +304,30 @@
               <label class="form-label fw-bold">Content</label>
               <textarea class="form-control" id="aboutText" rows="6"></textarea>
             </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold">About Section Background Wallpaper</label>
+              <div class="about-bg-preview mb-3" id="aboutBgPreviewWrap" style="max-width: 400px;">
+                <img id="aboutBgPreviewImg" src="images/estate_bg.png" alt="About background preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+              </div>
+              <input type="hidden" id="aboutBackgroundImage" value="">
+              <input type="file" class="d-none" id="aboutBgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('aboutBgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+              </button>
+              <div id="aboutUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="aboutUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="aboutUploadBar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              <div id="aboutUploadSuccess" class="upload-success-badge d-none mt-3 text-success small">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Background uploaded! Click Save to apply on the website.</span>
+              </div>
+            </div>
             <button class="btn btn-accent" onclick="saveContent('about')"><i class="bi bi-check-lg me-1"></i> Save Changes</button>
           </div>
         </div>
