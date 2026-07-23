@@ -279,6 +279,75 @@ body {
   background: #fff9f5;
 }
 
+/* ===== Upload Progress & Success ===== */
+.hero-bg-preview {
+  max-width: 420px;
+  border: 2px dashed #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f8f9fa;
+}
+
+.hero-bg-preview img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.hero-bg-preview img.preview-flash {
+  animation: previewFlash 0.6s ease;
+}
+
+@keyframes previewFlash {
+  0%   { opacity: 0.5; transform: scale(0.98); }
+  50%  { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.upload-progress-bar {
+  height: 10px;
+  border-radius: 6px;
+  background: #e9ecef;
+}
+
+.upload-progress-bar .progress-bar {
+  background: linear-gradient(90deg, var(--accent), #d4873a);
+  transition: width 0.25s ease;
+}
+
+.upload-success-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #d4edda;
+  color: #155724;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: successPop 0.5s ease;
+}
+
+.upload-success-badge i {
+  font-size: 1.1rem;
+  animation: checkBounce 0.6s ease;
+}
+
+@keyframes successPop {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes checkBounce {
+  0%   { transform: scale(0); }
+  60%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.text-accent { color: var(--accent); }
+
 .message-card:hover {
   box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
