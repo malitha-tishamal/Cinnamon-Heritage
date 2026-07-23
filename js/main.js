@@ -47,13 +47,28 @@ const FALLBACK = {
   hero: {
     title: 'Pure Ceylon Cinnamon',
     subtitle: 'From our family estate in Galle to your table — authentic, sustainable, exceptional.',
-    cta_text: 'Discover Our Story'
+    cta_text: 'Discover Our Story',
+    background_image: 'images/cinnamon_spices.jpg'
   }
 };
 
+const DEFAULT_HERO_BG = 'images/cinnamon_spices.jpg';
+
 // ============================================================
-// Apply hero content
+// Apply hero content & background
 // ============================================================
+function applyHeroBackground(content) {
+  const heroSection = document.getElementById('hero-section');
+  if (!heroSection) return;
+
+  const hero = (content && content.hero) ? content.hero : FALLBACK.hero;
+  const bgUrl = hero.background_image || DEFAULT_HERO_BG;
+  heroSection.style.background = `linear-gradient(rgba(10,10,15,0.55), rgba(10,10,15,0.7)), url('${bgUrl}')`;
+  heroSection.style.backgroundSize = 'cover';
+  heroSection.style.backgroundPosition = 'center';
+  heroSection.style.backgroundAttachment = 'fixed';
+  heroSection.classList.add('hero-bg-updated');
+}
 function applyHeroContent(content) {
   const heroTitle    = document.getElementById('hero-title');
   const heroSubtitle = document.getElementById('hero-subtitle');
@@ -73,6 +88,8 @@ function applyHeroContent(content) {
     heroCta.style.display = 'inline-block';
     heroCta.classList.add('hero-cta-animate');
   }
+
+  applyHeroBackground(content);
 }
 
 // ============================================================
@@ -211,7 +228,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   initScrollAnimations();
+  initRealtimeUpdates();
 });
+
+// ============================================================
+// Real-time Firestore listeners — site updates instantly
+// ============================================================
+function initRealtimeUpdates() {
+  if (typeof subscribeToContent !== 'function') return;
+
+  subscribeToContent(content => {
+    applyHeroContent(content);
+  });
+
+  subscribeToProducts(products => {
+    renderProducts(products);
+  });
+
+  subscribeToSettings(settings => {
+    applySettings(settings);
+  });
+}
 
 // ============================================================
 // Modal — Process & Product click handler (unchanged)
