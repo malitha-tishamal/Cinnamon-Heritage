@@ -94,18 +94,13 @@
           <div class="col-lg-6 text-content mb-4 mb-lg-0 reveal-right">
             <div class="glass-card p-4 p-md-5">
               <div class="accent-badge mb-3">ISO 22000 & HACCP</div>
-              <h2 class="display-5 fw-bold mb-4" style="font-family: 'Oswald', sans-serif; color: #fff;">Our Modern Facility</h2>
-              <p class="lead mb-0" style="font-size: 1.15rem; line-height: 1.8; color: #ffffff !important;">
-                Our state-of-the-art processing facility combines centuries-old Sri Lankan craftsmanship with modern food-grade technology. Every workstation features hygienic stainless steel surfaces, and our advanced mechanical dryers are calibrated to preserve the delicate essential oils that make Ceylon cinnamon exceptional.
-              </p>
-              <p class="mt-3" style="font-size: 1.05rem; color: #e0e0e0 !important;">
-                Over 50 skilled local artisans work alongside quality-control specialists to ensure every batch meets international export standards.
-              </p>
+              <h2 id="factory-title" class="display-5 fw-bold mb-4" style="font-family: 'Oswald', sans-serif; color: #fff;">Our Modern Facility</h2>
+              <div id="factory-text-container" style="font-size: 1.15rem; line-height: 1.8; color: #ffffff !important;"></div>
             </div>
           </div>
           <div class="col-lg-6 image-content reveal-left">
             <div class="estate-image-wrapper p-2 bg-white shadow-lg">
-              <img src="images/cinnamon_srilanka.jpg" alt="Bundles of cinnamon quills" class="img-fluid w-100" loading="lazy">
+              <img id="factory-image" src="images/cinnamon_srilanka.jpg" alt="Bundles of cinnamon quills" class="img-fluid w-100" loading="lazy">
             </div>
           </div>
         </div>
@@ -404,17 +399,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <!-- EmailJS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <!-- Floating Promo Alert -->
-  <div id="promoAlert" class="promo-alert-card">
-    <div class="promo-alert-header">
-      <span><i class="fa-solid fa-fire text-danger me-1"></i> SPECIAL OFFER</span>
-      <button class="promo-close-btn" id="closePromoBtn">&times;</button>
-    </div>
-    <div class="promo-alert-title" id="promoAlertText">
-      Save up to 15% on our C5 Grade Cinnamon Sticks today!
-    </div>
-    <button class="promo-alert-btn w-100" id="claimPromoBtn">Claim Deal</button>
-  </div>
+  <!-- Floating Promo Alert — populated dynamically by JS -->
+  <div id="promoAlert" class="promo-alert-card"></div>
 
   <!-- Custom Script -->
   <!-- Firebase SDKs -->
