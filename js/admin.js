@@ -209,13 +209,14 @@ let siteSettings = {};
 
 async function loadSection(section) {
   try {
-    if (section === 'dashboard')   return loadDashboard();
-    if (section === 'process')     return loadProcessSteps();
-    if (section === 'products')    return loadProducts();
-    if (section === 'orders')      return loadOrders();
-    if (section === 'messages')    return loadMessages();
-    if (section === 'settings')    return loadSettings();
-    if (section === 'accounts')    return loadAccounts();
+    if (section === 'dashboard')    return loadDashboard();
+    if (section === 'process')      return loadProcessSteps();
+    if (section === 'products')     return loadProducts();
+    if (section === 'orders')       return loadOrders();
+    if (section === 'messages')     return loadMessages();
+    if (section === 'settings')     return loadSettings();
+    if (section === 'accounts')     return loadAccounts();
+    if (section === 'admin-accounts') return loadAdminAccounts();
 
     // Content sections (hero, about, factory, quality, contact-info)
     const content = await getContent();  // replaces fetch('/api/content')
@@ -238,6 +239,12 @@ async function loadSection(section) {
     if (section === 'factory' && content?.factory) {
       document.getElementById('factoryTitle').value = content.factory.title || '';
       document.getElementById('factoryText').value  = content.factory.text  || '';
+      const bgUrl  = content.factory.background_image || 'images/estate_bg.png';
+      const imgUrl = content.factory.image_url        || 'images/cinnamon_srilanka.jpg';
+      document.getElementById('factoryBackgroundImage').value = bgUrl;
+      document.getElementById('factoryBgPreviewImg').src      = bgUrl;
+      document.getElementById('factoryImageUrl').value        = imgUrl;
+      document.getElementById('factoryImgPreview').src        = imgUrl;
     }
     if (section === 'quality' && content?.quality) {
       document.getElementById('qualityTitle').value = content.quality.title || '';
@@ -275,7 +282,12 @@ async function saveContent(section) {
         background_image: document.getElementById('aboutBackgroundImage').value || 'images/estate_bg.png'
       };
     } else if (section === 'factory') {
-      fields = { title: document.getElementById('factoryTitle').value, text: document.getElementById('factoryText').value };
+      fields = {
+        title:            document.getElementById('factoryTitle').value,
+        text:             document.getElementById('factoryText').value,
+        background_image: document.getElementById('factoryBackgroundImage').value || 'images/estate_bg.png',
+        image_url:        document.getElementById('factoryImageUrl').value        || 'images/cinnamon_srilanka.jpg'
+      };
     } else if (section === 'quality') {
       fields = { title: document.getElementById('qualityTitle').value, text: document.getElementById('qualityText').value };
     } else if (section === 'contact') {
@@ -375,6 +387,96 @@ document.getElementById('aboutBgUpload')?.addEventListener('change', async funct
   } catch (err) {
     progressWrap.classList.add('d-none');
     showAdminToast('Upload failed: ' + err.message, 'error');
+  } finally {
+    this.value = '';
+  }
+});
+
+// Factory BACKGROUND upload with Cloudinary progress
+document.getElementById('factoryBgUpload')?.addEventListener('change', async function() {
+  if (!this.files || !this.files.length) return;
+
+  const progressWrap  = document.getElementById('factoryBgUploadProgress');
+  const progressBar   = document.getElementById('factoryBgUploadBar');
+  const progressPct   = document.getElementById('factoryBgUploadPercent');
+  const successBadge  = document.getElementById('factoryBgUploadSuccess');
+  const failedBadge   = document.getElementById('factoryBgUploadFailed');
+  const failedMsg     = document.getElementById('factoryBgUploadFailedMsg');
+  const previewImg    = document.getElementById('factoryBgPreviewImg');
+  const bgInput       = document.getElementById('factoryBackgroundImage');
+
+  progressWrap.classList.remove('d-none');
+  successBadge.classList.add('d-none');
+  failedBadge.classList.add('d-none');
+  progressBar.style.width = '0%';
+  progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(this.files[0], (pct) => {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    });
+
+    bgInput.value = url;
+    previewImg.src = url;
+    previewImg.classList.add('preview-flash');
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      progressWrap.classList.add('d-none');
+      successBadge.classList.remove('d-none');
+      previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    progressWrap.classList.add('d-none');
+    failedMsg.textContent = 'Upload failed: ' + err.message;
+    failedBadge.classList.remove('d-none');
+  } finally {
+    this.value = '';
+  }
+});
+
+// Factory PRODUCT IMAGE upload with Cloudinary progress
+document.getElementById('factoryImgUpload')?.addEventListener('change', async function() {
+  if (!this.files || !this.files.length) return;
+
+  const progressWrap  = document.getElementById('factoryImgUploadProgress');
+  const progressBar   = document.getElementById('factoryImgUploadBar');
+  const progressPct   = document.getElementById('factoryImgUploadPercent');
+  const successBadge  = document.getElementById('factoryImgUploadSuccess');
+  const failedBadge   = document.getElementById('factoryImgUploadFailed');
+  const failedMsg     = document.getElementById('factoryImgUploadFailedMsg');
+  const previewImg    = document.getElementById('factoryImgPreview');
+  const imgInput      = document.getElementById('factoryImageUrl');
+
+  progressWrap.classList.remove('d-none');
+  successBadge.classList.add('d-none');
+  failedBadge.classList.add('d-none');
+  progressBar.style.width = '0%';
+  progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(this.files[0], (pct) => {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    });
+
+    imgInput.value = url;
+    previewImg.src = url;
+    previewImg.classList.add('preview-flash');
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      progressWrap.classList.add('d-none');
+      successBadge.classList.remove('d-none');
+      previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    progressWrap.classList.add('d-none');
+    failedMsg.textContent = 'Upload failed: ' + err.message;
+    failedBadge.classList.remove('d-none');
   } finally {
     this.value = '';
   }
@@ -1070,4 +1172,98 @@ function renderTopLocations(locationStats) {
   });
   if (locationStats.length === 0) html = '<tr><td colspan="3" class="text-center text-muted py-3">No location data yet</td></tr>';
   document.getElementById('topLocations').innerHTML = html;
+}
+
+// ============================================================
+// ADMIN ACCOUNT MANAGEMENT
+// ============================================================
+async function loadAdminAccounts() {
+  const listEl = document.getElementById('adminAccountsList');
+  if (listEl) listEl.innerHTML = '<p class="text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Loading accounts...</p>';
+
+  try {
+    const snapshot = await db.collection('profiles').orderBy('created_at', 'desc').get();
+    let html = '';
+
+    snapshot.forEach(doc => {
+      const p = doc.data();
+      const uid = doc.id;
+      const createdAt = p.created_at ? new Date(p.created_at.seconds * 1000).toLocaleString() : 'N/A';
+      const isApproved = p.is_approved === true;
+      const isAdmin    = p.role === 'admin';
+
+      html += `
+        <div class="item-card" id="account-${uid}">
+          <div class="item-header d-flex align-items-center gap-3">
+            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                 style="width:46px;height:46px;background:linear-gradient(135deg,#a65d25,#d4873a);font-family:'Oswald',sans-serif;font-size:1.3rem;color:#fff;font-weight:700;">
+              ${(p.username || p.email || '?')[0].toUpperCase()}
+            </div>
+            <div class="flex-grow-1">
+              <div class="fw-bold">${p.username || '(no username)'}</div>
+              <div class="small text-muted">${p.email}</div>
+              <div class="small text-muted">Joined: ${createdAt}</div>
+            </div>
+            <div class="d-flex flex-column align-items-end gap-1">
+              <span class="badge ${isAdmin ? 'bg-primary' : 'bg-secondary'}">${isAdmin ? 'Admin' : 'User'}</span>
+              <span class="badge ${isApproved ? 'bg-success' : 'bg-warning text-dark'}">${isApproved ? 'Approved' : 'Pending'}</span>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-3 flex-wrap">
+            ${!isApproved ? `<button class="btn btn-success btn-sm" onclick="approveAccount('${uid}')"><i class="bi bi-check-circle me-1"></i>Approve</button>` : ''}
+            ${isApproved  ? `<button class="btn btn-warning btn-sm text-dark" onclick="revokeAccount('${uid}')"><i class="bi bi-slash-circle me-1"></i>Revoke</button>` : ''}
+            ${!isAdmin    ? `<button class="btn btn-outline-primary btn-sm" onclick="makeAdmin('${uid}')"><i class="bi bi-shield-lock me-1"></i>Make Admin</button>` : ''}
+            <button class="btn btn-outline-danger btn-sm ms-auto" onclick="deleteAccount('${uid}')"><i class="bi bi-trash me-1"></i>Delete</button>
+          </div>
+        </div>`;
+    });
+
+    if (snapshot.empty) html = '<div class="alert alert-secondary small">No admin accounts found in the system.</div>';
+    if (listEl) listEl.innerHTML = html;
+  } catch (err) {
+    console.error('Load admin accounts error:', err);
+    if (listEl) listEl.innerHTML = '<div class="alert alert-danger small">Failed to load accounts: ' + err.message + '</div>';
+  }
+}
+
+async function approveAccount(uid) {
+  try {
+    await db.collection('profiles').doc(uid).update({ is_approved: true });
+    showAdminToast('Account approved successfully!', 'success');
+    loadAdminAccounts();
+  } catch (err) {
+    showAdminToast('Failed to approve: ' + err.message, 'error');
+  }
+}
+
+async function revokeAccount(uid) {
+  if (!confirm('Revoke this account\'s access? They will not be able to log in until re-approved.')) return;
+  try {
+    await db.collection('profiles').doc(uid).update({ is_approved: false });
+    showAdminToast('Account access revoked.', 'success');
+    loadAdminAccounts();
+  } catch (err) {
+    showAdminToast('Failed to revoke: ' + err.message, 'error');
+  }
+}
+
+async function makeAdmin(uid) {
+  try {
+    await db.collection('profiles').doc(uid).update({ role: 'admin', is_approved: true });
+    showAdminToast('User promoted to Admin and approved!', 'success');
+    loadAdminAccounts();
+  } catch (err) {
+    showAdminToast('Failed to update role: ' + err.message, 'error');
+  }
+}
+
+async function deleteAccount(uid) {
+  if (!confirm('Permanently delete this account? This cannot be undone.')) return;
+  try {
+    await db.collection('profiles').doc(uid).delete();
+    showAdminToast('Account deleted successfully.', 'success');
+    loadAdminAccounts();
+  } catch (err) {
+    showAdminToast('Failed to delete: ' + err.message, 'error');
+  }
 }
