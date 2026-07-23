@@ -224,6 +224,9 @@ async function loadSection(section) {
       document.getElementById('heroTitle').value    = content.hero.title    || '';
       document.getElementById('heroSubtitle').value = content.hero.subtitle || '';
       document.getElementById('heroCta').value      = content.hero.cta_text || '';
+      const bgUrl = content.hero.background_image || 'images/cinnamon_spices.jpg';
+      document.getElementById('heroBackgroundImage').value = bgUrl;
+      document.getElementById('heroBgPreviewImg').src = bgUrl;
     }
     if (section === 'about' && content?.about) {
       document.getElementById('aboutTitle').value = content.about.title || '';
@@ -257,9 +260,10 @@ async function saveContent(section) {
     let fields = {};
     if (section === 'hero') {
       fields = {
-        title:    document.getElementById('heroTitle').value,
-        subtitle: document.getElementById('heroSubtitle').value,
-        cta_text: document.getElementById('heroCta').value
+        title:            document.getElementById('heroTitle').value,
+        subtitle:         document.getElementById('heroSubtitle').value,
+        cta_text:         document.getElementById('heroCta').value,
+        background_image: document.getElementById('heroBackgroundImage').value || 'images/cinnamon_spices.jpg'
       };
     } else if (section === 'about') {
       fields = { title: document.getElementById('aboutTitle').value, text: document.getElementById('aboutText').value };
@@ -277,24 +281,85 @@ async function saveContent(section) {
       };
     }
 
-    for (const [field_name, field_value] of Object.entries(fields)) {
-      await saveContentField(section, field_name, field_value);  // replaces fetch('/api/admin/content', PUT)
-    }
+    await saveContentFields(section, fields);
     showAdminToast('Changes saved successfully!', 'success');
   } catch (err) {
-    showAdminToast('Failed to save changes', 'error');
+    console.error('Save content error:', err);
+    showAdminToast('Failed to save: ' + (err.message || 'Unknown error'), 'error');
   }
 }
 
-// ============================================================
-// IMAGE UPLOAD — replaces fetch('/api/admin/upload')
-// ============================================================
-async function uploadImageFile(fileInput, bucket = 'product-images') {
-  if (!fileInput.files || fileInput.files.length === 0) return null;
+// Hero background upload with Cloudinary progress
+document.getElementById('heroBgUpload')?.addEventListener('change', async function() {
+  if (!this.files || !this.files.length) return;
+
+  const progressWrap = document.getElementById('heroUploadProgress');
+  const progressBar  = document.getElementById('heroUploadBar');
+  const progressPct  = document.getElementById('heroUploadPercent');
+  const successBadge = document.getElementById('heroUploadSuccess');
+  const previewImg   = document.getElementById('heroBgPreviewImg');
+  const bgInput      = document.getElementById('heroBackgroundImage');
+
+  progressWrap.classList.remove('d-none');
+  successBadge.classList.add('d-none');
+  progressBar.style.width = '0%';
+  progressPct.textContent = '0%';
+
   try {
-    const url = await uploadImage(fileInput.files[0], bucket);  // from supabase.js
+    const url = await uploadImageWithProgress(this.files[0], (pct) => {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    });
+
+    bgInput.value = url;
+    previewImg.src = url;
+    previewImg.classList.add('preview-flash');
+
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      progressWrap.classList.add('d-none');
+      successBadge.classList.remove('d-none');
+      previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    progressWrap.classList.add('d-none');
+    showAdminToast('Upload failed: ' + err.message, 'error');
+  } finally {
+    this.value = '';
+  }
+});
+
+// ============================================================
+// IMAGE UPLOAD — with Cloudinary progress animation
+// ============================================================
+async function uploadImageFile(fileInput, bucket = 'product-images', progressIds = null) {
+  if (!fileInput.files || fileInput.files.length === 0) return null;
+
+  let progressWrap, progressBar, progressPct;
+  if (progressIds) {
+    progressWrap = document.getElementById(progressIds.wrap);
+    progressBar  = document.getElementById(progressIds.bar);
+    progressPct  = document.getElementById(progressIds.pct);
+    if (progressWrap) progressWrap.classList.remove('d-none');
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressPct) progressPct.textContent = '0%';
+  }
+
+  try {
+    const url = await uploadImageWithProgress(fileInput.files[0], (pct) => {
+      if (progressBar) progressBar.style.width = pct + '%';
+      if (progressPct) progressPct.textContent = pct + '%';
+    });
+
+    if (progressBar) progressBar.style.width = '100%';
+    if (progressPct) progressPct.textContent = '100%';
+    setTimeout(() => { if (progressWrap) progressWrap.classList.add('d-none'); }, 500);
+
     return url;
   } catch (err) {
+    if (progressWrap) progressWrap.classList.add('d-none');
     showAdminToast('Failed to upload image: ' + err.message, 'error');
     return null;
   }
@@ -313,7 +378,7 @@ async function loadProcessSteps() {
           <div class="item-header">
             <h5><span class="text-muted me-2">#${step.step_number}</span> ${step.title}</h5>
             <div>
-              <button class="btn btn-outline-danger btn-sm" onclick="deleteStep(${step.id})"><i class="bi bi-trash"></i></button>
+              <button class="btn btn-outline-danger btn-sm" onclick="deleteStep('${step.id}')"><i class="bi bi-trash"></i></button>
             </div>
           </div>
           <div class="row g-3">
@@ -329,7 +394,7 @@ async function loadProcessSteps() {
               <label class="form-label small fw-bold">Image URL / Upload</label>
               <div class="input-group input-group-sm">
                 <input type="text" class="form-control" id="stepImg-${step.id}" value="${step.image_url || ''}">
-                <input type="file" class="form-control d-none" id="stepImgUpload-${step.id}" accept="image/*" onchange="handleStepImageUpload(${step.id})">
+                <input type="file" class="form-control d-none" id="stepImgUpload-${step.id}" accept="image/*" onchange="handleStepImageUpload('${step.id}')">
                 <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('stepImgUpload-${step.id}').click()"><i class="bi bi-upload"></i> Upload</button>
               </div>
             </div>
@@ -342,7 +407,7 @@ async function loadProcessSteps() {
               <textarea class="form-control form-control-sm" id="stepFull-${step.id}" rows="2">${step.full_desc || ''}</textarea>
             </div>
             <div class="col-12">
-              <button class="btn btn-accent btn-sm" onclick="saveStep(${step.id})"><i class="bi bi-check-lg me-1"></i>Save</button>
+              <button class="btn btn-accent btn-sm" onclick="saveStep('${step.id}')"><i class="bi bi-check-lg me-1"></i>Save</button>
             </div>
           </div>
         </div>`;
@@ -359,7 +424,7 @@ async function handleStepImageUpload(id) {
   const url = await uploadImageFile(fileInput, 'process-images');
   if (url) {
     document.getElementById(`stepImg-${id}`).value = url;
-    showAdminToast('Image uploaded! Click Save to apply.', 'info');
+    showAdminToast('Image uploaded! Click Save to apply.', 'success');
   }
 }
 
@@ -418,7 +483,7 @@ async function loadProducts() {
         <div class="item-card ${isLowStock ? 'border-warning' : ''}" id="product-${p.id}" style="${isLowStock ? 'border-left:4px solid #ffc107;' : ''}">
           <div class="item-header">
             <h5>${p.title} ${isLowStock ? '<span class="badge bg-warning text-dark small ms-2">Low Stock</span>' : ''}</h5>
-            <button class="btn btn-outline-danger btn-sm" onclick="deleteProduct(${p.id})"><i class="bi bi-trash"></i></button>
+            <button class="btn btn-outline-danger btn-sm" onclick="deleteProduct('${p.id}')"><i class="bi bi-trash"></i></button>
           </div>
           <div class="row g-3">
             <div class="col-md-4">
@@ -429,7 +494,7 @@ async function loadProducts() {
               <label class="form-label small fw-bold">Image URL / Upload Image</label>
               <div class="input-group input-group-sm">
                 <input type="text" class="form-control" id="prodImg-${p.id}" value="${p.image_url || ''}">
-                <input type="file" class="form-control d-none" id="prodImgUpload-${p.id}" accept="image/*" onchange="handleProductImageUpload(${p.id})">
+                <input type="file" class="form-control d-none" id="prodImgUpload-${p.id}" accept="image/*" onchange="handleProductImageUpload('${p.id}')">
                 <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('prodImgUpload-${p.id}').click()"><i class="bi bi-upload"></i> Upload</button>
               </div>
             </div>
@@ -462,7 +527,7 @@ async function loadProducts() {
               <textarea class="form-control form-control-sm" id="prodFull-${p.id}" rows="2">${p.full_desc || ''}</textarea>
             </div>
             <div class="col-12">
-              <button class="btn btn-accent btn-sm" onclick="saveProduct(${p.id})"><i class="bi bi-check-lg me-1"></i>Save</button>
+              <button class="btn btn-accent btn-sm" onclick="saveProduct('${p.id}')"><i class="bi bi-check-lg me-1"></i>Save</button>
             </div>
           </div>
         </div>`;
@@ -479,7 +544,7 @@ async function handleProductImageUpload(id) {
   const url = await uploadImageFile(fileInput, 'product-images');
   if (url) {
     document.getElementById(`prodImg-${id}`).value = url;
-    showAdminToast('Image uploaded! Click Save to apply.', 'info');
+    showAdminToast('Image uploaded! Click Save to apply.', 'success');
   }
 }
 
@@ -519,7 +584,7 @@ async function handleNewProductImageUpload() {
   const url = await uploadImageFile(fileInput, 'product-images');
   if (url) {
     document.getElementById('newProdImg').value = url;
-    showAdminToast('Image uploaded!', 'info');
+    showAdminToast('Image uploaded!', 'success');
   }
 }
 
@@ -585,8 +650,8 @@ async function loadOrders() {
           <td>LKR ${Number(o.total_amount).toLocaleString()}</td>
           <td><span class="badge ${statusClass}">${o.status}</span></td>
           <td class="text-end pe-4">
-            <button class="btn btn-outline-light btn-sm me-1" onclick="viewOrder(${o.id})"><i class="bi bi-eye"></i></button>
-            <button class="btn btn-outline-danger btn-sm" onclick="deleteOrder(${o.id})"><i class="bi bi-trash"></i></button>
+            <button class="btn btn-outline-light btn-sm me-1" onclick="viewOrder('${o.id}')"><i class="bi bi-eye"></i></button>
+            <button class="btn btn-outline-danger btn-sm" onclick="deleteOrder('${o.id}')"><i class="bi bi-trash"></i></button>
           </td>
         </tr>`;
     });
@@ -627,7 +692,7 @@ async function viewOrder(id) {
           ${o.bank_reference ? `<p class="mb-1"><strong>Bank Ref:</strong> ${o.bank_reference}</p>` : ''}
           <div class="mt-3">
             <label class="form-label small fw-bold">Update Status</label>
-            <select class="form-select form-select-sm" onchange="updateOrderStatusAndRefresh(${o.id}, this.value)">
+            <select class="form-select form-select-sm" onchange="updateOrderStatusAndRefresh('${o.id}', this.value)">
               ${['Pending','Processing','Shipped','Delivered','Cancelled'].map(s => `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s}</option>`).join('')}
             </select>
           </div>
@@ -762,7 +827,7 @@ async function loadDeliveryRates() {
           <td>
             <input type="number" class="form-control form-control-sm" style="width:100px;"
                    id="rate-${r.id}" value="${r.rate}"
-                   onchange="updateDeliveryRate(${r.id}, this.value)">
+                   onchange="updateDeliveryRate('${r.id}', this.value)">
           </td>
           <td class="text-end">
             <span class="text-success d-none" id="rateSaved-${r.id}"><i class="bi bi-check-circle-fill"></i></span>
@@ -805,8 +870,8 @@ async function loadMessages() {
               ${m.phone ? `<span class="text-muted ms-2 small">| ${m.phone}</span>` : ''}
             </div>
             <div class="d-flex gap-2">
-              ${!m.is_read ? `<button class="btn btn-outline-success btn-sm" onclick="markRead(${m.id})"><i class="bi bi-check2"></i></button>` : ''}
-              <button class="btn btn-outline-danger btn-sm" onclick="deleteMessage(${m.id})"><i class="bi bi-trash"></i></button>
+              ${!m.is_read ? `<button class="btn btn-outline-success btn-sm" onclick="markRead('${m.id}')"><i class="bi bi-check2"></i></button>` : ''}
+              <button class="btn btn-outline-danger btn-sm" onclick="deleteMessage('${m.id}')"><i class="bi bi-trash"></i></button>
             </div>
           </div>
           ${m.subject ? `<div class="fw-bold mb-1">${m.subject}</div>` : ''}
