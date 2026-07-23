@@ -262,6 +262,30 @@
               <label class="form-label fw-bold">Button Text</label>
               <input type="text" class="form-control" id="heroCta" placeholder="e.g. Discover Our Heritage">
             </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold">Hero Background Wallpaper</label>
+              <div class="hero-bg-preview mb-3" id="heroBgPreviewWrap">
+                <img id="heroBgPreviewImg" src="images/cinnamon_spices.jpg" alt="Hero background preview" class="img-fluid rounded">
+              </div>
+              <input type="hidden" id="heroBackgroundImage" value="">
+              <input type="file" class="d-none" id="heroBgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('heroBgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+              </button>
+              <div id="heroUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="heroUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="heroUploadBar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              <div id="heroUploadSuccess" class="upload-success-badge d-none mt-3">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Background uploaded! Click Save to apply on the website.</span>
+              </div>
+            </div>
             <button class="btn btn-accent" onclick="saveContent('hero')"><i class="bi bi-check-lg me-1"></i> Save Changes</button>
           </div>
         </div>
@@ -652,8 +676,11 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase.js"></script>
   <script src="js/admin.js"></script>
 </body>
 </html>
