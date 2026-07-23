@@ -113,9 +113,13 @@ function renderProducts(products) {
     const isOutOfStock = p.stock_quantity <= 0;
     const isTopSeller  = p.total_sales >= 50;
 
+    // Calculate dynamic discount percentage
+    const discountPct = oldPrice > 0 ? Math.round((parseFloat(p.discount) / oldPrice) * 100) : 0;
+    const discountLabel = discountPct > 0 ? `${discountPct}% OFF` : `LKR ${parseFloat(p.discount).toLocaleString()} OFF`;
+
     const col = document.createElement('div');
     col.className = 'col-lg-3 col-md-6';
-    col.style.cssText = `opacity:0;transform:translateY(30px);transition:opacity 0.5s ease ${i * 0.1}s,transform 0.5s ease ${i * 0.1}s`;
+    col.style.cssText = `opacity:0;transform:translateY(30px);transition:opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1) ${i * 0.1}s,transform 0.5s cubic-bezier(0.23, 1, 0.32, 1) ${i * 0.1}s`;
 
     col.innerHTML = `
       <div class="card h-100 product-card ${isOutOfStock ? 'opacity-75' : ''}"
@@ -123,8 +127,8 @@ function renderProducts(products) {
            data-desc="${p.short_desc}" data-price="${p.price}"
            data-discount="${p.discount}" data-stock="${p.stock_quantity}">
         <div class="overflow-hidden" style="height:200px;position:relative;">
-          ${hasDiscount  ? '<span class="badge bg-danger position-absolute top-0 end-0 m-2" style="z-index:1;border-radius:6px;">OFFER</span>' : ''}
-          ${isTopSeller  ? '<span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2" style="z-index:1;border-radius:6px;">TOP SELLER</span>' : ''}
+          ${hasDiscount  ? `<span class="discount-badge position-absolute top-0 end-0 m-2" style="z-index:1;">${discountLabel}</span>` : ''}
+          ${isTopSeller  ? `<span class="topseller-badge position-absolute top-0 start-0 m-2" style="z-index:1;">TOP SELLER</span>` : ''}
           <img src="${p.image_url}" alt="${p.title}" class="card-img-top h-100 w-100 object-fit-cover product-img" style="transition:transform 0.6s ease;">
         </div>
         <div class="card-body d-flex flex-column p-4">
