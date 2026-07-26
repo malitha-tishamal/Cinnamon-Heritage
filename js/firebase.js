@@ -311,8 +311,7 @@ async function seedDatabaseIfNeeded() {
 // AUTH HELPERS
 // ============================================================
 
-/** Login admin */
-/** Login admin */
+/** Generic user login */
 async function authLogin(email, password) {
   try {
     const userCredential = await auth.signInWithEmailAndPassword(email, password);
@@ -344,47 +343,57 @@ async function authLogin(email, password) {
     
     const profile = profileDoc.data();
     
-    if (!profile || profile.role !== 'admin') {
-      await auth.signOut();
-      return { success: false, error: 'Access denied. Admin accounts only.' };
-    }
-    
-    if (profile.is_approved === false) {
-      await auth.signOut();
-      return { success: false, error: 'Access denied. Your account is pending admin approval.' };
-    }
-    
-    return { success: true, username: profile.username };
+    return { 
+      success: true, 
+      userId: userId,
+      username: profile.username || (profile.first_name ? `${profile.first_name} ${profile.last_name}` : email.split('@')[0]),
+      role: profile.role,
+      is_approved: profile.is_approved,
+      profile: profile
+    };
   } catch (error) {
     return { success: false, error: error.message };
   }
 }
 
-/** Signup (creating admin account) */
-async function authSignup(username, email, password) {
+/** Generic user signup with support for custom fields */
+async function authSignup(username, email, password, extraData = {}) {
   try {
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
     const userId = userCredential.user.uid;
     
-    // Check if there are already any profiles in the system
-    const profilesSnap = await db.collection('profiles').limit(1).get();
-    const isFirstUser = profilesSnap.empty;
+    const role = extraData.role || 'customer';
     
-    // Save profile as admin, auto-approved if first user, else pending
-    await db.collection('profiles').doc(userId).set({
+    const profile = {
       id: userId,
-      username: username,
+      username: username || email.split('@')[0],
       email: email,
-      role: 'admin',
-      is_approved: isFirstUser, // First user is automatically approved
-      created_at: firebase.firestore.FieldValue.serverTimestamp()
-    });
+      role: role,
+      first_name: extraData.first_name || '',
+      last_name: extraData.last_name || '',
+      mobile: extraData.mobile || '',
+      nic: extraData.nic || '',
+      city: extraData.city || '',
+      profile_pic_url: extraData.profile_pic_url || '',
+      is_approved: role === 'admin' ? false : true, // Customers automatically approved, admins need approval
+      created_at: firebase.firestore.FieldValue.serverTimestamp(),
+      cart_items: []
+    };
+
+    // If first user, auto-approve and force admin role
+    const profilesSnap = await db.collection('profiles').limit(1).get();
+    if (profilesSnap.empty) {
+      profile.role = 'admin';
+      profile.is_approved = true;
+    }
     
-    const msg = isFirstUser 
-      ? 'Admin account created and approved! You can now log in.' 
-      : 'Account created! Please wait for another admin to approve your account before logging in.';
+    await db.collection('profiles').doc(userId).set(profile);
+    
+    const msg = profile.role === 'admin' && !profile.is_approved
+      ? 'Admin account created! Please wait for another admin to approve your account before logging in.'
+      : 'Account created successfully!';
       
-    return { success: true, message: msg };
+    return { success: true, message: msg, role: profile.role, user: profile };
   } catch (error) {
     return { success: false, error: error.message };
   }
@@ -410,11 +419,14 @@ async function authStatus() {
         const profile = profileDoc.exists ? profileDoc.data() : null;
         resolve({
           isLoggedIn: true,
+          userId: user.uid,
           isAdmin: profile?.role === 'admin' && profile?.is_approved === true,
-          username: profile?.username ?? user.email
+          username: profile?.username || (profile?.first_name ? `${profile.first_name} ${profile.last_name}` : user.email),
+          role: profile?.role ?? 'customer',
+          profile: profile
         });
       } catch (e) {
-        resolve({ isLoggedIn: true, isAdmin: false, username: user.email });
+        resolve({ isLoggedIn: true, isAdmin: false, username: user.email, role: 'customer' });
       }
     });
   });
@@ -428,6 +440,62 @@ async function authForgotPassword(email) {
     });
     return { success: true, message: 'Password reset email sent! Check your inbox.' };
   } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+/** Get cart items from profile */
+async function getCartItems(userId) {
+  try {
+    const doc = await db.collection('profiles').doc(userId).get();
+    if (doc.exists) {
+      return doc.data().cart_items || [];
+    }
+    return [];
+  } catch (error) {
+    console.error("Failed to get cart items:", error);
+    return [];
+  }
+}
+
+/** Save cart items to profile */
+async function saveCartItems(userId, cartItems) {
+  try {
+    await db.collection('profiles').doc(userId).update({
+      cart_items: cartItems,
+      updated_at: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to save cart items:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/** Update profile picture */
+async function updateProfilePicture(userId, url) {
+  try {
+    await db.collection('profiles').doc(userId).update({
+      profile_pic_url: url,
+      updated_at: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update profile pic:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/** Update general profile data */
+async function updateProfileData(userId, fields) {
+  try {
+    await db.collection('profiles').doc(userId).update({
+      ...fields,
+      updated_at: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update profile data:", error);
     return { success: false, error: error.message };
   }
 }
@@ -488,17 +556,21 @@ async function getProducts() {
     });
     
     // Pre-calculate sales for each product client-side
-    const ordersSnap = await db.collection('orders').get();
     const salesMap = {};
-    ordersSnap.forEach(oDoc => {
-      const order = oDoc.data();
-      if (order.status !== 'Cancelled' && order.order_items) {
-        order.order_items.forEach(item => {
-          const prodId = item.product_id;
-          salesMap[prodId] = (salesMap[prodId] || 0) + (item.quantity || 0);
-        });
-      }
-    });
+    try {
+      const ordersSnap = await db.collection('orders').get();
+      ordersSnap.forEach(oDoc => {
+        const order = oDoc.data();
+        if (order.status !== 'Cancelled' && order.order_items) {
+          order.order_items.forEach(item => {
+            const prodId = item.product_id;
+            salesMap[prodId] = (salesMap[prodId] || 0) + (item.quantity || 0);
+          });
+        }
+      });
+    } catch (e) {
+      console.warn("Could not pre-calculate sales count client-side (unauthorized or network error):", e);
+    }
     
     return productsList.map(p => ({
       ...p,
@@ -764,45 +836,53 @@ async function deleteStepById(id) {
 // ORDERS HELPERS
 // ============================================================
 
-/** Place order (using Firestore transactions to atomically decrement stock) */
+/** Place order (using Firestore transactions to atomically decrement stock for all items) */
 async function placeOrder(orderData) {
   try {
-    const productRef = db.collection('products').doc(String(orderData.product_id));
-    let finalOrderId = '';
+    let finalOrderId = 'CH-' + Date.now() + '-' + Math.floor(Math.random() * 100);
+    
+    // Normalize order items (supports single-product parameter for backwards compatibility)
+    let items = [];
+    if (orderData.order_items && Array.isArray(orderData.order_items)) {
+      items = orderData.order_items;
+    } else {
+      items = [{
+        product_id:   String(orderData.product_id),
+        product_name: orderData.product_name,
+        quantity:     parseInt(orderData.quantity ?? 1),
+        unit_price:   parseFloat(orderData.unit_price)
+      }];
+    }
     
     await db.runTransaction(async (transaction) => {
-      const productDoc = await transaction.get(productRef);
-      if (!productDoc.exists) {
-        throw new Error("Product does not exist!");
-      }
-      
-      const currentStock = productDoc.data().stock_quantity ?? 0;
-      const purchaseQty = orderData.quantity ?? 1;
-      
-      if (currentStock < purchaseQty) {
-        throw new Error("Insufficient stock available!");
-      }
-      
-      // Calculate order ID incrementally
-      const ordersSnapshot = await db.collection('orders').get();
-      let maxOrderId = 0;
-      ordersSnapshot.forEach(doc => {
-        const numId = parseInt(doc.id);
-        if (!isNaN(numId) && numId > maxOrderId) {
-          maxOrderId = numId;
+      // 1. Fetch all product documents first
+      const productDocs = [];
+      for (const item of items) {
+        const ref = db.collection('products').doc(String(item.product_id));
+        const doc = await transaction.get(ref);
+        if (!doc.exists) {
+          throw new Error(`Product "${item.product_name}" does not exist!`);
         }
-      });
-      const newOrderId = String(maxOrderId + 1);
-      finalOrderId = newOrderId;
+        productDocs.push({ ref, doc, item });
+      }
+
+      // 2. Perform stock validation & update
+      for (const { ref, doc, item } of productDocs) {
+        const currentStock = doc.data().stock_quantity ?? 0;
+        const purchaseQty = item.quantity;
+        
+        if (currentStock < purchaseQty) {
+          throw new Error(`Insufficient stock available for "${item.product_name}"!`);
+        }
+        
+        transaction.update(ref, {
+          stock_quantity: currentStock - purchaseQty,
+          updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
       
-      // Update stock
-      transaction.update(productRef, {
-        stock_quantity: currentStock - purchaseQty,
-        updated_at: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      
-      // Write the order document
-      const orderRef = db.collection('orders').doc(newOrderId);
+      // 3. Write the order document
+      const orderRef = db.collection('orders').doc(finalOrderId);
       transaction.set(orderRef, {
         customer_name:    orderData.customer_name,
         customer_email:   orderData.customer_email,
@@ -818,15 +898,7 @@ async function placeOrder(orderData) {
         province:         orderData.province ?? null,
         bank_reference:   orderData.bank_reference ?? null,
         created_at:       firebase.firestore.FieldValue.serverTimestamp(),
-        // Store embedded order item details for easy access
-        order_items: [
-          {
-            product_id:   String(orderData.product_id),
-            product_name: orderData.product_name,
-            quantity:     parseInt(purchaseQty),
-            unit_price:   parseFloat(orderData.unit_price)
-          }
-        ]
+        order_items:      items
       });
     });
     
