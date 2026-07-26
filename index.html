@@ -28,7 +28,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-          <ul class="navbar-nav gap-3 text-uppercase nav-links" style="font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.9rem; letter-spacing: 1px;">
+          <ul class="navbar-nav gap-3 text-uppercase nav-links align-items-center" style="font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.9rem; letter-spacing: 1px;">
             <li class="nav-item">
               <a class="nav-link text-white" href="#about">About&nbsp;Us</a>
             </li>
@@ -43,6 +43,29 @@
             </li>
             <li class="nav-item">
               <a class="nav-link text-white" href="#contact">Contact</a>
+            </li>
+            <li class="nav-item d-flex align-items-center gap-3 ms-lg-3">
+              <!-- Cart Icon -->
+              <a class="nav-link text-white position-relative" href="#" id="cartBtn" style="padding: 5px;">
+                <i class="fas fa-shopping-cart fs-5"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger d-none" id="cartBadge" style="font-size: 0.65rem; padding: 0.25em 0.5em; min-width: 18px; height: 18px; line-height: 10px;">0</span>
+              </a>
+              
+              <!-- Login Button -->
+              <a class="btn btn-sm rounded-0 text-white px-3 py-2 text-uppercase fw-bold" href="#" id="navLoginBtn" style="background: var(--accent); border: none; font-family: 'Oswald', sans-serif; font-size: 0.8rem; letter-spacing: 0.5px; border-radius: 4px !important;">Login</a>
+
+              <!-- User Menu Dropdown -->
+              <div id="userProfileMenu" class="d-none dropdown">
+                <a class="nav-link text-white dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 5px;">
+                  <img id="navProfilePic" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d4873a'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid var(--accent);">
+                  <span id="navUsername" class="small d-none d-lg-inline">Profile</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="background: rgba(15,15,25,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                  <li><a class="dropdown-item" href="#" id="profileDetailsBtn"><i class="fas fa-user-cog me-2" style="color: var(--accent);"></i> My Profile</a></li>
+                  <li><hr class="dropdown-divider" style="background-color: rgba(255,255,255,0.1);"></li>
+                  <li><a class="dropdown-item text-danger" href="#" id="clientLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                </ul>
+              </div>
             </li>
           </ul>
         </div>
@@ -401,6 +424,223 @@
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <!-- Floating Promo Alert — populated dynamically by JS -->
   <div id="promoAlert" class="promo-alert-card"></div>
+
+  <!-- Cart Drawer -->
+  <div id="cartDrawer" class="cart-drawer">
+    <div class="cart-drawer-header">
+      <h4 class="mb-0 text-white" style="font-family: 'Oswald', sans-serif; letter-spacing: 1px;"><i class="fas fa-shopping-cart me-2" style="color: var(--accent);"></i>YOUR CART</h4>
+      <button class="cart-close-btn" id="closeCartBtn">&times;</button>
+    </div>
+    <div class="cart-drawer-body" id="cartDrawerItems">
+      <!-- Loaded dynamically via JS -->
+    </div>
+    <div class="cart-drawer-footer">
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-white-50">Subtotal</span>
+        <span id="cartSubtotal" class="fw-bold text-white">LKR 0.00</span>
+      </div>
+      <div class="d-flex justify-content-between mb-3">
+        <span class="text-white-50">Discount</span>
+        <span id="cartDiscount" class="fw-bold text-success">- LKR 0.00</span>
+      </div>
+      <div class="d-flex justify-content-between border-top border-secondary pt-3 mb-4">
+        <span class="h5 mb-0 text-white" style="font-family: 'Oswald', sans-serif;">TOTAL</span>
+        <span id="cartTotal" class="h5 mb-0 fw-bold text-accent" style="font-family: 'Oswald', sans-serif;">LKR 0.00</span>
+      </div>
+      <button class="btn w-100 py-3 fw-bold text-uppercase rounded-0" id="cartCheckoutBtn" style="background: var(--accent); color: #fff; font-family: 'Oswald', sans-serif; letter-spacing: 1px; border: none; transition: background 0.3s;">Proceed to Checkout</button>
+    </div>
+  </div>
+  <div class="cart-overlay" id="cartOverlay"></div>
+
+  <!-- Glassmorphic Auth Modal -->
+  <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-auth-card">
+        <div class="modal-header border-0 pb-0">
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body px-4 px-md-5 pb-5">
+          <!-- Auth Form Toggles -->
+          <div class="d-flex justify-content-center gap-4 mb-4 auth-tabs">
+            <a href="#" class="auth-tab-link active" id="toggleLoginTab">Login</a>
+            <a href="#" class="auth-tab-link" id="toggleSignupTab">Sign Up</a>
+          </div>
+
+          <!-- Login Tab -->
+          <div id="authLoginTab">
+            <h3 class="text-center mb-4 text-white" style="font-family: 'Oswald', sans-serif; letter-spacing: 1.5px;">WELCOME BACK</h3>
+            <form id="clientLoginForm">
+              <div class="mb-3">
+                <label class="form-label text-white-50 small">Email Address</label>
+                <input type="email" class="form-control glass-input" id="clientLoginEmail" placeholder="name@example.com" required>
+              </div>
+              <div class="mb-4">
+                <label class="form-label text-white-50 small">Password</label>
+                <input type="password" class="form-control glass-input" id="clientLoginPassword" placeholder="••••••••" required>
+              </div>
+              <div id="clientLoginError" class="alert alert-danger py-2 small d-none" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+              <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0 mb-3" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">Sign In</button>
+            </form>
+          </div>
+
+          <!-- Signup Tab -->
+          <div id="authSignupTab" class="d-none">
+            <h3 class="text-center mb-4 text-white" style="font-family: 'Oswald', sans-serif; letter-spacing: 1.5px;">CREATE ACCOUNT</h3>
+            <form id="clientSignupForm">
+              
+              <!-- Role Selector -->
+              <div class="mb-4 text-center">
+                <label class="form-label text-white-50 small d-block mb-2">Register As</label>
+                <div class="btn-group w-100" role="group">
+                  <input type="radio" class="btn-check" name="signupRole" id="signupRoleUser" value="customer" checked autocomplete="off">
+                  <label class="btn btn-outline-light rounded-0" for="signupRoleUser" style="font-size:0.85rem; letter-spacing:0.5px;">Customer / User</label>
+
+                  <input type="radio" class="btn-check" name="signupRole" id="signupRoleAdmin" value="admin" autocomplete="off">
+                  <label class="btn btn-outline-light rounded-0" for="signupRoleAdmin" style="font-size:0.85rem; letter-spacing:0.5px;">Admin / Agent</label>
+                </div>
+              </div>
+
+              <!-- Profile Pic Upload Section -->
+              <div class="text-center mb-3" id="signupPicUploadSection">
+                <div class="position-relative d-inline-block">
+                  <img id="signupPicPreview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Profile Picture" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid var(--accent); background: rgba(255,255,255,0.05);">
+                  <label for="signupPicInput" class="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center cursor-pointer" style="width: 28px; height: 28px; border: 1.5px solid var(--accent); cursor: pointer;">
+                    <i class="fas fa-camera" style="font-size: 0.75rem;"></i>
+                  </label>
+                  <input type="file" id="signupPicInput" accept="image/*" class="d-none">
+                  <input type="hidden" id="signupPicUrl" value="">
+                </div>
+                <div id="picUploadSpinner" class="spinner-border spinner-border-sm text-accent d-none mt-1" role="status"></div>
+                <div class="text-white-50 small mt-1" style="font-size: 0.75rem;">Upload Profile Photo (Optional)</div>
+              </div>
+
+              <div class="row g-2" id="signupNameRow">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">First Name</label>
+                  <input type="text" class="form-control glass-input" id="signupFirstName" placeholder="John" required>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">Last Name</label>
+                  <input type="text" class="form-control glass-input" id="signupLastName" placeholder="Doe" required>
+                </div>
+              </div>
+              <div class="row g-2">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">Username</label>
+                  <input type="text" class="form-control glass-input" id="signupUsername" placeholder="johndoe" required>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">NIC Number</label>
+                  <input type="text" class="form-control glass-input" id="signupNic" placeholder="1999XXXXXXXX" required>
+                </div>
+              </div>
+              <div class="row g-2" id="signupMobileRow">
+                <div class="col-md-12 mb-2">
+                  <label class="form-label text-white-50 small">Mobile Number</label>
+                  <input type="tel" class="form-control glass-input" id="signupMobile" placeholder="07XXXXXXXX" required>
+                </div>
+              </div>
+              <div class="row g-2" id="signupLocationRow">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">Province</label>
+                  <select class="form-control glass-input" id="signupProvince" required>
+                    <option value="">Select Province</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">District (City)</label>
+                  <select class="form-control glass-input" id="signupCity" required disabled>
+                    <option value="">Select District</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label text-white-50 small">Email Address</label>
+                <input type="email" class="form-control glass-input" id="signupEmail" placeholder="john@example.com" required>
+              </div>
+              <div class="mb-2">
+                <label class="form-label text-white-50 small">Password</label>
+                <input type="password" class="form-control glass-input" id="signupPassword" placeholder="•••••••• (Min 6 chars)" required minlength="6">
+              </div>
+              <div class="mb-4" id="signupConfirmPasswordGroup">
+                <label class="form-label text-white-50 small">Confirm Password</label>
+                <input type="password" class="form-control glass-input" id="signupConfirmPassword" placeholder="••••••••" required>
+              </div>
+              <div id="clientSignupError" class="alert alert-danger py-2 small d-none" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+              <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">Sign Up</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile Modal -->
+  <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-auth-card">
+        <div class="modal-header border-0 pb-0">
+          <h4 class="modal-title text-white fw-bold" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-user-circle me-2 text-accent"></i>MY PROFILE</h4>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body px-4 px-md-5 pb-5 text-center">
+          <div class="mb-4 position-relative d-inline-block">
+            <img id="profilePicPreview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Profile" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--accent); background: rgba(255,255,255,0.05);">
+            <label for="profilePicInput" class="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center cursor-pointer" style="width: 32px; height: 32px; border: 1.5px solid var(--accent); cursor: pointer;">
+              <i class="fas fa-camera" style="font-size: 0.85rem;"></i>
+            </label>
+            <input type="file" id="profilePicInput" accept="image/*" class="d-none">
+            <div id="profilePicSpinner" class="spinner-border spinner-border-sm text-accent d-none mt-2" role="status"></div>
+            <input type="hidden" id="profilePicUrl" value="">
+          </div>
+          
+          <form id="profileUpdateForm" class="text-start">
+            <div class="row g-2">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">First Name</label>
+                <input type="text" class="form-control glass-input" id="profileFirstName" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Last Name</label>
+                <input type="text" class="form-control glass-input" id="profileLastName" required>
+              </div>
+            </div>
+            <div class="row g-2" id="profileMobileRow">
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Mobile Number</label>
+                <input type="tel" class="form-control glass-input" id="profileMobile" required>
+              </div>
+            </div>
+            <div class="row g-2" id="profileLocationRow">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Province</label>
+                <select class="form-control glass-input" id="profileProvince" required>
+                  <option value="">Select Province</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">District (City)</label>
+                <select class="form-control glass-input" id="profileCity" required disabled>
+                  <option value="">Select District</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-white-50 small">NIC Number</label>
+              <input type="text" class="form-control glass-input" id="profileNic" required>
+            </div>
+            <div class="mb-4">
+              <label class="form-label text-white-50 small">Email Address (Read Only)</label>
+              <input type="email" class="form-control glass-input" id="profileEmail" readonly style="opacity: 0.6; cursor: not-allowed;">
+            </div>
+            <div id="profileUpdateError" class="alert alert-danger py-2 small d-none" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+            <div id="profileUpdateSuccess" class="alert alert-success py-2 small d-none" style="background: rgba(40,167,69,0.2); border: 1px solid rgba(40,167,69,0.4); color: #85ff93;">Profile updated successfully!</div>
+            <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">Save Settings</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Custom Script -->
   <!-- Firebase SDKs -->
