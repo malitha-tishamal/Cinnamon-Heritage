@@ -37,9 +37,10 @@ async function fetchWithCache(key, fetcher, fallback) {
 }
 
 const dataPromises = {
-  content:  fetchWithCache('cache_content', getContent, null),
-  products: fetchWithCache('cache_products', getProducts, []),
-  settings: fetchWithCache('cache_settings', getSettings, {})
+  content:       fetchWithCache('cache_content', getContent, null),
+  products:      fetchWithCache('cache_products', getProducts, []),
+  settings:      fetchWithCache('cache_settings', getSettings, {}),
+  deliveryRates: fetchWithCache('cache_delivery_rates', getDeliveryRates, [])
 };
 
 // Fallback content if Supabase is slow or unavailable
@@ -164,31 +165,31 @@ let promoTimeout = null;    // Timeout handle for auto-advance
 function initPromoAlert(products) {
   if (promoAlertInitialized) return;
 
-  // Filter products that have a discount and stock
-  const discounted = products.filter(p => parseFloat(p.discount) > 0 && p.stock_quantity > 0);
-  if (discounted.length === 0) return;
+  // Filter products that are configured as popups in DB, are active and in stock
+  let popupProducts = products.filter(p => p.is_popup === true && p.is_active !== false && p.stock_quantity > 0);
+  
+  // Cap popup limit based on settings (default 5, max 10)
+  let maxPopups = parseInt(siteSettings.max_popups) || 5;
+  if (maxPopups > 10) maxPopups = 10;
+  if (maxPopups < 1) maxPopups = 5;
 
-  // Sort by discount percentage (highest first) so best deals show first
-  discounted.sort((a, b) => {
-    const pctA = (parseFloat(a.discount) / (parseFloat(a.price) + parseFloat(a.discount))) * 100;
-    const pctB = (parseFloat(b.discount) / (parseFloat(b.price) + parseFloat(b.discount))) * 100;
-    return pctB - pctA;
-  });
+  if (popupProducts.length === 0) {
+    // Fallback to discounted products if none are explicitly marked as popup
+    popupProducts = products.filter(p => parseFloat(p.discount) > 0 && p.stock_quantity > 0);
+  }
 
-  promoQueue = discounted;
+  // Slice queue to max limit
+  promoQueue = popupProducts.slice(0, maxPopups);
   promoQueueIndex = 0;
 
   const promoAlert   = document.getElementById('promoAlert');
-  const closePromoBtn = document.getElementById('closePromoBtn');
-  const claimPromoBtn = document.getElementById('claimPromoBtn');
-
-  if (!promoAlert) return;
+  if (!promoAlert || promoQueue.length === 0) return;
 
   // Show a specific product promo in the popup
   function showPromoForProduct(product) {
     const displayPrice = parseFloat(product.price);
-    const oldPrice     = displayPrice + parseFloat(product.discount);
-    const pct          = oldPrice > 0 ? Math.round((parseFloat(product.discount) / oldPrice) * 100) : 0;
+    const oldPrice     = displayPrice + parseFloat(product.discount || 0);
+    const pct          = oldPrice > 0 ? Math.round((parseFloat(product.discount || 0) / oldPrice) * 100) : 0;
 
     // Build the popup HTML with image + text
     promoAlert.innerHTML = `
@@ -200,40 +201,31 @@ function initPromoAlert(products) {
         </div>
       </div>
       <div class="promo-alert-body">
-        ${ product.image_url ? `<div class="promo-product-img"><img src="${product.image_url}" alt="${product.title}" loading="lazy"></div>` : '' }
+        <div class="promo-product-img">
+          <img src="${product.image_url}" alt="${product.title}">
+        </div>
         <div class="promo-product-info">
-          <div class="promo-alert-title" id="promoAlertText">
-            Save <strong>${pct}%</strong> on <strong>${product.title}</strong>! Special seasonal offer.
-          </div>
+          <div class="promo-alert-title mb-1 fw-bold text-white text-truncate">${product.title}</div>
+          <p class="small text-white-50 mb-0 text-truncate-2" style="font-size:0.75rem; line-height:1.3; max-height: 2.6em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal;">${product.short_desc}</p>
           <div class="promo-prices">
             <span class="promo-new-price">LKR ${displayPrice.toLocaleString()}</span>
             <span class="promo-old-price">LKR ${oldPrice.toLocaleString()}</span>
           </div>
         </div>
       </div>
-      <button class="promo-alert-btn w-100 mt-2" id="claimPromoBtn">Claim Deal &rarr;</button>
+      <button class="promo-alert-btn w-100 mt-2" id="claimPromoBtn">Add to Cart</button>
     `;
 
     // Re-bind claim button
-    document.getElementById('claimPromoBtn').onclick = () => {
+    document.getElementById('claimPromoBtn').onclick = (e) => {
+      e.stopPropagation();
       clearTimeout(promoTimeout);
       promoAlert.classList.remove('active');
-      const target = document.getElementById('products');
-      if (target) {
-        const navHeight = document.querySelector('.navbar')?.offsetHeight || 80;
-        window.scrollTo({
-          top: target.getBoundingClientRect().top + window.pageYOffset - navHeight,
-          behavior: 'smooth'
-        });
-        setTimeout(() => {
-          const card = document.querySelector(`.product-card[data-id="${product.id}"]`);
-          if (card) {
-            card.classList.add('pulse-highlight');
-            card.click();
-            setTimeout(() => card.classList.remove('pulse-highlight'), 2000);
-          }
-        }, 800);
-      }
+      addToCart(product.id);
+      
+      // Advance to next product
+      promoQueueIndex = (promoQueueIndex + 1) % promoQueue.length;
+      promoTimeout = setTimeout(() => showAndActivate(), 8000);
     };
 
     // Re-bind close button — on close, show NEXT product after delay
@@ -323,10 +315,10 @@ function renderProducts(products) {
           </div>
           <p class="card-text small flex-grow-1" style="color:var(--text-secondary);">${p.short_desc}</p>
           <div class="mt-3 d-flex gap-2">
-            <span class="btn btn-outline-dark product-btn fw-bold flex-grow-1 text-uppercase" style="font-family:'Oswald',sans-serif;font-size:0.75rem;letter-spacing:1px;">Details</span>
+            <span class="btn btn-outline-dark product-btn fw-bold flex-grow-1 text-uppercase" style="font-family:'Oswald',sans-serif;font-size:0.75rem;letter-spacing:1px;border-radius:8px;">Details</span>
             ${isOutOfStock ?
               '<button class="btn btn-secondary fw-bold flex-grow-1 text-uppercase disabled" style="font-family:\'Oswald\',sans-serif;font-size:0.75rem;border-radius:8px;">Sold Out</button>' :
-              `<a href="checkout.html?product_id=${p.id}" class="btn fw-bold flex-grow-1 text-uppercase" style="background:var(--accent);border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:0.75rem;border-radius:8px;">Buy</a>`}
+              `<button class="btn add-to-cart-btn fw-bold flex-grow-1 text-uppercase" data-id="${p.id}" style="background:var(--accent);border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:0.75rem;border-radius:8px;">Add to Cart</button>`}
           </div>
         </div>
       </div>`;
@@ -393,24 +385,107 @@ function applySettings(settings) {
 // ============================================================
 // DOM Ready
 // ============================================================
+let deliveryRates = [];
+
+function setupSignupLocationSelectors() {
+  const provinceSelect = document.getElementById('signupProvince');
+  const districtSelect = document.getElementById('signupCity');
+  
+  if (!provinceSelect || !districtSelect) return;
+  
+  provinceSelect.innerHTML = '<option value="">Select Province</option>';
+  districtSelect.innerHTML = '<option value="">Select District</option>';
+  districtSelect.disabled = true;
+
+  const provinces = [...new Set(deliveryRates.map(r => r.province))].filter(Boolean);
+  provinces.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    provinceSelect.appendChild(opt);
+  });
+
+  provinceSelect.addEventListener('change', () => {
+    const province = provinceSelect.value;
+    districtSelect.innerHTML = '<option value="">Select District</option>';
+    districtSelect.disabled = !province;
+    if (province) {
+      deliveryRates.filter(r => r.province === province).forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.district;
+        opt.textContent = d.district;
+        districtSelect.appendChild(opt);
+      });
+    }
+  });
+}
+
+function setupProfileLocationSelectors() {
+  const provinceSelect = document.getElementById('profileProvince');
+  const districtSelect = document.getElementById('profileCity');
+  
+  if (!provinceSelect || !districtSelect) return;
+  
+  provinceSelect.innerHTML = '<option value="">Select Province</option>';
+  districtSelect.innerHTML = '<option value="">Select District</option>';
+  districtSelect.disabled = true;
+
+  const provinces = [...new Set(deliveryRates.map(r => r.province))].filter(Boolean);
+  provinces.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    provinceSelect.appendChild(opt);
+  });
+
+  provinceSelect.addEventListener('change', () => {
+    const province = provinceSelect.value;
+    districtSelect.innerHTML = '<option value="">Select District</option>';
+    districtSelect.disabled = !province;
+    if (province) {
+      deliveryRates.filter(r => r.province === province).forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.district;
+        opt.textContent = d.district;
+        districtSelect.appendChild(opt);
+      });
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   showSkeletons();
 
-  const [content, products, settings] = await Promise.all([
-    dataPromises.content, dataPromises.products, dataPromises.settings
+  const [content, products, settings, rates] = await Promise.all([
+    dataPromises.content,
+    dataPromises.products,
+    dataPromises.settings,
+    dataPromises.deliveryRates
   ]);
+
+  allProducts = products;
+  siteSettings = settings;
+  deliveryRates = rates || [];
 
   applyHeroContent(content);
   applyAboutContent(content);
   applyFactoryContent(content);
   applySettings(settings);
   renderProducts(products);
+  
+  setupSignupLocationSelectors();
+  setupProfileLocationSelectors();
 
   const preloader = document.getElementById('preloader');
   if (preloader) {
     preloader.classList.add('hidden');
     setTimeout(() => preloader.remove(), 600);
   }
+
+  // Check auth session
+  await checkAuthStatus();
+  // Setup drawer and modal UI listeners
+  initCartAndAuthListeners();
 
   initScrollAnimations();
   initRealtimeUpdates();
@@ -448,8 +523,20 @@ const modalTitle = document.getElementById('modalTitle');
 const modalDesc  = document.getElementById('modalDesc');
 
 document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('add-to-cart-btn')) {
+    e.preventDefault();
+    e.stopPropagation();
+    const productId = e.target.getAttribute('data-id');
+    addToCart(productId);
+    return;
+  }
+
   const card = e.target.closest('.process-card, .product-card');
   if (!card) return;
+  
+  // If user clicks anything inside product card but targeted add-to-cart-btn, ignore details modal
+  if (e.target.closest('.add-to-cart-btn')) return;
+
   e.preventDefault();
   e.stopPropagation();
 
@@ -633,3 +720,569 @@ window.addEventListener('scroll', function() {
     }
   }
 });
+
+// ============================================================
+// SHOPPING CART & CLIENT AUTH SYSTEM
+// ============================================================
+let currentUser = null;
+let currentCart = [];
+let allProducts = [];
+let siteSettings = {};
+
+const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+
+async function checkAuthStatus() {
+  const status = await authStatus();
+  const loginBtn = document.getElementById('navLoginBtn');
+  const profileMenu = document.getElementById('userProfileMenu');
+  
+  if (status.isLoggedIn) {
+    currentUser = status.profile;
+    if (loginBtn) loginBtn.classList.add('d-none');
+    if (profileMenu) profileMenu.classList.remove('d-none');
+    
+    // Update nav profile pic and name
+    const navPic = document.getElementById('navProfilePic');
+    const navName = document.getElementById('navUsername');
+    if (navPic) {
+      navPic.src = currentUser.profile_pic_url || DEFAULT_AVATAR;
+    }
+    if (navName) {
+      navName.textContent = currentUser.first_name || currentUser.username;
+    }
+    
+    // Fetch and load cart
+    currentCart = await getCartItems(status.userId);
+    updateCartUI();
+  } else {
+    currentUser = null;
+    currentCart = [];
+    if (loginBtn) loginBtn.classList.remove('d-none');
+    if (profileMenu) profileMenu.classList.add('d-none');
+    updateCartUI();
+  }
+}
+
+function updateCartUI() {
+  const badge = document.getElementById('cartBadge');
+  const drawerBody = document.getElementById('cartDrawerItems');
+  
+  // Update badge count
+  const totalQty = currentCart.reduce((sum, item) => sum + item.quantity, 0);
+  if (badge) {
+    if (totalQty > 0) {
+      badge.textContent = totalQty;
+      badge.classList.remove('d-none');
+    } else {
+      badge.classList.add('d-none');
+    }
+  }
+  
+  if (!drawerBody) return;
+  
+  if (currentCart.length === 0) {
+    drawerBody.innerHTML = `
+      <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center py-5">
+        <i class="fas fa-shopping-basket fa-3x text-muted mb-3" style="color: rgba(255,255,255,0.2) !important;"></i>
+        <h5 class="text-white">Your cart is empty</h5>
+        <p class="text-white-50 small">Add premium cinnamon products to get started.</p>
+      </div>`;
+    updateCartTotals(0, 0);
+    return;
+  }
+  
+  let html = '';
+  let subtotal = 0;
+  let discountTotal = 0;
+  
+  currentCart.forEach(item => {
+    // Find product details
+    const product = allProducts.find(p => p.id === item.product_id);
+    if (!product) return;
+    
+    const price = parseFloat(product.price);
+    const discount = parseFloat(product.discount || 0);
+    const itemSubtotal = price * item.quantity;
+    const itemDiscount = discount * item.quantity;
+    
+    subtotal += itemSubtotal;
+    discountTotal += itemDiscount;
+    
+    html += `
+      <div class="cart-item" data-id="${item.product_id}">
+        <div class="cart-item-img">
+          <img src="${product.image_url}" alt="${product.title}">
+        </div>
+        <div class="cart-item-details">
+          <div class="cart-item-title">${product.title}</div>
+          <div class="cart-item-price">LKR ${price.toLocaleString()}</div>
+          <div class="cart-item-actions">
+            <div class="cart-qty-ctrl">
+              <button class="cart-qty-btn" onclick="changeCartQty('${item.product_id}', -1)">-</button>
+              <div class="cart-qty-val">${item.quantity}</div>
+              <button class="cart-qty-btn" onclick="changeCartQty('${item.product_id}', 1)">+</button>
+            </div>
+            <button class="cart-remove-btn" onclick="removeFromCart('${item.product_id}')">
+              <i class="fas fa-trash-alt me-1"></i> Remove
+            </button>
+          </div>
+        </div>
+      </div>`;
+  });
+  
+  drawerBody.innerHTML = html;
+  updateCartTotals(subtotal, discountTotal);
+}
+
+function updateCartTotals(subtotal, discountTotal) {
+  const total = subtotal - discountTotal;
+  document.getElementById('cartSubtotal').textContent = `LKR ${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+  document.getElementById('cartDiscount').textContent = `- LKR ${discountTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+  document.getElementById('cartTotal').textContent = `LKR ${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+}
+
+async function changeCartQty(productId, delta) {
+  if (!currentUser) return;
+  const item = currentCart.find(i => i.product_id === productId);
+  if (!item) return;
+  
+  // Find product stock
+  const product = allProducts.find(p => p.id === productId);
+  const maxStock = product ? (product.stock_quantity ?? 0) : 0;
+  
+  const newQty = item.quantity + delta;
+  if (newQty <= 0) {
+    await removeFromCart(productId);
+    return;
+  }
+  
+  if (newQty > maxStock) {
+    showToast(`Cannot exceed available stock of ${maxStock}!`, 'error');
+    return;
+  }
+  
+  item.quantity = newQty;
+  updateCartUI();
+  await saveCartItems(currentUser.id, currentCart);
+}
+
+async function removeFromCart(productId) {
+  if (!currentUser) return;
+  currentCart = currentCart.filter(i => i.product_id !== productId);
+  updateCartUI();
+  await saveCartItems(currentUser.id, currentCart);
+  showToast("Product removed from cart", "success");
+}
+
+async function addToCart(productId) {
+  if (!currentUser) {
+    // Show login modal
+    const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+    authModal.show();
+    showToast("Please log in to add products to cart.", "error");
+    return;
+  }
+  
+  const product = allProducts.find(p => p.id === productId);
+  if (!product) return;
+  
+  if (product.stock_quantity <= 0) {
+    showToast("This product is out of stock!", "error");
+    return;
+  }
+  
+  const existing = currentCart.find(i => i.product_id === productId);
+  if (existing) {
+    if (existing.quantity >= product.stock_quantity) {
+      showToast(`Cannot add more. Available stock is ${product.stock_quantity}!`, "error");
+      return;
+    }
+    existing.quantity += 1;
+  } else {
+    currentCart.push({
+      product_id: productId,
+      quantity: 1
+    });
+  }
+  
+  updateCartUI();
+  await saveCartItems(currentUser.id, currentCart);
+  showToast(`${product.title} added to cart!`, "success");
+  
+  // Open Cart Drawer
+  document.getElementById('cartDrawer').classList.add('open');
+  document.getElementById('cartOverlay').classList.add('open');
+}
+
+// Expose functions globally for dynamic elements
+window.changeCartQty = changeCartQty;
+window.removeFromCart = removeFromCart;
+window.addToCart = addToCart;
+
+function initCartAndAuthListeners() {
+  // Drawer Toggles
+  const cartBtn = document.getElementById('cartBtn');
+  const closeCartBtn = document.getElementById('closeCartBtn');
+  const cartDrawer = document.getElementById('cartDrawer');
+  const cartOverlay = document.getElementById('cartOverlay');
+  
+  if (cartBtn) {
+    cartBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!currentUser) {
+        new bootstrap.Modal(document.getElementById('authModal')).show();
+        showToast("Please log in to view your cart.", "error");
+        return;
+      }
+      cartDrawer.classList.add('open');
+      cartOverlay.classList.add('open');
+    });
+  }
+  
+  if (closeCartBtn) {
+    closeCartBtn.addEventListener('click', () => {
+      cartDrawer.classList.remove('open');
+      cartOverlay.classList.remove('open');
+    });
+  }
+  
+  if (cartOverlay) {
+    cartOverlay.addEventListener('click', () => {
+      cartDrawer.classList.remove('remove');
+      cartDrawer.classList.remove('open');
+      cartOverlay.classList.remove('open');
+    });
+  }
+
+  // Auth Tabs Toggle
+  const toggleLoginTab = document.getElementById('toggleLoginTab');
+  const toggleSignupTab = document.getElementById('toggleSignupTab');
+  const loginTab = document.getElementById('authLoginTab');
+  const signupTab = document.getElementById('authSignupTab');
+
+  if (toggleLoginTab && toggleSignupTab) {
+    toggleLoginTab.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleSignupTab.classList.remove('active');
+      toggleLoginTab.classList.add('active');
+      signupTab.classList.add('d-none');
+      loginTab.classList.remove('d-none');
+    });
+
+    toggleSignupTab.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleLoginTab.classList.remove('active');
+      toggleSignupTab.classList.add('active');
+      loginTab.classList.add('d-none');
+      signupTab.classList.remove('d-none');
+    });
+  }
+
+  // Navigation login button
+  const navLoginBtn = document.getElementById('navLoginBtn');
+  if (navLoginBtn) {
+    navLoginBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      new bootstrap.Modal(document.getElementById('authModal')).show();
+    });
+  }
+
+  // Signup Image Upload to Cloudinary
+  const signupPicInput = document.getElementById('signupPicInput');
+  const signupPicPreview = document.getElementById('signupPicPreview');
+  const signupPicUrl = document.getElementById('signupPicUrl');
+  const picUploadSpinner = document.getElementById('picUploadSpinner');
+
+  if (signupPicInput) {
+    signupPicInput.addEventListener('change', async () => {
+      const file = signupPicInput.files[0];
+      if (!file) return;
+      
+      try {
+        if (picUploadSpinner) picUploadSpinner.classList.remove('d-none');
+        const url = await uploadImage(file);
+        if (signupPicPreview) signupPicPreview.src = url;
+        if (signupPicUrl) signupPicUrl.value = url;
+        showToast("Profile photo uploaded!", "success");
+      } catch (err) {
+        showToast("Failed to upload image to Cloudinary", "error");
+      } finally {
+        if (picUploadSpinner) picUploadSpinner.classList.add('d-none');
+      }
+    });
+  }
+
+  // Submit Client Login Form
+  const clientLoginForm = document.getElementById('clientLoginForm');
+  const clientLoginError = document.getElementById('clientLoginError');
+  if (clientLoginForm) {
+    clientLoginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (clientLoginError) clientLoginError.classList.add('d-none');
+
+      const email = document.getElementById('clientLoginEmail').value.trim();
+      const password = document.getElementById('clientLoginPassword').value;
+
+      const res = await authLogin(email, password);
+      if (res.success) {
+        showToast("Logged in successfully!", "success");
+        // Hide modal
+        bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
+        clientLoginForm.reset();
+        await checkAuthStatus();
+      } else {
+        if (clientLoginError) {
+          clientLoginError.textContent = res.error || "Login failed";
+          clientLoginError.classList.remove('d-none');
+        }
+      }
+    });
+  }
+
+  // Submit Client Signup Form
+  const clientSignupForm = document.getElementById('clientSignupForm');
+  const clientSignupError = document.getElementById('clientSignupError');
+  if (clientSignupForm) {
+    // Dynamic fields toggling based on Register As selection
+    const roleRadios = document.querySelectorAll('input[name="signupRole"]');
+    roleRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const role = e.target.value;
+        const picSection = document.getElementById('signupPicUploadSection');
+        const nameRow = document.getElementById('signupNameRow');
+        const mobileRow = document.getElementById('signupMobileRow');
+        const locationRow = document.getElementById('signupLocationRow');
+
+        if (role === 'admin') {
+          if (picSection) picSection.classList.add('d-none');
+          if (nameRow) nameRow.classList.add('d-none');
+          if (mobileRow) mobileRow.classList.add('d-none');
+          if (locationRow) locationRow.classList.add('d-none');
+
+          document.getElementById('signupFirstName').required = false;
+          document.getElementById('signupLastName').required = false;
+          document.getElementById('signupMobile').required = false;
+          document.getElementById('signupProvince').required = false;
+          document.getElementById('signupCity').required = false;
+        } else {
+          if (picSection) picSection.classList.remove('d-none');
+          if (nameRow) nameRow.classList.remove('d-none');
+          if (mobileRow) mobileRow.classList.remove('d-none');
+          if (locationRow) locationRow.classList.remove('d-none');
+
+          document.getElementById('signupFirstName').required = true;
+          document.getElementById('signupLastName').required = true;
+          document.getElementById('signupMobile').required = true;
+          document.getElementById('signupProvince').required = true;
+          document.getElementById('signupCity').required = true;
+        }
+      });
+    });
+
+    clientSignupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (clientSignupError) clientSignupError.classList.add('d-none');
+
+      const password = document.getElementById('signupPassword').value;
+      const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+      if (password !== confirmPassword) {
+        if (clientSignupError) {
+          clientSignupError.textContent = "Passwords do not match!";
+          clientSignupError.classList.remove('d-none');
+        }
+        return;
+      }
+
+      const email = document.getElementById('signupEmail').value.trim();
+      const username = document.getElementById('signupUsername').value.trim();
+      const role = document.querySelector('input[name="signupRole"]:checked')?.value || 'customer';
+
+      const extraData = {
+        role: role,
+        first_name: role === 'customer' ? document.getElementById('signupFirstName').value.trim() : '',
+        last_name: role === 'customer' ? document.getElementById('signupLastName').value.trim() : '',
+        mobile: role === 'customer' ? document.getElementById('signupMobile').value.trim() : '',
+        nic: document.getElementById('signupNic').value.trim(),
+        city: role === 'customer' ? document.getElementById('signupCity').value.trim() : '',
+        profile_pic_url: role === 'customer' ? (document.getElementById('signupPicUrl').value || '') : ''
+      };
+
+      const res = await authSignup(username, email, password, extraData);
+      if (res.success) {
+        showToast(res.message, "success");
+        if (role === 'admin') {
+          // Admin needs approval, don't auto login
+          bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
+          clientSignupForm.reset();
+        } else {
+          // Auto login customer
+          const loginRes = await authLogin(email, password);
+          if (loginRes.success) {
+            bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
+            clientSignupForm.reset();
+            if (signupPicPreview) signupPicPreview.src = DEFAULT_AVATAR;
+            if (signupPicUrl) signupPicUrl.value = '';
+            await checkAuthStatus();
+          }
+        }
+      } else {
+        if (clientSignupError) {
+          clientSignupError.textContent = res.error || "Signup failed";
+          clientSignupError.classList.remove('d-none');
+        }
+      }
+    });
+  }
+
+  // Logout Click
+  const clientLogoutBtn = document.getElementById('clientLogoutBtn');
+  if (clientLogoutBtn) {
+    clientLogoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await authLogout();
+    });
+  }
+
+  // Profile Details Button Click (populates settings modal)
+  const profileDetailsBtn = document.getElementById('profileDetailsBtn');
+  if (profileDetailsBtn) {
+    profileDetailsBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      document.getElementById('profileFirstName').value = currentUser.first_name || '';
+      document.getElementById('profileLastName').value = currentUser.last_name || '';
+      document.getElementById('profileMobile').value = currentUser.mobile || '';
+      
+      const userCity = currentUser.city || '';
+      const matchedRate = deliveryRates.find(r => r.district.toLowerCase() === userCity.toLowerCase());
+      const userProvince = matchedRate ? matchedRate.province : '';
+
+      const provinceSelect = document.getElementById('profileProvince');
+      const districtSelect = document.getElementById('profileCity');
+      
+      if (provinceSelect && districtSelect) {
+        provinceSelect.value = userProvince;
+        
+        districtSelect.innerHTML = '<option value="">Select District</option>';
+        if (userProvince) {
+          districtSelect.disabled = false;
+          deliveryRates.filter(r => r.province === userProvince).forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.district;
+            opt.textContent = d.district;
+            if (d.district.toLowerCase() === userCity.toLowerCase()) {
+              opt.selected = true;
+            }
+            districtSelect.appendChild(opt);
+          });
+          districtSelect.value = userCity;
+        } else {
+          districtSelect.disabled = true;
+        }
+      }
+
+      document.getElementById('profileNic').value = currentUser.nic || '';
+      document.getElementById('profileEmail').value = currentUser.email || '';
+      
+      const profilePicPreview = document.getElementById('profilePicPreview');
+      if (profilePicPreview) {
+        profilePicPreview.src = currentUser.profile_pic_url || DEFAULT_AVATAR;
+      }
+      document.getElementById('profilePicUrl').value = currentUser.profile_pic_url || '';
+
+      // Hide updates
+      document.getElementById('profileUpdateError').classList.add('d-none');
+      document.getElementById('profileUpdateSuccess').classList.add('d-none');
+
+      new bootstrap.Modal(document.getElementById('profileModal')).show();
+    });
+  }
+
+  // Profile Pic Upload (in profile details modal)
+  const profilePicInput = document.getElementById('profilePicInput');
+  const profilePicPreview = document.getElementById('profilePicPreview');
+  const profilePicSpinner = document.getElementById('profilePicSpinner');
+  const profilePicUrl = document.getElementById('profilePicUrl');
+
+  if (profilePicInput) {
+    profilePicInput.addEventListener('change', async () => {
+      const file = profilePicInput.files[0];
+      if (!file || !currentUser) return;
+
+      try {
+        if (profilePicSpinner) profilePicSpinner.classList.remove('d-none');
+        const url = await uploadImage(file);
+        if (profilePicPreview) profilePicPreview.src = url;
+        if (profilePicUrl) profilePicUrl.value = url;
+        
+        // Atomically update pic in db immediately
+        await updateProfilePicture(currentUser.id, url);
+        currentUser.profile_pic_url = url;
+        
+        // Update Nav bar picture too
+        const navPic = document.getElementById('navProfilePic');
+        if (navPic) navPic.src = url;
+
+        showToast("Profile picture updated!", "success");
+      } catch (err) {
+        showToast("Failed to upload image to Cloudinary", "error");
+      } finally {
+        if (profilePicSpinner) profilePicSpinner.classList.add('d-none');
+      }
+    });
+  }
+
+  // Save general profile details form
+  const profileUpdateForm = document.getElementById('profileUpdateForm');
+  const profileUpdateError = document.getElementById('profileUpdateError');
+  const profileUpdateSuccess = document.getElementById('profileUpdateSuccess');
+
+  if (profileUpdateForm) {
+    profileUpdateForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (profileUpdateError) profileUpdateError.classList.add('d-none');
+      if (profileUpdateSuccess) profileUpdateSuccess.classList.add('d-none');
+
+      const updates = {
+        first_name: document.getElementById('profileFirstName').value.trim(),
+        last_name: document.getElementById('profileLastName').value.trim(),
+        mobile: document.getElementById('profileMobile').value.trim(),
+        city: document.getElementById('profileCity').value.trim(),
+        nic: document.getElementById('profileNic').value.trim()
+      };
+
+      const res = await updateProfileData(currentUser.id, updates);
+      if (res.success) {
+        if (profileUpdateSuccess) profileUpdateSuccess.classList.remove('d-none');
+        currentUser = { ...currentUser, ...updates };
+        
+        // Update nav bar name too
+        const navName = document.getElementById('navUsername');
+        if (navName) navName.textContent = currentUser.first_name;
+
+        setTimeout(() => {
+          bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
+        }, 1500);
+      } else {
+        if (profileUpdateError) {
+          profileUpdateError.textContent = res.error || "Update failed";
+          profileUpdateError.classList.remove('d-none');
+        }
+      }
+    });
+  }
+
+  // Checkout Button
+  const cartCheckoutBtn = document.getElementById('cartCheckoutBtn');
+  if (cartCheckoutBtn) {
+    cartCheckoutBtn.addEventListener('click', () => {
+      if (currentCart.length === 0) {
+        showToast("Your cart is empty!", "error");
+        return;
+      }
+      window.location.href = "checkout.html?cart=true";
+    });
+  }
+}
