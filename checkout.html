@@ -370,21 +370,156 @@
     let deliveryRates = [];
     let siteSettings = {};
     let selectedDeliveryCharge = 0;
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('product_id');
-    if (!productId) window.location.href = 'index.html';
+    let isCartCheckout = false;
+    let cartItemsList = [];
 
     async function initCheckout() {
-      await Promise.all([fetchProduct(), fetchDeliveryRates(), fetchSettings()]);
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('product_id');
+      isCartCheckout = urlParams.get('cart') === 'true';
+
+      if (!productId && !isCartCheckout) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      await Promise.all([
+        isCartCheckout ? fetchCartData() : fetchProduct(productId),
+        fetchDeliveryRates(),
+        fetchSettings()
+      ]);
       setupLocationSelectors();
+      await prefillCustomerDetails();
       updateCalculations();
     }
 
-    async function fetchProduct() {
+    async function prefillCustomerDetails() {
+      const status = await authStatus();
+      if (status.isLoggedIn && status.profile) {
+        document.getElementById('name').value = (status.profile.first_name ? `${status.profile.first_name} ${status.profile.last_name}` : status.profile.username) || '';
+        document.getElementById('email').value = status.profile.email || '';
+        document.getElementById('phone').value = status.profile.mobile || '';
+        
+        // Prefill province and district (city)
+        const userCity = status.profile.city || '';
+        if (userCity) {
+          const matchedRate = deliveryRates.find(r => r.district.toLowerCase() === userCity.toLowerCase());
+          if (matchedRate) {
+            const provinceSelect = document.getElementById('province');
+            const districtSelect = document.getElementById('district');
+            
+            provinceSelect.value = matchedRate.province;
+            
+            districtSelect.innerHTML = '<option value="">Select District</option>';
+            districtSelect.disabled = false;
+            deliveryRates.filter(r => r.province === matchedRate.province).forEach(d => {
+              const opt = document.createElement('option');
+              opt.value = d.district;
+              opt.textContent = d.district;
+              if (d.district.toLowerCase() === userCity.toLowerCase()) {
+                opt.selected = true;
+              }
+              districtSelect.appendChild(opt);
+            });
+            districtSelect.value = matchedRate.district;
+            selectedDeliveryCharge = parseFloat(matchedRate.rate);
+          }
+        }
+      }
+    }
+
+    async function fetchCartData() {
+      try {
+        const status = await authStatus();
+        if (!status.isLoggedIn) {
+          alert("Please log in to checkout.");
+          window.location.href = "index.html";
+          return;
+        }
+
+        // Cart loaded successfully
+
+        const items = await getCartItems(status.userId);
+        if (items.length === 0) {
+          alert("Your cart is empty!");
+          window.location.href = "index.html";
+          return;
+        }
+
+        cartItemsList = [];
+        for (const item of items) {
+          const prod = await getProduct(item.product_id);
+          if (prod) {
+            cartItemsList.push({
+              product: prod,
+              quantity: item.quantity
+            });
+          }
+        }
+
+        renderCartSummary();
+      } catch (err) {
+        console.error("Cart loading error:", err);
+        window.location.href = "index.html";
+      }
+    }
+
+    function renderCartSummary() {
+      const summaryCard = document.getElementById('productSummary');
+      if (!summaryCard) return;
+
+      let html = `
+        <h3 class="h4 mb-4 border-bottom border-secondary pb-3" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-shopping-basket me-2 text-accent"></i>ORDER SUMMARY</h3>
+        <div class="cart-items-summary-list mb-4" style="max-height: 250px; overflow-y: auto;">`;
+
+      cartItemsList.forEach(item => {
+        const price = parseFloat(item.product.price);
+        const discount = parseFloat(item.product.discount || 0);
+        
+        html += `
+          <div class="d-flex align-items-center gap-3 mb-3 border-bottom border-secondary pb-3 pe-2">
+            <img src="${item.product.image_url}" alt="${item.product.title}" class="rounded" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid rgba(255,255,255,0.15);">
+            <div class="flex-grow-1 min-w-0">
+              <h5 class="small mb-1 text-white text-truncate fw-bold">${item.product.title}</h5>
+              <small class="text-white-50">LKR ${price.toLocaleString()} x ${item.quantity}</small>
+            </div>
+            <div class="text-end text-accent fw-bold small">
+              LKR ${(price * item.quantity).toLocaleString()}
+            </div>
+          </div>`;
+      });
+
+      html += `
+        </div>
+        <div class="price-details">
+          <div class="price-row">
+            <span>Subtotal</span>
+            <span id="subtotal">LKR 0.00</span>
+          </div>
+          <div class="price-row">
+            <span>Discount</span>
+            <span id="discount" class="text-success">- LKR 0.00</span>
+          </div>
+          <div class="price-row">
+            <span>Delivery Fee</span>
+            <span id="deliveryCharge">LKR 0.00</span>
+          </div>
+          <div class="price-row total">
+            <span>Total</span>
+            <span id="totalAmount">LKR 0.00</span>
+          </div>
+        </div>`;
+
+      summaryCard.innerHTML = html;
+    }
+
+    async function fetchProduct(productId) {
       try {
         currentProduct = await getProduct(productId);
         if (!currentProduct) throw new Error('Not found');
+        
+        // Product loaded successfully
+
         renderProduct();
       } catch (err) {
         alert('Product not found. Redirecting...');
@@ -402,11 +537,9 @@
         siteSettings = await getSettings();
         if (siteSettings.cod_enabled === '1') document.getElementById('codContainer').classList.remove('d-none');
         if (siteSettings.online_pay_enabled === '1') document.getElementById('payNowContainer').classList.remove('d-none');
-        // Bank transfer - always show (or check setting)
         if (siteSettings.bank_transfer_enabled === '1') {
           document.getElementById('bankTransferContainer').classList.remove('d-none');
         }
-        // Load bank details from settings
         if (siteSettings.bank_name) document.getElementById('bankName').textContent = siteSettings.bank_name;
         if (siteSettings.bank_branch) document.getElementById('bankBranch').textContent = siteSettings.bank_branch;
         if (siteSettings.bank_acc_name) document.getElementById('bankAccName').textContent = siteSettings.bank_acc_name;
@@ -416,7 +549,6 @@
       } catch (e) { console.error('Failed to fetch settings'); }
     }
 
-    // Payment method selection
     function selectPayment(method) {
       document.querySelectorAll('.payment-radio-card').forEach(c => c.classList.remove('selected'));
       const bankPanel = document.getElementById('bankDetailsPanel');
@@ -442,9 +574,26 @@
     }
 
     function updateBankAmount() {
-      if (!currentProduct) return;
-      const total = (currentProduct.price * qty) - ((parseFloat(currentProduct.discount) || 0) * qty) + selectedDeliveryCharge;
-      document.getElementById('bankTransferAmount').textContent = `LKR ${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      let subtotal = 0;
+      let discount = 0;
+      let delivery = selectedDeliveryCharge;
+
+      if (isCartCheckout) {
+        cartItemsList.forEach(item => {
+          subtotal += parseFloat(item.product.price) * item.quantity;
+          discount += parseFloat(item.product.discount || 0) * item.quantity;
+        });
+      } else {
+        if (!currentProduct) return;
+        subtotal = currentProduct.price * qty;
+        discount = (parseFloat(currentProduct.discount) || 0) * qty;
+      }
+      
+      const total = subtotal - discount + delivery;
+      const bankAmountEl = document.getElementById('bankTransferAmount');
+      if (bankAmountEl) {
+        bankAmountEl.textContent = `LKR ${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      }
     }
 
     function copyToClipboard(elementId) {
@@ -512,10 +661,21 @@
     }
 
     function updateCalculations() {
-      if (!currentProduct) return;
-      const subtotal = currentProduct.price * qty;
-      const discount = (parseFloat(currentProduct.discount) || 0) * qty;
-      const delivery = selectedDeliveryCharge;
+      let subtotal = 0;
+      let discount = 0;
+      let delivery = selectedDeliveryCharge;
+
+      if (isCartCheckout) {
+        cartItemsList.forEach(item => {
+          subtotal += parseFloat(item.product.price) * item.quantity;
+          discount += parseFloat(item.product.discount || 0) * item.quantity;
+        });
+      } else {
+        if (!currentProduct) return;
+        subtotal = currentProduct.price * qty;
+        discount = (parseFloat(currentProduct.discount) || 0) * qty;
+      }
+
       const total = subtotal - discount + delivery;
       document.getElementById('subtotal').innerText = `LKR ${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
       document.getElementById('discount').innerText = `- LKR ${discount.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
@@ -541,7 +701,7 @@
       const loadingOverlay = document.getElementById('loadingOverlay');
       loadingOverlay.style.display = 'flex';
 
-      const orderData = {
+      let orderData = {
         customer_name: document.getElementById('name').value,
         customer_email: document.getElementById('email').value,
         customer_phone: document.getElementById('phone').value,
@@ -550,19 +710,49 @@
         district: document.getElementById('district').value,
         payment_method: paymentMethod,
         bank_reference: paymentMethod === 'BANK' ? document.getElementById('bankRefNo').value.trim() : null,
-        product_id: currentProduct.id,
-        quantity: qty,
-        subtotal: currentProduct.price * qty,
-        discount_total: (parseFloat(currentProduct.discount) || 0) * qty,
-        delivery_charge: selectedDeliveryCharge,
-        total_amount: (currentProduct.price * qty) - ((parseFloat(currentProduct.discount) || 0) * qty) + selectedDeliveryCharge,
-        product_name: currentProduct.title,
-        unit_price: currentProduct.price
+        delivery_charge: selectedDeliveryCharge
       };
+
+      if (isCartCheckout) {
+        let subtotal = 0;
+        let discount_total = 0;
+        let orderItems = [];
+
+        cartItemsList.forEach(item => {
+          subtotal += parseFloat(item.product.price) * item.quantity;
+          discount_total += parseFloat(item.product.discount || 0) * item.quantity;
+          orderItems.push({
+            product_id:   item.product.id,
+            product_name: item.product.title,
+            quantity:     item.quantity,
+            unit_price:   parseFloat(item.product.price)
+          });
+        });
+
+        orderData.subtotal = subtotal;
+        orderData.discount_total = discount_total;
+        orderData.total_amount = subtotal - discount_total + selectedDeliveryCharge;
+        orderData.order_items = orderItems;
+      } else {
+        orderData.product_id = currentProduct.id;
+        orderData.quantity = qty;
+        orderData.subtotal = currentProduct.price * qty;
+        orderData.discount_total = (parseFloat(currentProduct.discount) || 0) * qty;
+        orderData.total_amount = (currentProduct.price * qty) - ((parseFloat(currentProduct.discount) || 0) * qty) + selectedDeliveryCharge;
+        orderData.product_name = currentProduct.title;
+        orderData.unit_price = currentProduct.price;
+      }
 
       try {
         const result = await placeOrder(orderData);
         if (result.success) {
+          // Clear cart if this was a cart checkout
+          if (isCartCheckout) {
+            const status = await authStatus();
+            if (status.isLoggedIn) {
+              await saveCartItems(status.userId, []);
+            }
+          }
           showToast('Order placed successfully! Redirecting...', 'success');
           setTimeout(() => window.location.href = 'index.html', 3000);
         } else {
