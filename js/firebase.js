@@ -81,7 +81,6 @@ function subscribeToContent(callback) {
 
 function subscribeToProducts(callback) {
   return db.collection('products')
-    .where('is_active', '==', true)
     .orderBy('display_order')
     .onSnapshot(
       async () => {
@@ -169,7 +168,8 @@ async function seedDatabaseIfNeeded() {
         price: 2500,
         discount: 100,
         stock_quantity: 5,
-        delivery_charge: 500
+        delivery_charge: 500,
+        total_sales: 0
       },
       {
         id: '2',
@@ -182,7 +182,8 @@ async function seedDatabaseIfNeeded() {
         price: 1200,
         discount: 50,
         stock_quantity: 100,
-        delivery_charge: 350
+        delivery_charge: 350,
+        total_sales: 0
       },
       {
         id: '3',
@@ -195,7 +196,8 @@ async function seedDatabaseIfNeeded() {
         price: 2000,
         discount: 0,
         stock_quantity: 30,
-        delivery_charge: 350
+        delivery_charge: 350,
+        total_sales: 0
       }
     ];
     
@@ -544,9 +546,8 @@ async function saveContentField(section_name, field_name, field_value) {
 async function getProducts() {
   await seedDatabaseIfNeeded();
   return serveFromCache('cache_products', async () => {
-    // Get active products
+    // Get all products ordered by display_order
     const snapshot = await db.collection('products')
-      .where('is_active', '==', true)
       .orderBy('display_order')
       .get();
       
@@ -555,27 +556,13 @@ async function getProducts() {
       productsList.push({ id: doc.id, ...doc.data() });
     });
     
-    // Pre-calculate sales for each product client-side
-    const salesMap = {};
-    try {
-      const ordersSnap = await db.collection('orders').get();
-      ordersSnap.forEach(oDoc => {
-        const order = oDoc.data();
-        if (order.status !== 'Cancelled' && order.order_items) {
-          order.order_items.forEach(item => {
-            const prodId = item.product_id;
-            salesMap[prodId] = (salesMap[prodId] || 0) + (item.quantity || 0);
-          });
-        }
-      });
-    } catch (e) {
-      console.warn("Could not pre-calculate sales count client-side (unauthorized or network error):", e);
-    }
-    
-    return productsList.map(p => ({
-      ...p,
-      total_sales: salesMap[p.id] || 0
-    }));
+    // Filter active products client-side to avoid composite index requirements
+    return productsList
+      .filter(p => p.is_active !== false)
+      .map(p => ({
+        ...p,
+        total_sales: p.total_sales || 0
+      }));
   });
 }
 
@@ -592,22 +579,9 @@ async function getProductsAdmin() {
       productsList.push({ id: doc.id, ...doc.data() });
     });
     
-    // Fetch sales counts
-    const ordersSnap = await db.collection('orders').get();
-    const salesMap = {};
-    ordersSnap.forEach(oDoc => {
-      const order = oDoc.data();
-      if (order.status !== 'Cancelled' && order.order_items) {
-        order.order_items.forEach(item => {
-          const prodId = item.product_id;
-          salesMap[prodId] = (salesMap[prodId] || 0) + (item.quantity || 0);
-        });
-      }
-    });
-    
     return productsList.map(p => ({
       ...p,
-      total_sales: salesMap[p.id] || 0
+      total_sales: p.total_sales || 0
     }));
   } catch (error) {
     console.error("Error fetching admin products:", error);
@@ -870,6 +844,7 @@ async function placeOrder(orderData) {
       for (const { ref, doc, item } of productDocs) {
         const currentStock = doc.data().stock_quantity ?? 0;
         const purchaseQty = item.quantity;
+        const currentSales = doc.data().total_sales ?? 0;
         
         if (currentStock < purchaseQty) {
           throw new Error(`Insufficient stock available for "${item.product_name}"!`);
@@ -877,6 +852,7 @@ async function placeOrder(orderData) {
         
         transaction.update(ref, {
           stock_quantity: currentStock - purchaseQty,
+          total_sales: currentSales + purchaseQty,
           updated_at: firebase.firestore.FieldValue.serverTimestamp()
         });
       }
@@ -1136,11 +1112,17 @@ async function getDashboardStats() {
     });
 
     // Group sales performance count client-side
-    const salesMap = {};
+    const salesMapByName = {};
+    const salesMapById = {};
     ordersList.forEach(o => {
       if (o.status !== 'Cancelled' && o.order_items) {
         o.order_items.forEach(item => {
-          salesMap[item.product_name] = (salesMap[item.product_name] || 0) + item.quantity;
+          const prodName = item.product_name;
+          const prodId = item.product_id;
+          salesMapByName[prodName] = (salesMapByName[prodName] || 0) + item.quantity;
+          if (prodId) {
+            salesMapById[prodId] = (salesMapById[prodId] || 0) + item.quantity;
+          }
         });
       }
     });
@@ -1148,10 +1130,19 @@ async function getDashboardStats() {
     const activeProductsList = [];
     activeProds.forEach(doc => {
       const data = doc.data();
+      const calculatedSales = salesMapById[doc.id] || salesMapByName[data.title] || 0;
+      
+      // Self-healing check: if the total_sales field is missing or incorrect, update it in Firestore
+      if (data.total_sales !== calculatedSales) {
+        db.collection('products').doc(doc.id).update({
+          total_sales: calculatedSales
+        }).catch(err => console.error("Self-healing update failed for product:", doc.id, err));
+      }
+
       activeProductsList.push({
         title: data.title,
         stock_quantity: data.stock_quantity ?? 0,
-        sales: salesMap[data.title] || 0
+        sales: salesMapByName[data.title] || 0
       });
     });
 
