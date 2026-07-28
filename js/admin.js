@@ -644,9 +644,36 @@ async function loadProducts() {
             <div class="col-md-4">
               <label class="form-label small fw-bold">Image URL / Upload Image</label>
               <div class="input-group input-group-sm">
-                <input type="text" class="form-control" id="prodImg-${p.id}" value="${p.image_url || ''}">
+                <input type="text" class="form-control" id="prodImg-${p.id}" value="${p.image_url || ''}" oninput="updateProductThumbnail('${p.id}')">
                 <input type="file" class="form-control d-none" id="prodImgUpload-${p.id}" accept="image/*" onchange="handleProductImageUpload('${p.id}')">
                 <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('prodImgUpload-${p.id}').click()"><i class="bi bi-upload"></i> Upload</button>
+              </div>
+              
+              <!-- Thumbnail & Upload Progress UI -->
+              <div class="d-flex align-items-center gap-3 mt-2">
+                <div class="product-thumb-preview border rounded" style="width: 50px; height: 50px; overflow: hidden; background: rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center;">
+                  <img id="prodThumb-${p.id}" src="${p.image_url || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a6a6a6\'><path d=\'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\'/></svg>'}" class="w-100 h-100 object-fit-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a6a6a6\'><path d=\'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\'/></svg>'}">
+                </div>
+                <div class="flex-grow-1">
+                  <!-- Progress Bar -->
+                  <div id="prodUploadProgress-${p.id}" class="d-none">
+                    <div class="d-flex justify-content-between small text-white-50" style="font-size: 0.75rem;">
+                      <span>Uploading...</span>
+                      <span id="prodUploadPercent-${p.id}" class="fw-bold text-accent">0%</span>
+                    </div>
+                    <div class="progress mt-1" style="height: 4px; background-color: rgba(255,255,255,0.1);">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated bg-accent" id="prodUploadBar-${p.id}" role="progressbar" style="width: 0%; background-color: #d4873a !important;"></div>
+                    </div>
+                  </div>
+                  <!-- Success Badge -->
+                  <div id="prodUploadSuccess-${p.id}" class="d-none text-success small fw-bold" style="font-size: 0.75rem;">
+                    <i class="bi bi-check-circle-fill me-1"></i> Uploaded! Save to apply.
+                  </div>
+                  <!-- Error Badge -->
+                  <div id="prodUploadFailed-${p.id}" class="d-none text-danger small fw-bold" style="font-size: 0.75rem;">
+                    <i class="bi bi-x-circle-fill me-1"></i> Upload failed.
+                  </div>
+                </div>
               </div>
             </div>
             <div class="col-md-2">
@@ -692,10 +719,47 @@ async function loadProducts() {
 
 async function handleProductImageUpload(id) {
   const fileInput = document.getElementById(`prodImgUpload-${id}`);
-  const url = await uploadImageFile(fileInput, 'product-images');
-  if (url) {
-    document.getElementById(`prodImg-${id}`).value = url;
-    showAdminToast('Image uploaded! Click Save to apply.', 'success');
+  if (!fileInput.files || !fileInput.files.length) return;
+
+  const progressWrap = document.getElementById(`prodUploadProgress-${id}`);
+  const progressBar  = document.getElementById(`prodUploadBar-${id}`);
+  const progressPct  = document.getElementById(`prodUploadPercent-${id}`);
+  const successBadge = document.getElementById(`prodUploadSuccess-${id}`);
+  const failedBadge  = document.getElementById(`prodUploadFailed-${id}`);
+  const previewImg   = document.getElementById(`prodThumb-${id}`);
+  const imgInput     = document.getElementById(`prodImg-${id}`);
+
+  if (progressWrap) progressWrap.classList.remove('d-none');
+  if (successBadge) successBadge.classList.add('d-none');
+  if (failedBadge) failedBadge.classList.add('d-none');
+  if (progressBar) progressBar.style.width = '0%';
+  if (progressPct) progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(fileInput.files[0], (pct) => {
+      if (progressBar) progressBar.style.width = pct + '%';
+      if (progressPct) progressPct.textContent = pct + '%';
+    });
+
+    if (imgInput) imgInput.value = url;
+    if (previewImg) {
+      previewImg.src = url;
+      previewImg.classList.add('preview-flash');
+    }
+    if (progressBar) progressBar.style.width = '100%';
+    if (progressPct) progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      if (progressWrap) progressWrap.classList.add('d-none');
+      if (successBadge) successBadge.classList.remove('d-none');
+      if (previewImg) previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    if (progressWrap) progressWrap.classList.add('d-none');
+    if (failedBadge) failedBadge.classList.remove('d-none');
+    showAdminToast('Upload failed: ' + err.message, 'error');
+  } finally {
+    fileInput.value = '';
   }
 }
 
@@ -720,22 +784,88 @@ async function saveProduct(id) {
 }
 
 function addProduct() {
-  ['newProdTitle','newProdImg','newProdShort','newProdFull'].forEach(id => document.getElementById(id).value = '');
+  ['newProdTitle','newProdImg','newProdShort','newProdFull'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
   document.getElementById('newProdPrice').value    = '0';
   document.getElementById('newProdDiscount').value = '0';
   document.getElementById('newProdStock').value    = '10';
   document.getElementById('newProdDelivery').value = '350';
   document.getElementById('newProdOrder').value    = '99';
   document.getElementById('newProdImgUpload').value = '';
+  
+  // Reset upload UI
+  const thumb = document.getElementById('newProdThumb');
+  if (thumb) thumb.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/></svg>";
+  
+  ['newProdUploadProgress','newProdUploadSuccess','newProdUploadFailed'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('d-none');
+  });
+
   new bootstrap.Modal(document.getElementById('addProductModal')).show();
 }
 
 async function handleNewProductImageUpload() {
   const fileInput = document.getElementById('newProdImgUpload');
-  const url = await uploadImageFile(fileInput, 'product-images');
-  if (url) {
-    document.getElementById('newProdImg').value = url;
-    showAdminToast('Image uploaded!', 'success');
+  if (!fileInput.files || !fileInput.files.length) return;
+
+  const progressWrap = document.getElementById('newProdUploadProgress');
+  const progressBar  = document.getElementById('newProdUploadBar');
+  const progressPct  = document.getElementById('newProdUploadPercent');
+  const successBadge = document.getElementById('newProdUploadSuccess');
+  const failedBadge  = document.getElementById('newProdUploadFailed');
+  const previewImg   = document.getElementById('newProdThumb');
+  const imgInput     = document.getElementById('newProdImg');
+
+  if (progressWrap) progressWrap.classList.remove('d-none');
+  if (successBadge) successBadge.classList.add('d-none');
+  if (failedBadge) failedBadge.classList.add('d-none');
+  if (progressBar) progressBar.style.width = '0%';
+  if (progressPct) progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(fileInput.files[0], (pct) => {
+      if (progressBar) progressBar.style.width = pct + '%';
+      if (progressPct) progressPct.textContent = pct + '%';
+    });
+
+    if (imgInput) imgInput.value = url;
+    if (previewImg) {
+      previewImg.src = url;
+      previewImg.classList.add('preview-flash');
+    }
+    if (progressBar) progressBar.style.width = '100%';
+    if (progressPct) progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      if (progressWrap) progressWrap.classList.add('d-none');
+      if (successBadge) successBadge.classList.remove('d-none');
+      if (previewImg) previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    if (progressWrap) progressWrap.classList.add('d-none');
+    if (failedBadge) failedBadge.classList.remove('d-none');
+    showAdminToast('Upload failed: ' + err.message, 'error');
+  } finally {
+    fileInput.value = '';
+  }
+}
+
+function updateProductThumbnail(id) {
+  const imgInput = document.getElementById(`prodImg-${id}`);
+  const previewImg = document.getElementById(`prodThumb-${id}`);
+  if (imgInput && previewImg) {
+    previewImg.src = imgInput.value || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/></svg>";
+  }
+}
+
+function updateNewProductThumbnail() {
+  const imgInput = document.getElementById('newProdImg');
+  const previewImg = document.getElementById('newProdThumb');
+  if (imgInput && previewImg) {
+    previewImg.src = imgInput.value || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/></svg>";
   }
 }
 
