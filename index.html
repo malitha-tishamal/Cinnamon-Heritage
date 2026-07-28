@@ -21,60 +21,130 @@
   </div>
   <!-- Header and Navigation -->
   <header>
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: rgba(0,0,0,0.3); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 20px 0;">
-      <div class="container">
-        <a class="navbar-brand logo fs-3 text-white" href="#" style="font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: 2px;">Cinnamon&nbsp;Heritage</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-          <ul class="navbar-nav gap-3 text-uppercase nav-links align-items-center" style="font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.9rem; letter-spacing: 1px;">
-            <li class="nav-item">
-              <a class="nav-link text-white" href="#about">About&nbsp;Us</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-white" href="#factory">Factory</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-white" href="#process">Our&nbsp;Process</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-white" href="#products">Products</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-white" href="#contact">Contact</a>
-            </li>
-            <li class="nav-item d-flex align-items-center gap-3 ms-lg-3">
-              <!-- Cart Icon -->
-              <a class="nav-link text-white position-relative" href="#" id="cartBtn" style="padding: 5px;">
-                <i class="fas fa-shopping-cart fs-5"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger d-none" id="cartBadge" style="font-size: 0.65rem; padding: 0.25em 0.5em; min-width: 18px; height: 18px; line-height: 10px;">0</span>
-              </a>
-              
-              <!-- Login Button -->
-              <a class="btn btn-sm rounded-0 text-white px-3 py-2 text-uppercase fw-bold" href="#" id="navLoginBtn" style="background: var(--accent); border: none; font-family: 'Oswald', sans-serif; font-size: 0.8rem; letter-spacing: 0.5px; border-radius: 4px !important;">Login</a>
+    <nav class="navbar navbar-dark fixed-top navbar-balanced">
+      <div class="container-fluid navbar-container">
+        <!-- Logo — left -->
+        <a class="navbar-brand navbar-brand-logo" href="#hero-section">
+          <img src="images/logo.png" alt="Cinnamon Heritage" class="navbar-logo" width="40" height="40">
+          <span class="navbar-brand-text">Cinnamon&nbsp;Heritage</span>
+        </a>
 
-              <!-- User Menu Dropdown -->
+        <!-- Desktop: nav links + actions — right side -->
+        <div class="navbar-desktop-group d-none d-xl-flex">
+          <ul class="navbar-nav navbar-nav-main text-uppercase nav-links">
+            <li class="nav-item"><a class="nav-link text-white" href="#hero-section">Home</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#heritage">Heritage</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#ceylon-cinnamon">Ceylon</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#products">Products</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#essential-oils">Essential Oils</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#b2b">B2B</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#process">Process</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#experience">Experience</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#contact">Contact</a></li>
+          </ul>
+
+          <div class="navbar-vdivider" aria-hidden="true"></div>
+
+          <div class="navbar-actions">
+            <a class="btn nav-btn-secondary" href="#products">
+              <span class="nav-btn-short">Products</span>
+              <span class="nav-btn-full">Explore Products</span>
+            </a>
+            <a class="btn nav-btn-primary text-white" href="#b2b">
+              <span class="nav-btn-short">B2B</span>
+              <span class="nav-btn-full">B2B Discussion</span>
+            </a>
+
+            <div class="navbar-utilities">
+              <a class="nav-link text-white position-relative navbar-cart" href="#" id="cartBtn" aria-label="Shopping cart">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger d-none" id="cartBadge">0</span>
+              </a>
+
+              <div id="navAuthButtons" class="nav-auth-buttons">
+                <a class="btn nav-login-btn text-white text-uppercase fw-bold" href="#" id="navLoginBtn">Login</a>
+                <a class="btn nav-signup-btn text-white text-uppercase fw-bold" href="#" id="navSignupBtn">Sign Up</a>
+              </div>
+
               <div id="userProfileMenu" class="d-none dropdown">
-                <a class="nav-link text-white dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 5px;">
-                  <img id="navProfilePic" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d4873a'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid var(--accent);">
-                  <span id="navUsername" class="small d-none d-lg-inline">Profile</span>
+                <a class="nav-link text-white dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <img id="navProfilePic" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d4873a'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Avatar" class="rounded-circle nav-avatar">
+                  <span id="navUsername" class="small">Profile</span>
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="background: rgba(15,15,25,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark navbar-dropdown">
                   <span id="navAdminPanelLink" class="d-none">
                     <li><a class="dropdown-item" href="admin.html" target="_blank"><i class="fas fa-shield-alt me-2" style="color: var(--accent);"></i> Admin Panel</a></li>
-                    <li><hr class="dropdown-divider" style="background-color: rgba(255,255,255,0.1);"></li>
+                    <li><hr class="dropdown-divider"></li>
                   </span>
                   <li><a class="dropdown-item" href="#" id="profileDetailsBtn"><i class="fas fa-user-cog me-2" style="color: var(--accent);"></i> My Profile</a></li>
-                  <li><hr class="dropdown-divider" style="background-color: rgba(255,255,255,0.1);"></li>
+                  <li><hr class="dropdown-divider"></li>
                   <li><a class="dropdown-item text-danger" href="#" id="clientLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
                 </ul>
               </div>
-            </li>
-          </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile: cart + hamburger -->
+        <div class="navbar-mobile-tools d-flex d-xl-none">
+          <a class="nav-link text-white position-relative navbar-cart navbar-cart-mobile" href="#" id="cartBtnMobile" aria-label="Shopping cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger d-none" id="cartBadgeMobile">0</span>
+          </a>
+          <button class="navbar-toggler nav-drawer-toggle" type="button" id="navDrawerToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navDrawer">
+            <span class="nav-drawer-toggle-bar"></span>
+            <span class="nav-drawer-toggle-bar"></span>
+            <span class="nav-drawer-toggle-bar"></span>
+          </button>
         </div>
       </div>
     </nav>
+
+    <!-- Mobile nav drawer (~70% width) -->
+    <div class="nav-drawer-overlay" id="navDrawerOverlay"></div>
+    <aside class="nav-drawer" id="navDrawer" aria-hidden="true">
+      <div class="nav-drawer-header">
+        <div class="nav-drawer-brand">
+          <img src="images/logo.png" alt="" class="nav-drawer-logo" width="32" height="32">
+          <span>Menu</span>
+        </div>
+        <button class="nav-drawer-close" id="navDrawerClose" aria-label="Close menu">&times;</button>
+      </div>
+
+      <nav class="nav-drawer-body">
+        <ul class="nav-drawer-links">
+          <li><a class="nav-drawer-link" href="#hero-section">Home</a></li>
+          <li><a class="nav-drawer-link" href="#heritage">Heritage</a></li>
+          <li><a class="nav-drawer-link" href="#ceylon-cinnamon">Ceylon</a></li>
+          <li><a class="nav-drawer-link" href="#products">Products</a></li>
+          <li><a class="nav-drawer-link" href="#essential-oils">Essential Oils</a></li>
+          <li><a class="nav-drawer-link" href="#b2b">B2B</a></li>
+          <li><a class="nav-drawer-link" href="#process">Process</a></li>
+          <li><a class="nav-drawer-link" href="#experience">Experience</a></li>
+          <li><a class="nav-drawer-link" href="#contact">Contact</a></li>
+        </ul>
+
+        <div class="nav-drawer-actions">
+          <a class="btn nav-btn-secondary w-100" href="#products">Explore Products</a>
+          <a class="btn nav-btn-primary text-white w-100" href="#b2b">B2B Discussion</a>
+          <a href="https://wa.me/94771234567?text=Hello%20Cinnamon%20Heritage%2C%20I%20would%20like%20to%20inquire%20about%20your%20products." target="_blank" rel="noopener noreferrer" class="btn nav-whatsapp-mobile w-100 text-white text-uppercase fw-bold">
+            <i class="fab fa-whatsapp"></i> WhatsApp Us
+          </a>
+          <div id="navDrawerAuthButtons" class="nav-drawer-auth">
+            <a class="btn nav-login-btn text-white text-uppercase fw-bold flex-fill" href="#" id="navLoginBtnMobile">Login</a>
+            <a class="btn nav-signup-btn text-white text-uppercase fw-bold flex-fill" href="#" id="navSignupBtnMobile">Sign Up</a>
+          </div>
+          <div id="userProfileMenuMobile" class="d-none nav-drawer-profile">
+            <div class="nav-drawer-user d-flex align-items-center gap-3">
+              <img id="navProfilePicMobile" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d4873a'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Avatar" class="rounded-circle nav-avatar">
+              <span id="navUsernameMobile" class="text-white fw-bold"></span>
+            </div>
+            <a class="nav-drawer-link" href="#" id="profileDetailsBtnMobile"><i class="fas fa-user-cog me-2"></i> My Profile</a>
+            <a class="nav-drawer-link text-danger" href="#" id="clientLogoutBtnMobile"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
     <!-- Hero section -->
     <section id="hero-section" class="hero d-flex align-items-center position-relative min-vh-100 w-100" style="background: linear-gradient(rgba(10,10,15,0.55), rgba(10,10,15,0.7)), url('images/cinnamon_spices.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
       <div class="container position-relative z-2">
@@ -82,7 +152,7 @@
             <div class="hero-content-box">
               <h1 id="hero-title" class="display-3 fw-bold mb-4"></h1>
               <p id="hero-subtitle" class="lead-text mb-5"></p>
-              <a id="hero-cta" class="btn btn-lg rounded-0 text-white text-uppercase fw-bold px-5 py-3 cta-btn" href="#about" style="display: none;"></a>
+              <a id="hero-cta" class="btn btn-lg rounded-0 text-white text-uppercase fw-bold px-5 py-3 cta-btn" href="#heritage" style="display: none;"></a>
             </div>
           </div>
       </div>
@@ -93,7 +163,7 @@
   <!-- Main content -->
   <main>
     <!-- About section -->
-    <section id="about" class="about estate-immersive position-relative overflow-hidden py-0 reveal">
+    <section id="heritage" class="about estate-immersive position-relative overflow-hidden py-0 reveal">
       <div class="estate-bg-overlay"></div>
       <div class="container position-relative z-2 py-5 my-5">
         <div class="row align-items-center gx-lg-5">
