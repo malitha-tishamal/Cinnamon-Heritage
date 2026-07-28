@@ -1059,16 +1059,21 @@ async function saveSetting(key, value) {
 async function getDeliveryRates() {
   await seedDatabaseIfNeeded();
   try {
-    const snapshot = await db.collection('delivery_rates')
-      .orderBy('province')
-      .orderBy('district')
-      .get();
+    const snapshot = await db.collection('delivery_rates').get();
       
     const ratesList = [];
     snapshot.forEach(doc => {
       ratesList.push({ id: doc.id, ...doc.data() });
     });
-    return ratesList;
+    
+    // Sort client-side to avoid composite index requirements
+    return ratesList.sort((a, b) => {
+      if (a.province < b.province) return -1;
+      if (a.province > b.province) return 1;
+      if (a.district < b.district) return -1;
+      if (a.district > b.district) return 1;
+      return 0;
+    });
   } catch (error) {
     console.error("Error fetching delivery rates:", error);
     return [];

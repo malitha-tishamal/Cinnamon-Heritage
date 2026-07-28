@@ -61,6 +61,10 @@
                   <span id="navUsername" class="small d-none d-lg-inline">Profile</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="background: rgba(15,15,25,0.95); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                  <span id="navAdminPanelLink" class="d-none">
+                    <li><a class="dropdown-item" href="admin.html" target="_blank"><i class="fas fa-shield-alt me-2" style="color: var(--accent);"></i> Admin Panel</a></li>
+                    <li><hr class="dropdown-divider" style="background-color: rgba(255,255,255,0.1);"></li>
+                  </span>
                   <li><a class="dropdown-item" href="#" id="profileDetailsBtn"><i class="fas fa-user-cog me-2" style="color: var(--accent);"></i> My Profile</a></li>
                   <li><hr class="dropdown-divider" style="background-color: rgba(255,255,255,0.1);"></li>
                   <li><a class="dropdown-item text-danger" href="#" id="clientLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
@@ -455,11 +459,11 @@
                 </div>
               </div>
               <div class="row g-2">
-                <div class="col-md-6 mb-2">
-                  <label class="form-label text-white-50 small">Username</label>
-                  <input type="text" class="form-control glass-input" id="signupUsername" placeholder="johndoe" required>
+                <div class="col-md-12 mb-2 d-none" id="signupUsernameRow">
+                  <label class="form-label text-white-50 small">Username <span class="text-white-25" style="font-size:0.7rem;">(auto-generated)</span></label>
+                  <input type="text" class="form-control glass-input" id="signupUsername" placeholder="johndoe">
                 </div>
-                <div class="col-md-6 mb-2">
+                <div class="col-md-12 mb-2">
                   <label class="form-label text-white-50 small">NIC Number</label>
                   <input type="text" class="form-control glass-input" id="signupNic" placeholder="1999XXXXXXXX" required>
                 </div>

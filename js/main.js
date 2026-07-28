@@ -446,7 +446,10 @@ function setupSignupLocationSelectors() {
   const districtSelect = document.getElementById('signupCity');
   
   if (!provinceSelect || !districtSelect) return;
-  
+  if (!deliveryRates || !deliveryRates.length) return; // rates not loaded yet
+
+  // Repopulate provinces
+  const currentProvince = provinceSelect.value;
   provinceSelect.innerHTML = '<option value="">Select Province</option>';
   districtSelect.innerHTML = '<option value="">Select District</option>';
   districtSelect.disabled = true;
@@ -458,17 +461,23 @@ function setupSignupLocationSelectors() {
     opt.textContent = p;
     provinceSelect.appendChild(opt);
   });
+  if (currentProvince) provinceSelect.value = currentProvince;
 
-  provinceSelect.addEventListener('change', () => {
-    const province = provinceSelect.value;
-    districtSelect.innerHTML = '<option value="">Select District</option>';
-    districtSelect.disabled = !province;
+  // Replace listener to avoid duplicates
+  const newProvince = provinceSelect.cloneNode(true);
+  provinceSelect.parentNode.replaceChild(newProvince, provinceSelect);
+
+  document.getElementById('signupProvince').addEventListener('change', () => {
+    const province = document.getElementById('signupProvince').value;
+    const city = document.getElementById('signupCity');
+    city.innerHTML = '<option value="">Select District</option>';
+    city.disabled = !province;
     if (province) {
       deliveryRates.filter(r => r.province === province).forEach(d => {
         const opt = document.createElement('option');
         opt.value = d.district;
         opt.textContent = d.district;
-        districtSelect.appendChild(opt);
+        city.appendChild(opt);
       });
     }
   });
@@ -479,7 +488,9 @@ function setupProfileLocationSelectors() {
   const districtSelect = document.getElementById('profileCity');
   
   if (!provinceSelect || !districtSelect) return;
-  
+  if (!deliveryRates || !deliveryRates.length) return;
+
+  const currentProvince = provinceSelect.value;
   provinceSelect.innerHTML = '<option value="">Select Province</option>';
   districtSelect.innerHTML = '<option value="">Select District</option>';
   districtSelect.disabled = true;
@@ -491,17 +502,23 @@ function setupProfileLocationSelectors() {
     opt.textContent = p;
     provinceSelect.appendChild(opt);
   });
+  if (currentProvince) provinceSelect.value = currentProvince;
 
-  provinceSelect.addEventListener('change', () => {
-    const province = provinceSelect.value;
-    districtSelect.innerHTML = '<option value="">Select District</option>';
-    districtSelect.disabled = !province;
+  // Replace listener to avoid duplicates
+  const newProvince = provinceSelect.cloneNode(true);
+  provinceSelect.parentNode.replaceChild(newProvince, provinceSelect);
+
+  document.getElementById('profileProvince').addEventListener('change', () => {
+    const province = document.getElementById('profileProvince').value;
+    const city = document.getElementById('profileCity');
+    city.innerHTML = '<option value="">Select District</option>';
+    city.disabled = !province;
     if (province) {
       deliveryRates.filter(r => r.province === province).forEach(d => {
         const opt = document.createElement('option');
         opt.value = d.district;
         opt.textContent = d.district;
-        districtSelect.appendChild(opt);
+        city.appendChild(opt);
       });
     }
   });
@@ -815,6 +832,16 @@ async function checkAuthStatus() {
       navName.textContent = currentUser.first_name || currentUser.username;
     }
     
+    // Show Admin Panel link for admin users
+    const adminPanelLink = document.getElementById('navAdminPanelLink');
+    if (adminPanelLink) {
+      if (currentUser.role === 'admin') {
+        adminPanelLink.classList.remove('d-none');
+      } else {
+        adminPanelLink.classList.add('d-none');
+      }
+    }
+    
     // Fetch and load cart
     currentCart = await getCartItems(status.userId);
     updateCartUI();
@@ -1039,6 +1066,8 @@ function initCartAndAuthListeners() {
       toggleSignupTab.classList.add('active');
       loginTab.classList.add('d-none');
       signupTab.classList.remove('d-none');
+      // Ensure province/district dropdowns are populated each time signup tab opens
+      setupSignupLocationSelectors();
     });
   }
 
@@ -1116,19 +1145,25 @@ function initCartAndAuthListeners() {
         const nameRow = document.getElementById('signupNameRow');
         const mobileRow = document.getElementById('signupMobileRow');
         const locationRow = document.getElementById('signupLocationRow');
+        const usernameInput = document.getElementById('signupUsername');
+        const usernameGroup = usernameInput ? usernameInput.closest('.col-md-6, .mb-2') : null;
 
         if (role === 'admin') {
+          // Admin: needs name + email + password only
           if (picSection) picSection.classList.add('d-none');
-          if (nameRow) nameRow.classList.add('d-none');
           if (mobileRow) mobileRow.classList.add('d-none');
           if (locationRow) locationRow.classList.add('d-none');
+          if (nameRow) nameRow.classList.remove('d-none');
 
-          document.getElementById('signupFirstName').required = false;
-          document.getElementById('signupLastName').required = false;
+          document.getElementById('signupFirstName').required = true;
+          document.getElementById('signupLastName').required = true;
           document.getElementById('signupMobile').required = false;
           document.getElementById('signupProvince').required = false;
           document.getElementById('signupCity').required = false;
+          const nicEl = document.getElementById('signupNic');
+          if (nicEl) { nicEl.required = false; nicEl.closest('.col-md-12, .row, div')?.classList?.add('d-none'); }
         } else {
+          // Customer: all fields visible and required
           if (picSection) picSection.classList.remove('d-none');
           if (nameRow) nameRow.classList.remove('d-none');
           if (mobileRow) mobileRow.classList.remove('d-none');
@@ -1139,6 +1174,8 @@ function initCartAndAuthListeners() {
           document.getElementById('signupMobile').required = true;
           document.getElementById('signupProvince').required = true;
           document.getElementById('signupCity').required = true;
+          const nicEl = document.getElementById('signupNic');
+          if (nicEl) { nicEl.required = true; nicEl.closest('.col-md-12, .row, div')?.classList?.remove('d-none'); }
         }
       });
     });
@@ -1159,13 +1196,19 @@ function initCartAndAuthListeners() {
       }
 
       const email = document.getElementById('signupEmail').value.trim();
-      const username = document.getElementById('signupUsername').value.trim();
       const role = document.querySelector('input[name="signupRole"]:checked')?.value || 'customer';
+      const firstName = document.getElementById('signupFirstName').value.trim();
+      const lastName  = document.getElementById('signupLastName').value.trim();
+      // Auto-generate username from first + last name if not provided
+      const usernameEl = document.getElementById('signupUsername');
+      const username = usernameEl && usernameEl.value.trim()
+        ? usernameEl.value.trim()
+        : (firstName + lastName).toLowerCase().replace(/\s+/g, '') || email.split('@')[0];
 
       const extraData = {
         role: role,
-        first_name: role === 'customer' ? document.getElementById('signupFirstName').value.trim() : '',
-        last_name: role === 'customer' ? document.getElementById('signupLastName').value.trim() : '',
+        first_name: firstName,
+        last_name: lastName,
         mobile: role === 'customer' ? document.getElementById('signupMobile').value.trim() : '',
         nic: document.getElementById('signupNic').value.trim(),
         city: role === 'customer' ? document.getElementById('signupCity').value.trim() : '',
@@ -1215,9 +1258,10 @@ function initCartAndAuthListeners() {
       e.preventDefault();
       if (!currentUser) return;
 
-      document.getElementById('profileFirstName').value = currentUser.first_name || '';
+      document.getElementById('profileFirstName').value = currentUser.first_name || currentUser.username || '';
       document.getElementById('profileLastName').value = currentUser.last_name || '';
       document.getElementById('profileMobile').value = currentUser.mobile || '';
+
       
       const userCity = currentUser.city || '';
       const matchedRate = deliveryRates.find(r => r.district.toLowerCase() === userCity.toLowerCase());
@@ -1227,8 +1271,18 @@ function initCartAndAuthListeners() {
       const districtSelect = document.getElementById('profileCity');
       
       if (provinceSelect && districtSelect) {
+        // Re-populate province options each time to ensure they're loaded
+        provinceSelect.innerHTML = '<option value="">Select Province</option>';
+        const provinces = [...new Set(deliveryRates.map(r => r.province))].filter(Boolean);
+        provinces.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p;
+          opt.textContent = p;
+          provinceSelect.appendChild(opt);
+        });
         provinceSelect.value = userProvince;
         
+        // Populate districts for the matched province
         districtSelect.innerHTML = '<option value="">Select District</option>';
         if (userProvince) {
           districtSelect.disabled = false;
@@ -1263,6 +1317,8 @@ function initCartAndAuthListeners() {
       new bootstrap.Modal(document.getElementById('profileModal')).show();
     });
   }
+
+
 
   // Profile Pic Upload (in profile details modal)
   const profilePicInput = document.getElementById('profilePicInput');

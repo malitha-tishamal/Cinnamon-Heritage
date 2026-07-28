@@ -907,6 +907,8 @@ footer {
   border-radius: 16px !important;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.1);
   color: #fff;
+  flex-direction: column !important;
+  margin: auto;
 }
 .glass-input {
   background: rgba(255, 255, 255, 0.05) !important;
@@ -925,6 +927,29 @@ footer {
 .glass-input::placeholder {
   color: rgba(255, 255, 255, 0.3) !important;
 }
+/* Fix native select dropdown: options must be styled directly */
+select.glass-input {
+  appearance: auto;
+  -webkit-appearance: auto;
+  cursor: pointer;
+  color-scheme: dark;           /* Forces OS-native dark dropdown on Windows/Chrome */
+}
+select.glass-input option {
+  background-color: #1a1a2e !important;
+  color: #ffffff !important;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+}
+select.glass-input option:hover,
+select.glass-input option:focus,
+select.glass-input option:checked {
+  background-color: #d4873a !important;
+  color: #ffffff !important;
+}
+select.glass-input option:disabled {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
 .auth-tab-link {
   color: rgba(255, 255, 255, 0.5);
   font-family: 'Oswald', sans-serif;
