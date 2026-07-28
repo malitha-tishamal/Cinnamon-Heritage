@@ -246,6 +246,11 @@ async function loadSection(section) {
       document.getElementById('factoryImageUrl').value        = imgUrl;
       document.getElementById('factoryImgPreview').src        = imgUrl;
     }
+    if (section === 'process' && content?.process) {
+      const bgUrl = content.process.background_image || 'images/estate_bg.png';
+      document.getElementById('processBackgroundImage').value = bgUrl;
+      document.getElementById('processBgPreviewImg').src = bgUrl;
+    }
     if (section === 'quality' && content?.quality) {
       document.getElementById('qualityTitle').value = content.quality.title || '';
       document.getElementById('qualityText').value  = content.quality.text  || '';
@@ -287,6 +292,10 @@ async function saveContent(section) {
         text:             document.getElementById('factoryText').value,
         background_image: document.getElementById('factoryBackgroundImage').value || 'images/estate_bg.png',
         image_url:        document.getElementById('factoryImageUrl').value        || 'images/cinnamon_srilanka.jpg'
+      };
+    } else if (section === 'process') {
+      fields = {
+        background_image: document.getElementById('processBackgroundImage').value || 'images/estate_bg.png'
       };
     } else if (section === 'quality') {
       fields = { title: document.getElementById('qualityTitle').value, text: document.getElementById('qualityText').value };
@@ -482,6 +491,51 @@ document.getElementById('factoryImgUpload')?.addEventListener('change', async fu
   }
 });
 
+// Process BACKGROUND upload with Cloudinary progress
+document.getElementById('processBgUpload')?.addEventListener('change', async function() {
+  if (!this.files || !this.files.length) return;
+
+  const progressWrap  = document.getElementById('processBgUploadProgress');
+  const progressBar   = document.getElementById('processBgUploadBar');
+  const progressPct   = document.getElementById('processBgUploadPercent');
+  const successBadge  = document.getElementById('processBgUploadSuccess');
+  const failedBadge   = document.getElementById('processBgUploadFailed');
+  const failedMsg     = document.getElementById('processBgUploadFailedMsg');
+  const previewImg    = document.getElementById('processBgPreviewImg');
+  const bgInput       = document.getElementById('processBackgroundImage');
+
+  progressWrap.classList.remove('d-none');
+  successBadge.classList.add('d-none');
+  failedBadge.classList.add('d-none');
+  progressBar.style.width = '0%';
+  progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(this.files[0], (pct) => {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    });
+
+    bgInput.value = url;
+    previewImg.src = url;
+    previewImg.classList.add('preview-flash');
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      progressWrap.classList.add('d-none');
+      successBadge.classList.remove('d-none');
+      previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    progressWrap.classList.add('d-none');
+    failedMsg.textContent = 'Upload failed: ' + err.message;
+    failedBadge.classList.remove('d-none');
+  } finally {
+    this.value = '';
+  }
+});
+
 // ============================================================
 // IMAGE UPLOAD — with Cloudinary progress animation
 // ============================================================
@@ -544,9 +598,36 @@ async function loadProcessSteps() {
             <div class="col-md-6">
               <label class="form-label small fw-bold">Image URL / Upload</label>
               <div class="input-group input-group-sm">
-                <input type="text" class="form-control" id="stepImg-${step.id}" value="${step.image_url || ''}">
+                <input type="text" class="form-control" id="stepImg-${step.id}" value="${step.image_url || ''}" oninput="updateStepThumbnail('${step.id}')">
                 <input type="file" class="form-control d-none" id="stepImgUpload-${step.id}" accept="image/*" onchange="handleStepImageUpload('${step.id}')">
                 <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('stepImgUpload-${step.id}').click()"><i class="bi bi-upload"></i> Upload</button>
+              </div>
+              
+              <!-- Thumbnail & Upload Progress UI -->
+              <div class="d-flex align-items-center gap-3 mt-2">
+                <div class="product-thumb-preview border rounded" style="width: 50px; height: 50px; overflow: hidden; background: rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center;">
+                  <img id="stepThumb-${step.id}" src="${step.image_url || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a6a6a6\'><path d=\'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\'/></svg>'}" class="w-100 h-100 object-fit-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a6a6a6\'><path d=\'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\'/></svg>'}">
+                </div>
+                <div class="flex-grow-1">
+                  <!-- Progress Bar -->
+                  <div id="stepUploadProgress-${step.id}" class="d-none">
+                    <div class="d-flex justify-content-between small text-white-50" style="font-size: 0.75rem;">
+                      <span>Uploading...</span>
+                      <span id="stepUploadPercent-${step.id}" class="fw-bold text-accent">0%</span>
+                    </div>
+                    <div class="progress mt-1" style="height: 4px; background-color: rgba(255,255,255,0.1);">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated bg-accent" id="stepUploadBar-${step.id}" role="progressbar" style="width: 0%; background-color: #d4873a !important;"></div>
+                    </div>
+                  </div>
+                  <!-- Success Badge -->
+                  <div id="stepUploadSuccess-${step.id}" class="d-none text-success small fw-bold" style="font-size: 0.75rem;">
+                    <i class="bi bi-check-circle-fill me-1"></i> Uploaded! Save to apply.
+                  </div>
+                  <!-- Error Badge -->
+                  <div id="stepUploadFailed-${step.id}" class="d-none text-danger small fw-bold" style="font-size: 0.75rem;">
+                    <i class="bi bi-x-circle-fill me-1"></i> Upload failed.
+                  </div>
+                </div>
               </div>
             </div>
             <div class="col-md-6">
@@ -572,10 +653,55 @@ async function loadProcessSteps() {
 
 async function handleStepImageUpload(id) {
   const fileInput = document.getElementById(`stepImgUpload-${id}`);
-  const url = await uploadImageFile(fileInput, 'process-images');
-  if (url) {
-    document.getElementById(`stepImg-${id}`).value = url;
-    showAdminToast('Image uploaded! Click Save to apply.', 'success');
+  if (!fileInput.files || !fileInput.files.length) return;
+
+  const progressWrap = document.getElementById(`stepUploadProgress-${id}`);
+  const progressBar  = document.getElementById(`stepUploadBar-${id}`);
+  const progressPct  = document.getElementById(`stepUploadPercent-${id}`);
+  const successBadge = document.getElementById(`stepUploadSuccess-${id}`);
+  const failedBadge  = document.getElementById(`stepUploadFailed-${id}`);
+  const previewImg   = document.getElementById(`stepThumb-${id}`);
+  const imgInput     = document.getElementById(`stepImg-${id}`);
+
+  if (progressWrap) progressWrap.classList.remove('d-none');
+  if (successBadge) successBadge.classList.add('d-none');
+  if (failedBadge) failedBadge.classList.add('d-none');
+  if (progressBar) progressBar.style.width = '0%';
+  if (progressPct) progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(fileInput.files[0], (pct) => {
+      if (progressBar) progressBar.style.width = pct + '%';
+      if (progressPct) progressPct.textContent = pct + '%';
+    });
+
+    if (imgInput) imgInput.value = url;
+    if (previewImg) {
+      previewImg.src = url;
+      previewImg.classList.add('preview-flash');
+    }
+    if (progressBar) progressBar.style.width = '100%';
+    if (progressPct) progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      if (progressWrap) progressWrap.classList.add('d-none');
+      if (successBadge) successBadge.classList.remove('d-none');
+      if (previewImg) previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    if (progressWrap) progressWrap.classList.add('d-none');
+    if (failedBadge) failedBadge.classList.remove('d-none');
+    showAdminToast('Upload failed: ' + err.message, 'error');
+  } finally {
+    fileInput.value = '';
+  }
+}
+
+function updateStepThumbnail(id) {
+  const imgInput = document.getElementById(`stepImg-${id}`);
+  const previewImg = document.getElementById(`stepThumb-${id}`);
+  if (imgInput && previewImg) {
+    previewImg.src = imgInput.value || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/></svg>";
   }
 }
 
@@ -1397,3 +1523,12 @@ async function deleteAccount(uid) {
     showAdminToast('Failed to delete: ' + err.message, 'error');
   }
 }
+
+// Expose dynamic-HTML-called functions globally
+window.updateStepThumbnail    = updateStepThumbnail;
+window.handleStepImageUpload  = handleStepImageUpload;
+window.saveStep               = saveStep;
+window.deleteStep             = deleteStep;
+window.updateProductThumbnail = updateProductThumbnail;
+window.handleProductImageUpload = handleProductImageUpload;
+

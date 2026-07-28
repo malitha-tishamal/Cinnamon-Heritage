@@ -40,7 +40,8 @@ const dataPromises = {
   content:       fetchWithCache('cache_content', getContent, null),
   products:      fetchWithCache('cache_products', getProducts, []),
   settings:      fetchWithCache('cache_settings', getSettings, {}),
-  deliveryRates: fetchWithCache('cache_delivery_rates', getDeliveryRates, [])
+  deliveryRates: fetchWithCache('cache_delivery_rates', getDeliveryRates, []),
+  processSteps:  fetchWithCache('cache_process_steps', getProcessSteps, [])
 };
 
 // Fallback content if Supabase is slow or unavailable
@@ -151,6 +152,18 @@ function applyFactoryContent(content) {
   if (factoryImage && factory.image_url) {
     factoryImage.src = factory.image_url;
     factoryImage.alt = factory.title || 'Factory';
+  }
+}
+
+function applyProcessContent(content) {
+  if (!content || !content.process) return;
+  const process = content.process;
+  const processSection = document.getElementById('process');
+  if (processSection && process.background_image) {
+    processSection.style.backgroundImage = `url('${process.background_image}')`;
+    processSection.style.backgroundSize = 'cover';
+    processSection.style.backgroundPosition = 'center';
+    processSection.style.backgroundAttachment = 'fixed';
   }
 }
 
@@ -335,6 +348,47 @@ function renderProducts(products) {
 }
 
 // ============================================================
+// Render Process Steps
+// ============================================================
+function renderProcessSteps(steps) {
+  const processRow = document.getElementById('processRow');
+  if (!processRow) return;
+
+  if (!steps || steps.length === 0) {
+    processRow.innerHTML = '<div class="col-12 text-center"><p class="text-secondary">No process steps available.</p></div>';
+    return;
+  }
+
+  processRow.innerHTML = '';
+  steps.forEach((step, i) => {
+    const col = document.createElement('div');
+    col.className = 'col-xl-4 col-lg-4 col-md-6';
+    col.style.cssText = `opacity:0;transform:translateY(30px);transition:opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1) ${i * 0.1}s,transform 0.5s cubic-bezier(0.23, 1, 0.32, 1) ${i * 0.1}s`;
+
+    col.innerHTML = `
+      <div class="card h-100 rounded-0 border shadow-sm process-card" 
+           data-num="${step.step_number}" data-title="${step.title}" data-img="${step.image_url}" data-desc="${step.full_desc || step.short_desc}">
+        <div class="overflow-hidden" style="height: 180px;">
+          <div class="card-img-top h-100 w-100 process-img" style="background-image: url('${step.image_url}'); background-size: cover; background-position: center; transition: transform 0.5s ease;"></div>
+        </div>
+        <div class="card-body d-flex flex-column p-4 border-top">
+          <h3 class="card-title d-flex align-items-center gap-3 fs-4 mb-3" style="font-family: 'Oswald', sans-serif;">
+            <span class="display-4 fw-bold text-muted lh-1 process-num" style="transition: color 0.3s ease;">${step.step_number}</span> ${step.title}
+          </h3>
+          <p class="card-text text-secondary flex-grow-1">${step.short_desc}</p>
+          <span class="btn btn-outline-dark rounded-0 fw-bold mt-auto align-self-start text-uppercase process-btn" style="font-family: 'Oswald', sans-serif; font-size: 0.85rem; letter-spacing: 1px; transition: all 0.3s ease;">View Details &rarr;</span>
+        </div>
+      </div>`;
+
+    processRow.appendChild(col);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      col.style.opacity = '1';
+      col.style.transform = 'translateY(0)';
+    }));
+  });
+}
+
+// ============================================================
 // Skeleton loaders
 // ============================================================
 function showSkeletons() {
@@ -456,11 +510,12 @@ function setupProfileLocationSelectors() {
 document.addEventListener('DOMContentLoaded', async () => {
   showSkeletons();
 
-  const [content, products, settings, rates] = await Promise.all([
+  const [content, products, settings, rates, steps] = await Promise.all([
     dataPromises.content,
     dataPromises.products,
     dataPromises.settings,
-    dataPromises.deliveryRates
+    dataPromises.deliveryRates,
+    dataPromises.processSteps
   ]);
 
   allProducts = products;
@@ -470,8 +525,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyHeroContent(content);
   applyAboutContent(content);
   applyFactoryContent(content);
+  applyProcessContent(content);
   applySettings(settings);
   renderProducts(products);
+  renderProcessSteps(steps);
   
   setupSignupLocationSelectors();
   setupProfileLocationSelectors();
@@ -501,6 +558,7 @@ function initRealtimeUpdates() {
     applyHeroContent(content);
     applyAboutContent(content);
     applyFactoryContent(content);
+    applyProcessContent(content);
   });
 
   subscribeToProducts(products => {
@@ -510,6 +568,12 @@ function initRealtimeUpdates() {
   subscribeToSettings(settings => {
     applySettings(settings);
   });
+
+  if (typeof subscribeToProcessSteps === 'function') {
+    subscribeToProcessSteps(steps => {
+      renderProcessSteps(steps);
+    });
+  }
 }
 
 // ============================================================

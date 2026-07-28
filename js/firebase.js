@@ -92,6 +92,19 @@ function subscribeToProducts(callback) {
     );
 }
 
+function subscribeToProcessSteps(callback) {
+  return db.collection('process_steps')
+    .orderBy('display_order')
+    .onSnapshot(
+      async () => {
+        invalidateCache('cache_process_steps');
+        const steps = await getProcessSteps();
+        callback(steps);
+      },
+      err => console.error('Process steps listener error:', err)
+    );
+}
+
 function subscribeToSettings(callback) {
   return db.collection('site_settings').onSnapshot(
     snapshot => {
@@ -722,7 +735,6 @@ async function getProcessSteps() {
   await seedDatabaseIfNeeded();
   return serveFromCache('cache_process_steps', async () => {
     const snapshot = await db.collection('process_steps')
-      .where('is_active', '==', true)
       .orderBy('display_order')
       .get();
       
@@ -730,7 +742,9 @@ async function getProcessSteps() {
     snapshot.forEach(doc => {
       stepsList.push({ id: doc.id, ...doc.data() });
     });
-    return stepsList;
+    
+    // Filter active steps client-side to avoid composite index requirements
+    return stepsList.filter(s => s.is_active !== false);
   });
 }
 
