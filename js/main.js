@@ -97,7 +97,7 @@ function applyHeroContent(content) {
 function applyAboutContent(content) {
   const aboutTitle = document.getElementById('about-title');
   const aboutTextContainer = document.getElementById('about-text-container');
-  const aboutSection = document.getElementById('about');
+  const aboutSection = document.getElementById('heritage');
 
   if (!content || !content.about) return;
 
@@ -560,6 +560,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await checkAuthStatus();
   // Setup drawer and modal UI listeners
   initCartAndAuthListeners();
+  initNavDrawer();
 
   initScrollAnimations();
   initRealtimeUpdates();
@@ -763,8 +764,7 @@ document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
       e.preventDefault();
       const navHeight = document.querySelector('.navbar').offsetHeight;
       window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - navHeight, behavior: 'smooth' });
-      const navCollapse = document.getElementById('navbarNav');
-      if (navCollapse.classList.contains('show')) new bootstrap.Collapse(navCollapse).hide();
+      closeNavDrawer();
     }
   });
 });
@@ -815,24 +815,30 @@ const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/20
 async function checkAuthStatus() {
   const status = await authStatus();
   const loginBtn = document.getElementById('navLoginBtn');
+  const signupBtn = document.getElementById('navSignupBtn');
+  const authButtons = document.getElementById('navAuthButtons');
   const profileMenu = document.getElementById('userProfileMenu');
+  const loginBtnMobile = document.getElementById('navLoginBtnMobile');
+  const signupBtnMobile = document.getElementById('navSignupBtnMobile');
+  const authButtonsMobile = document.getElementById('navDrawerAuthButtons');
+  const profileMenuMobile = document.getElementById('userProfileMenuMobile');
   
   if (status.isLoggedIn) {
     currentUser = status.profile;
-    if (loginBtn) loginBtn.classList.add('d-none');
+    if (authButtons) authButtons.classList.add('d-none');
     if (profileMenu) profileMenu.classList.remove('d-none');
+    if (authButtonsMobile) authButtonsMobile.classList.add('d-none');
+    if (profileMenuMobile) profileMenuMobile.classList.remove('d-none');
     
-    // Update nav profile pic and name
     const navPic = document.getElementById('navProfilePic');
     const navName = document.getElementById('navUsername');
-    if (navPic) {
-      navPic.src = currentUser.profile_pic_url || DEFAULT_AVATAR;
-    }
-    if (navName) {
-      navName.textContent = currentUser.first_name || currentUser.username;
-    }
+    const navPicMobile = document.getElementById('navProfilePicMobile');
+    const navNameMobile = document.getElementById('navUsernameMobile');
+    if (navPic) navPic.src = currentUser.profile_pic_url || DEFAULT_AVATAR;
+    if (navName) navName.textContent = currentUser.first_name || currentUser.username;
+    if (navPicMobile) navPicMobile.src = currentUser.profile_pic_url || DEFAULT_AVATAR;
+    if (navNameMobile) navNameMobile.textContent = currentUser.first_name || currentUser.username;
     
-    // Show Admin Panel link for admin users
     const adminPanelLink = document.getElementById('navAdminPanelLink');
     if (adminPanelLink) {
       if (currentUser.role === 'admin') {
@@ -842,32 +848,34 @@ async function checkAuthStatus() {
       }
     }
     
-    // Fetch and load cart
     currentCart = await getCartItems(status.userId);
     updateCartUI();
   } else {
     currentUser = null;
     currentCart = [];
-    if (loginBtn) loginBtn.classList.remove('d-none');
+    if (authButtons) authButtons.classList.remove('d-none');
     if (profileMenu) profileMenu.classList.add('d-none');
+    if (authButtonsMobile) authButtonsMobile.classList.remove('d-none');
+    if (profileMenuMobile) profileMenuMobile.classList.add('d-none');
     updateCartUI();
   }
 }
 
 function updateCartUI() {
   const badge = document.getElementById('cartBadge');
+  const badgeMobile = document.getElementById('cartBadgeMobile');
   const drawerBody = document.getElementById('cartDrawerItems');
   
-  // Update badge count
   const totalQty = currentCart.reduce((sum, item) => sum + item.quantity, 0);
-  if (badge) {
+  [badge, badgeMobile].forEach(el => {
+    if (!el) return;
     if (totalQty > 0) {
-      badge.textContent = totalQty;
-      badge.classList.remove('d-none');
+      el.textContent = totalQty;
+      el.classList.remove('d-none');
     } else {
-      badge.classList.add('d-none');
+      el.classList.add('d-none');
     }
-  }
+  });
   
   if (!drawerBody) return;
   
@@ -967,9 +975,7 @@ async function removeFromCart(productId) {
 
 async function addToCart(productId) {
   if (!currentUser) {
-    // Show login modal
-    const authModal = new bootstrap.Modal(document.getElementById('authModal'));
-    authModal.show();
+    openAuthModal('login');
     showToast("Please log in to add products to cart.", "error");
     return;
   }
@@ -1010,9 +1016,90 @@ window.changeCartQty = changeCartQty;
 window.removeFromCart = removeFromCart;
 window.addToCart = addToCart;
 
+function openAuthModal(tab) {
+  const authModal = document.getElementById('authModal');
+  const toggleLoginTab = document.getElementById('toggleLoginTab');
+  const toggleSignupTab = document.getElementById('toggleSignupTab');
+  const loginTab = document.getElementById('authLoginTab');
+  const signupTab = document.getElementById('authSignupTab');
+
+  if (tab === 'signup') {
+    toggleLoginTab?.classList.remove('active');
+    toggleSignupTab?.classList.add('active');
+    loginTab?.classList.add('d-none');
+    signupTab?.classList.remove('d-none');
+    setupSignupLocationSelectors();
+  } else {
+    toggleSignupTab?.classList.remove('active');
+    toggleLoginTab?.classList.add('active');
+    signupTab?.classList.add('d-none');
+    loginTab?.classList.remove('d-none');
+  }
+
+  new bootstrap.Modal(authModal).show();
+}
+
+function openCartDrawer() {
+  if (!currentUser) {
+    openAuthModal('login');
+    showToast("Please log in to view your cart.", "error");
+    return;
+  }
+  document.getElementById('cartDrawer').classList.add('open');
+  document.getElementById('cartOverlay').classList.add('open');
+}
+
+// ============================================================
+// Mobile Nav Drawer
+// ============================================================
+function openNavDrawer() {
+  const drawer = document.getElementById('navDrawer');
+  const overlay = document.getElementById('navDrawerOverlay');
+  const toggle = document.getElementById('navDrawerToggle');
+  if (!drawer || !overlay) return;
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+  toggle?.classList.add('active');
+  toggle?.setAttribute('aria-expanded', 'true');
+  drawer.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('nav-drawer-open');
+}
+
+function closeNavDrawer() {
+  const drawer = document.getElementById('navDrawer');
+  const overlay = document.getElementById('navDrawerOverlay');
+  const toggle = document.getElementById('navDrawerToggle');
+  if (!drawer || !overlay) return;
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+  toggle?.classList.remove('active');
+  toggle?.setAttribute('aria-expanded', 'false');
+  drawer.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('nav-drawer-open');
+}
+
+function initNavDrawer() {
+  const toggle = document.getElementById('navDrawerToggle');
+  const closeBtn = document.getElementById('navDrawerClose');
+  const overlay = document.getElementById('navDrawerOverlay');
+  const drawer = document.getElementById('navDrawer');
+  if (!toggle || !drawer) return;
+
+  toggle.addEventListener('click', () => {
+    if (drawer.classList.contains('open')) closeNavDrawer();
+    else openNavDrawer();
+  });
+  closeBtn?.addEventListener('click', closeNavDrawer);
+  overlay?.addEventListener('click', closeNavDrawer);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer.classList.contains('open')) closeNavDrawer();
+  });
+}
+
 function initCartAndAuthListeners() {
-  // Drawer Toggles
   const cartBtn = document.getElementById('cartBtn');
+  const cartBtnMobile = document.getElementById('cartBtnMobile');
   const closeCartBtn = document.getElementById('closeCartBtn');
   const cartDrawer = document.getElementById('cartDrawer');
   const cartOverlay = document.getElementById('cartOverlay');
@@ -1020,13 +1107,15 @@ function initCartAndAuthListeners() {
   if (cartBtn) {
     cartBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      if (!currentUser) {
-        new bootstrap.Modal(document.getElementById('authModal')).show();
-        showToast("Please log in to view your cart.", "error");
-        return;
-      }
-      cartDrawer.classList.add('open');
-      cartOverlay.classList.add('open');
+      openCartDrawer();
+    });
+  }
+
+  if (cartBtnMobile) {
+    cartBtnMobile.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeNavDrawer();
+      openCartDrawer();
     });
   }
   
@@ -1071,14 +1160,28 @@ function initCartAndAuthListeners() {
     });
   }
 
-  // Navigation login button
-  const navLoginBtn = document.getElementById('navLoginBtn');
-  if (navLoginBtn) {
-    navLoginBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      new bootstrap.Modal(document.getElementById('authModal')).show();
-    });
-  }
+  // Navigation login / signup buttons
+  ['navLoginBtn', 'navLoginBtnMobile'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeNavDrawer();
+        openAuthModal('login');
+      });
+    }
+  });
+
+  ['navSignupBtn', 'navSignupBtnMobile'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeNavDrawer();
+        openAuthModal('signup');
+      });
+    }
+  });
 
   // Signup Image Upload to Cloudinary
   const signupPicInput = document.getElementById('signupPicInput');
@@ -1243,20 +1346,22 @@ function initCartAndAuthListeners() {
   }
 
   // Logout Click
-  const clientLogoutBtn = document.getElementById('clientLogoutBtn');
-  if (clientLogoutBtn) {
-    clientLogoutBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await authLogout();
-    });
-  }
+  ['clientLogoutBtn', 'clientLogoutBtnMobile'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        closeNavDrawer();
+        await authLogout();
+      });
+    }
+  });
 
   // Profile Details Button Click (populates settings modal)
-  const profileDetailsBtn = document.getElementById('profileDetailsBtn');
-  if (profileDetailsBtn) {
-    profileDetailsBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (!currentUser) return;
+  function openProfileModal(e) {
+    e.preventDefault();
+    closeNavDrawer();
+    if (!currentUser) return;
 
       document.getElementById('profileFirstName').value = currentUser.first_name || currentUser.username || '';
       document.getElementById('profileLastName').value = currentUser.last_name || '';
@@ -1315,8 +1420,12 @@ function initCartAndAuthListeners() {
       document.getElementById('profileUpdateSuccess').classList.add('d-none');
 
       new bootstrap.Modal(document.getElementById('profileModal')).show();
-    });
   }
+
+  ['profileDetailsBtn', 'profileDetailsBtnMobile'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', openProfileModal);
+  });
 
 
 
