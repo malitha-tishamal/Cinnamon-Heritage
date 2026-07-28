@@ -699,9 +699,36 @@
             <div class="col-md-6">
               <label class="form-label small fw-bold">Image URL / Upload Image</label>
               <div class="input-group">
-                <input type="text" class="form-control" id="newProdImg">
+                <input type="text" class="form-control" id="newProdImg" oninput="updateNewProductThumbnail()">
                 <input type="file" class="form-control d-none" id="newProdImgUpload" accept="image/*" onchange="handleNewProductImageUpload()">
                 <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('newProdImgUpload').click()"><i class="bi bi-upload"></i></button>
+              </div>
+              
+              <!-- Thumbnail & Upload Progress UI -->
+              <div class="d-flex align-items-center gap-3 mt-2">
+                <div class="product-thumb-preview border rounded" style="width: 50px; height: 50px; overflow: hidden; background: rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center;">
+                  <img id="newProdThumb" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/></svg>" class="w-100 h-100 object-fit-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 24 24&#39; fill=&#39;%23a6a6a6&#39;><path d=&#39;M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z&#39;/></svg>'">
+                </div>
+                <div class="flex-grow-1">
+                  <!-- Progress Bar -->
+                  <div id="newProdUploadProgress" class="d-none">
+                    <div class="d-flex justify-content-between small text-white-50" style="font-size: 0.75rem;">
+                      <span>Uploading...</span>
+                      <span id="newProdUploadPercent" class="fw-bold text-accent">0%</span>
+                    </div>
+                    <div class="progress mt-1" style="height: 4px; background-color: rgba(255,255,255,0.1);">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated bg-accent" id="newProdUploadBar" role="progressbar" style="width: 0%; background-color: #d4873a !important;"></div>
+                    </div>
+                  </div>
+                  <!-- Success Badge -->
+                  <div id="newProdUploadSuccess" class="d-none text-success small fw-bold" style="font-size: 0.75rem;">
+                    <i class="bi bi-check-circle-fill me-1"></i> Uploaded!
+                  </div>
+                  <!-- Error Badge -->
+                  <div id="newProdUploadFailed" class="d-none text-danger small fw-bold" style="font-size: 0.75rem;">
+                    <i class="bi bi-x-circle-fill me-1"></i> Upload failed.
+                  </div>
+                </div>
               </div>
             </div>
             <div class="col-md-3">
