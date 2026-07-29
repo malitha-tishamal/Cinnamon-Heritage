@@ -21,16 +21,28 @@
   </div>
   <!-- Header and Navigation -->
   <header>
+    <!-- Announcement Bar -->
+    <div class="announcement-bar" id="announcementBar">
+      <div class="announcement-bar-inner">
+        <span class="announcement-bar-text">
+          <i class="fas fa-leaf announcement-bar-icon"></i>
+          Authentic Ceylon Cinnamon from Southern Sri Lanka
+        </span>
+        <div class="announcement-bar-links">
+          <a href="#products" class="announcement-bar-link">Explore Products <i class="fas fa-arrow-right"></i></a>
+          <span class="announcement-bar-divider">|</span>
+          <a href="#b2b" class="announcement-bar-link">Partner With Us <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
     <nav class="navbar navbar-dark fixed-top navbar-balanced">
       <div class="container-fluid navbar-container">
-        <!-- Logo — left -->
-        <a class="navbar-brand navbar-brand-logo" href="#hero-section">
-          <img src="images/logo.png" alt="Cinnamon Heritage" class="navbar-logo" width="40" height="40">
-          <span class="navbar-brand-text">Cinnamon&nbsp;Heritage</span>
-        </a>
-
-        <!-- Desktop: nav links + actions — right side -->
-        <div class="navbar-desktop-group d-none d-xl-flex">
+        <!-- Row 1: Logo + Nav Links -->
+        <div class="navbar-row-top d-none d-xl-flex">
+          <a class="navbar-brand navbar-brand-logo" href="#hero-section">
+            <img src="images/logo.png" alt="Cinnamon Heritage" class="navbar-logo" width="40" height="40">
+            <span class="navbar-brand-text">Cinnamon&nbsp;Heritage</span>
+          </a>
           <ul class="navbar-nav navbar-nav-main text-uppercase nav-links">
             <li class="nav-item"><a class="nav-link text-white" href="#hero-section">Home</a></li>
             <li class="nav-item"><a class="nav-link text-white" href="#heritage">Heritage</a></li>
@@ -42,16 +54,12 @@
             <li class="nav-item"><a class="nav-link text-white" href="#experience">Experience</a></li>
             <li class="nav-item"><a class="nav-link text-white" href="#contact">Contact</a></li>
           </ul>
+        </div>
 
-          <div class="navbar-vdivider" aria-hidden="true"></div>
-
+        <!-- Row 2: Action Buttons (right-aligned) -->
+        <div class="navbar-row-bottom d-none d-xl-flex">
           <div class="navbar-actions">
-            <a class="btn nav-btn-secondary" href="#products">
-              <span class="nav-btn-short">Products</span>
-              <span class="nav-btn-full">Explore Products</span>
-            </a>
             <a class="btn nav-btn-primary text-white" href="#b2b">
-              <span class="nav-btn-short">B2B</span>
               <span class="nav-btn-full">B2B Discussion</span>
             </a>
 
@@ -84,6 +92,12 @@
             </div>
           </div>
         </div>
+
+        <!-- Logo for mobile (visible only on mobile) -->
+        <a class="navbar-brand navbar-brand-logo d-xl-none" href="#hero-section">
+          <img src="images/logo.png" alt="Cinnamon Heritage" class="navbar-logo" width="40" height="40">
+          <span class="navbar-brand-text">Cinnamon&nbsp;Heritage</span>
+        </a>
 
         <!-- Mobile: cart + hamburger -->
         <div class="navbar-mobile-tools d-flex d-xl-none">
