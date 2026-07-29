@@ -93,6 +93,78 @@ h1,h2,h3,h4,h5,h6 {
   border-color: rgba(255,255,255,0.12);
 }
 
+/* ========== Announcement Bar ========== */
+.announcement-bar {
+  background: linear-gradient(135deg, var(--accent) 0%, #e8a04e 100%);
+  color: #fff;
+  padding: 6px 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.announcement-bar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: clamp(1rem, 3vw, 2.5rem);
+  padding-right: clamp(1rem, 3vw, 2.5rem);
+}
+
+.announcement-bar-text {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.announcement-bar-icon {
+  font-size: 0.8rem;
+}
+
+.announcement-bar-links {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.announcement-bar-link {
+  color: #fff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: opacity 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.announcement-bar-link:hover {
+  opacity: 0.8;
+  color: #fff;
+}
+
+.announcement-bar-divider {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 767.98px) {
+  .announcement-bar-inner {
+    flex-direction: column;
+    gap: 4px;
+    justify-content: center;
+    text-align: center;
+  }
+  .announcement-bar-text {
+    font-size: 0.65rem;
+  }
+  .announcement-bar-links {
+    font-size: 0.65rem;
+  }
+}
+
 /* ========== Navbar ========== */
 .navbar-balanced {
   background: rgba(0, 0, 0, 0.3);
