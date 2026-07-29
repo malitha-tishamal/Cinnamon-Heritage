@@ -638,6 +638,41 @@
 
             <div class="card border-0 shadow-sm mb-4">
               <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Announcement Bar</h5>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="settingAnnounceEnabled">
+                  <label class="form-check-label fw-bold">Enable Announcement Bar</label>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Announcement Text</label>
+                  <input type="text" class="form-control" id="settingAnnounceText" placeholder="Authentic Ceylon Cinnamon...">
+                </div>
+                <div class="row g-2 mb-3">
+                  <div class="col-6">
+                    <label class="form-label fw-bold small">Btn 1 Text</label>
+                    <input type="text" class="form-control form-control-sm" id="settingAnnounceBtn1Text" placeholder="Explore Products">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label fw-bold small">Btn 1 Link</label>
+                    <input type="text" class="form-control form-control-sm" id="settingAnnounceBtn1Link" placeholder="#products">
+                  </div>
+                </div>
+                <div class="row g-2 mb-4">
+                  <div class="col-6">
+                    <label class="form-label fw-bold small">Btn 2 Text</label>
+                    <input type="text" class="form-control form-control-sm" id="settingAnnounceBtn2Text" placeholder="Partner With Us">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label fw-bold small">Btn 2 Link</label>
+                    <input type="text" class="form-control form-control-sm" id="settingAnnounceBtn2Link" placeholder="#b2b">
+                  </div>
+                </div>
+                <button class="btn btn-accent w-100" onclick="saveAnnouncementSettings()">Save Announcement</button>
+              </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
                 <h5 class="fw-bold mb-3">Footer & Social Settings</h5>
                 <div class="mb-3">
                   <label class="form-label fw-bold">About Text</label>

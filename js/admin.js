@@ -1175,6 +1175,14 @@ async function loadSettings() {
     document.getElementById('settingSocialInstagram').value = siteSettings.social_instagram || '';
     document.getElementById('settingSocialTwitter').value   = siteSettings.social_twitter || '';
 
+    // Announcement Bar Settings
+    document.getElementById('settingAnnounceEnabled').checked   = siteSettings.announcement_enabled !== '0'; // default true
+    document.getElementById('settingAnnounceText').value        = siteSettings.announcement_text || 'Authentic Ceylon Cinnamon from Southern Sri Lanka';
+    document.getElementById('settingAnnounceBtn1Text').value    = siteSettings.announcement_btn1_text || 'Explore Products';
+    document.getElementById('settingAnnounceBtn1Link').value    = siteSettings.announcement_btn1_link || '#products';
+    document.getElementById('settingAnnounceBtn2Text').value    = siteSettings.announcement_btn2_text || 'Partner With Us';
+    document.getElementById('settingAnnounceBtn2Link').value    = siteSettings.announcement_btn2_link || '#b2b';
+
     loadDeliveryRates();
   } catch (err) {
     console.error('Settings load error:', err);
@@ -1217,6 +1225,28 @@ async function saveFooterSettings() {
     siteSettings = { ...siteSettings, ...settings };
   } catch (err) {
     showAdminToast('Failed to save footer settings', 'error');
+    console.error(err);
+  }
+}
+
+async function saveAnnouncementSettings() {
+  try {
+    const settings = {
+      announcement_enabled:   document.getElementById('settingAnnounceEnabled').checked ? '1' : '0',
+      announcement_text:      document.getElementById('settingAnnounceText').value,
+      announcement_btn1_text: document.getElementById('settingAnnounceBtn1Text').value,
+      announcement_btn1_link: document.getElementById('settingAnnounceBtn1Link').value,
+      announcement_btn2_text: document.getElementById('settingAnnounceBtn2Text').value,
+      announcement_btn2_link: document.getElementById('settingAnnounceBtn2Link').value
+    };
+    for (const [key, value] of Object.entries(settings)) {
+      await saveSetting(key, value); 
+    }
+    showAdminToast('Announcement settings saved successfully!', 'success');
+    siteSettings = { ...siteSettings, ...settings };
+  } catch (err) {
+    showAdminToast('Failed to save announcement settings', 'error');
+    console.error(err);
   }
 }
 

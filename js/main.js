@@ -434,6 +434,29 @@ function applySettings(settings) {
       if (el) el.href = settings[key];
     }
   }
+  
+  // Announcement Bar
+  const announcementBar = document.getElementById('announcementBar');
+  if (announcementBar) {
+    if (settings.announcement_enabled === '0') {
+      announcementBar.style.display = 'none';
+    } else {
+      announcementBar.style.display = 'block';
+      
+      const aText = document.getElementById('announcementText');
+      if (aText && settings.announcement_text) aText.textContent = settings.announcement_text;
+      
+      const btn1Text = document.getElementById('announcementBtn1Text');
+      const btn1Link = document.getElementById('announcementBtn1');
+      if (btn1Text && settings.announcement_btn1_text) btn1Text.textContent = settings.announcement_btn1_text;
+      if (btn1Link && settings.announcement_btn1_link) btn1Link.href = settings.announcement_btn1_link;
+      
+      const btn2Text = document.getElementById('announcementBtn2Text');
+      const btn2Link = document.getElementById('announcementBtn2');
+      if (btn2Text && settings.announcement_btn2_text) btn2Text.textContent = settings.announcement_btn2_text;
+      if (btn2Link && settings.announcement_btn2_link) btn2Link.href = settings.announcement_btn2_link;
+    }
+  }
 }
 
 // ============================================================
