@@ -212,6 +212,7 @@ async function loadSection(section) {
     if (section === 'dashboard')    return loadDashboard();
     if (section === 'process')      return loadProcessSteps();
     if (section === 'products')     return loadProducts();
+    if (section === 'popups')       return loadPopupManager();
     if (section === 'orders')       return loadOrders();
     if (section === 'messages')     return loadMessages();
     if (section === 'settings')     return loadSettings();
@@ -810,17 +811,30 @@ async function loadProducts() {
               <label class="form-label small fw-bold">Discount (LKR)</label>
               <input type="number" class="form-control form-control-sm" id="prodDiscount-${p.id}" value="${p.discount || 0}">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
               <label class="form-label small fw-bold">Stock Qty</label>
               <input type="number" class="form-control form-control-sm ${isLowStock ? 'is-invalid' : ''}" id="prodStock-${p.id}" value="${p.stock_quantity || 0}">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
               <label class="form-label small fw-bold">Default Delivery</label>
               <input type="number" class="form-control form-control-sm" id="prodDelivery-${p.id}" value="${p.delivery_charge || 0}">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
               <label class="form-label small fw-bold">Order</label>
               <input type="number" class="form-control form-control-sm" id="prodOrder-${p.id}" value="${p.display_order || 0}">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Card Type</label>
+              <select class="form-select form-select-sm" id="prodCardType-${p.id}">
+                <option value="product" ${p.card_type !== 'contact' ? 'selected' : ''}>Standard Product</option>
+                <option value="contact" ${p.card_type === 'contact' ? 'selected' : ''}>Contact Us (B2B)</option>
+              </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-center">
+              <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" id="prodIsPopup-${p.id}" ${p.is_popup === true ? 'checked' : ''}>
+                <label class="form-check-label small fw-bold" for="prodIsPopup-${p.id}">Promo Popup</label>
+              </div>
             </div>
             <div class="col-md-6">
               <label class="form-label small fw-bold">Short Description (card)</label>
@@ -901,6 +915,8 @@ async function saveProduct(id) {
       stock_quantity:  parseInt(document.getElementById(`prodStock-${id}`).value)      || 0,
       delivery_charge: parseFloat(document.getElementById(`prodDelivery-${id}`).value) || 0,
       display_order:   parseInt(document.getElementById(`prodOrder-${id}`).value)      || 0,
+      card_type:       document.getElementById(`prodCardType-${id}`).value             || 'product',
+      is_popup:        document.getElementById(`prodIsPopup-${id}`).checked,
       is_active:       true
     });
     showAdminToast('Product saved!', 'success');
@@ -919,6 +935,8 @@ function addProduct() {
   document.getElementById('newProdStock').value    = '10';
   document.getElementById('newProdDelivery').value = '350';
   document.getElementById('newProdOrder').value    = '99';
+  document.getElementById('newProdCardType').value = 'product';
+  document.getElementById('newProdIsPopup').checked = false;
   document.getElementById('newProdImgUpload').value = '';
   
   // Reset upload UI
@@ -1007,6 +1025,8 @@ async function submitNewProduct() {
       stock_quantity:  parseInt(document.getElementById('newProdStock').value)      || 0,
       delivery_charge: parseFloat(document.getElementById('newProdDelivery').value) || 0,
       display_order:   parseInt(document.getElementById('newProdOrder').value)      || 0,
+      card_type:       document.getElementById('newProdCardType').value             || 'product',
+      is_popup:        document.getElementById('newProdIsPopup').checked,
       is_active:       true
     });
     showAdminToast('New product added!', 'success');
@@ -1163,6 +1183,7 @@ async function loadSettings() {
 
     document.getElementById('settingLowStock').value         = siteSettings.low_stock_threshold    || 10;
     document.getElementById('settingDefaultDelivery').value  = siteSettings.default_delivery_charge || 350;
+    document.getElementById('settingMaxPopups').value        = siteSettings.max_popups             || 5;
     document.getElementById('settingCodEnabled').checked     = siteSettings.cod_enabled    === '1';
     document.getElementById('settingOnlineEnabled').checked  = siteSettings.online_pay_enabled === '1';
 
@@ -1194,6 +1215,7 @@ async function saveSettings() {
     const settings = {
       low_stock_threshold:    document.getElementById('settingLowStock').value,
       default_delivery_charge: document.getElementById('settingDefaultDelivery').value,
+      max_popups:             document.getElementById('settingMaxPopups').value             || '5',
       cod_enabled:            document.getElementById('settingCodEnabled').checked  ? '1' : '0',
       online_pay_enabled:     document.getElementById('settingOnlineEnabled').checked ? '1' : '0'
     };
@@ -1561,4 +1583,87 @@ window.saveStep               = saveStep;
 window.deleteStep             = deleteStep;
 window.updateProductThumbnail = updateProductThumbnail;
 window.handleProductImageUpload = handleProductImageUpload;
+window.toggleProductPopup     = toggleProductPopup;
+window.savePopupSettings      = savePopupSettings;
+window.loadPopupManager       = loadPopupManager;
+
+// ============================================================
+// POPUPS MANAGER
+// ============================================================
+async function loadPopupManager() {
+  const tableBody = document.getElementById('popupProductsTable');
+  if (tableBody) tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading products...</td></tr>';
+
+  try {
+    // Load setting first
+    if (!siteSettings.max_popups) {
+      siteSettings = await getSettings();
+    }
+    const maxVal = siteSettings.max_popups || 5;
+    const settingInput = document.getElementById('popupSettingMax');
+    if (settingInput) settingInput.value = maxVal;
+
+    // Load active products
+    const products = await getProductsAdmin();
+    let html = '';
+    
+    products.forEach(p => {
+      const isPopup = p.is_popup === true;
+      const price = parseFloat(p.price) || 0;
+      const discount = parseFloat(p.discount) || 0;
+      
+      html += `
+        <tr id="popup-row-${p.id}">
+          <td class="ps-4">
+            <div style="width:40px;height:40px;overflow:hidden;border-radius:6px;background:#eee;">
+              <img src="${p.image_url || 'images/logo.png'}" class="w-100 h-100 object-fit-cover" onerror="this.src='images/logo.png'">
+            </div>
+          </td>
+          <td>
+            <div class="fw-bold">${p.title}</div>
+            <small class="text-muted d-block" style="max-width:300px;font-size:0.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.short_desc}</small>
+          </td>
+          <td>LKR ${price.toLocaleString()}</td>
+          <td>LKR ${discount.toLocaleString()}</td>
+          <td><span class="badge ${p.stock_quantity > 0 ? 'bg-light text-dark border' : 'bg-danger-subtle text-danger'}">${p.stock_quantity}</span></td>
+          <td class="text-center">
+            <div class="form-check form-switch d-inline-block">
+              <input class="form-check-input" type="checkbox" id="tablePopupToggle-${p.id}" ${isPopup ? 'checked' : ''} onchange="toggleProductPopup('${p.id}', this.checked)">
+            </div>
+          </td>
+        </tr>`;
+    });
+
+    if (products.length === 0) html = '<tr><td colspan="6" class="text-center text-muted py-3">No products available.</td></tr>';
+    if (tableBody) tableBody.innerHTML = html;
+  } catch (err) {
+    console.error('Load popups error:', err);
+    if (tableBody) tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load products.</td></tr>';
+  }
+}
+
+async function toggleProductPopup(id, isChecked) {
+  try {
+    await updateProduct(id, { is_popup: isChecked });
+    showAdminToast(isChecked ? 'Product added to popups!' : 'Product removed from popups!', 'success');
+  } catch (err) {
+    showAdminToast('Failed to toggle popup status', 'error');
+    console.error(err);
+    // revert checkbox state
+    const cb = document.getElementById(`tablePopupToggle-${id}`);
+    if (cb) cb.checked = !isChecked;
+  }
+}
+
+async function savePopupSettings() {
+  try {
+    const maxVal = document.getElementById('popupSettingMax').value || '5';
+    await saveSetting('max_popups', maxVal);
+    siteSettings.max_popups = maxVal;
+    showAdminToast('Popup settings saved!', 'success');
+  } catch (err) {
+    showAdminToast('Failed to save popup settings', 'error');
+    console.error(err);
+  }
+}
 
