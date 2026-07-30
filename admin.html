@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <base href="/">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel | Cinnamon Heritage</title>
@@ -138,6 +139,7 @@
         <li data-section="factory"><i class="bi bi-building"></i> Factory</li>
         <li data-section="process"><i class="bi bi-gear"></i> Process Steps</li>
         <li data-section="products"><i class="bi bi-box-seam"></i> Products</li>
+        <li data-section="popups"><i class="bi bi-megaphone-fill"></i> Manage Popups</li>
         <li data-section="orders"><i class="bi bi-cart-check"></i> Orders</li>
         <li data-section="accounts"><i class="bi bi-bank"></i> Accounts & Sales</li>
         <li data-section="settings"><i class="bi bi-sliders"></i> E-commerce Settings</li>
@@ -451,9 +453,62 @@
       </div>
 
       <!-- Products Editor -->
-      <div id="sec-products" class="content-section d-none">
+      <div class="content-section d-none" id="sec-products">
         <h3 class="section-heading">Products <button class="btn btn-accent btn-sm float-end" onclick="addProduct()"><i class="bi bi-plus-lg me-1"></i>Add Product</button></h3>
         <div id="productsList"></div>
+      </div>
+
+      <!-- Popups Editor -->
+      <div id="sec-popups" class="content-section d-none">
+        <h3 class="section-heading">Promo Popups</h3>
+        <div class="row g-4 mb-4">
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-sliders me-2"></i>Popup Settings</h5>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Max Promo Popups (Queue Limit)</label>
+                  <input type="number" class="form-control" id="popupSettingMax" placeholder="5" min="1" max="10">
+                </div>
+                <button class="btn btn-accent w-100" onclick="savePopupSettings()"><i class="bi bi-check-lg me-1"></i>Save Settings</button>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>About Popups</h5>
+                <p class="text-muted small mb-0">
+                  Promo popups display sequential discounted offers to visiting customers. 
+                  You can explicitly toggle which products are included in the rotation below.
+                  If no products are explicitly selected, the system will fall back to displaying all active discounted products.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4" style="width: 80px;">Image</th>
+                    <th>Product Title</th>
+                    <th>Price</th>
+                    <th>Discount</th>
+                    <th>Stock</th>
+                    <th class="text-center" style="width: 180px;">Promo Popup Status</th>
+                  </tr>
+                </thead>
+                <tbody id="popupProductsTable">
+                  <!-- JS populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Quality Section Editor -->
@@ -623,6 +678,10 @@
                 <div class="mb-3">
                   <label class="form-label fw-bold">Default Delivery Charge (LKR)</label>
                   <input type="number" class="form-control" id="settingDefaultDelivery" placeholder="350">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Max Promo Popups (Queue Limit)</label>
+                  <input type="number" class="form-control" id="settingMaxPopups" placeholder="5" min="1" max="10">
                 </div>
                 <div class="form-check form-switch mb-2">
                   <input class="form-check-input" type="checkbox" id="settingCodEnabled">
@@ -818,6 +877,19 @@
             <div class="col-md-3">
               <label class="form-label small fw-bold">Order</label>
               <input type="number" class="form-control" id="newProdOrder" value="99">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Card Type</label>
+              <select class="form-select" id="newProdCardType">
+                <option value="product" selected>Standard Product</option>
+                <option value="contact">Contact Us (B2B)</option>
+              </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-center">
+              <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" id="newProdIsPopup">
+                <label class="form-check-label small fw-bold" for="newProdIsPopup">Promo Popup</label>
+              </div>
             </div>
             <div class="col-md-12">
               <label class="form-label small fw-bold">Short Description (card)</label>
