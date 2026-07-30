@@ -1000,6 +1000,101 @@ section {
 /* ========== Products Section ========== */
 .products { background: var(--bg-primary); }
 
+/* ========== Contact-Type Product Card (Bulk Supply) ========== */
+.product-card-contact {
+  background: linear-gradient(135deg, rgba(212,135,58,0.08), rgba(212,135,58,0.02)) !important;
+  border: 2px dashed rgba(212,135,58,0.4) !important;
+  position: relative;
+  overflow: hidden;
+}
+.product-card-contact::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle at center, rgba(212,135,58,0.06) 0%, transparent 70%);
+  animation: contactCardShimmer 8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes contactCardShimmer {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.3; }
+  50% { transform: translate(-10%, 10%) rotate(10deg); opacity: 0.6; }
+}
+.product-card-contact:hover {
+  border-color: var(--accent) !important;
+  border-style: solid !important;
+  box-shadow: 0 20px 50px rgba(212,135,58,0.2),
+              0 0 30px rgba(212,135,58,0.1) !important;
+}
+.product-card-contact .contact-card-icon {
+  width: 100%; height: 200px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, rgba(212,135,58,0.12), rgba(212,135,58,0.04));
+  position: relative;
+  overflow: hidden;
+}
+.product-card-contact .contact-card-icon i {
+  font-size: 4rem;
+  color: var(--accent);
+  opacity: 0.7;
+  transition: all 0.5s ease;
+}
+.product-card-contact:hover .contact-card-icon i {
+  opacity: 1;
+  transform: scale(1.15);
+}
+.product-card-contact .contact-card-icon .contact-icon-bg {
+  position: absolute;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,135,58,0.15) 0%, transparent 70%);
+  animation: contactIconPulse 3s ease-in-out infinite;
+}
+@keyframes contactIconPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.3); opacity: 0.8; }
+}
+.contact-us-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover)) !important;
+  border: none !important;
+  color: #fff !important;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.85rem !important;
+  letter-spacing: 1.5px;
+  border-radius: 8px !important;
+  padding: 12px 24px !important;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
+  position: relative;
+  overflow: hidden;
+}
+.contact-us-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.6s ease;
+}
+.contact-us-btn:hover::before {
+  left: 100%;
+}
+.contact-us-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(212,135,58,0.4) !important;
+}
+.contact-card-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  padding: 5px 14px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
 /* ========== Quality Section ========== */
 .quality {
   background: linear-gradient(rgba(10,10,15,0.85), rgba(10,10,15,0.85)), url('../images/cinnamon_plantlings.jpg');

@@ -607,25 +607,26 @@ async function loadProcessSteps() {
               <!-- Thumbnail & Upload Progress UI -->
               <div class="d-flex align-items-center gap-3 mt-2">
                 <div class="product-thumb-preview border rounded" style="width: 50px; height: 50px; overflow: hidden; background: rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center;">
-                  <img id="stepThumb-${step.id}" src="${step.image_url || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a6a6a6\'><path d=\'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\'/></svg>'}" class="w-100 h-100 object-fit-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a6a6a6\'><path d=\'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\'/></svg>'}">
+                  <img id="stepThumb-${step.id}" src="${step.image_url || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a6a6a6\'><path d=\'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\'/></svg>'}" class="w-100 h-100 object-fit-cover" onerror="handleImageError(this)">
                 </div>
                 <div class="flex-grow-1">
                   <!-- Progress Bar -->
-                  <div id="stepUploadProgress-${step.id}" class="d-none">
-                    <div class="d-flex justify-content-between small text-white-50" style="font-size: 0.75rem;">
-                      <span>Uploading...</span>
+                  <div id="stepUploadProgress-${step.id}" class="upload-progress-wrap d-none">
+                    <div class="d-flex justify-content-between small mb-1">
+                      <span class="text-muted">Uploading to Cloudinary...</span>
                       <span id="stepUploadPercent-${step.id}" class="fw-bold text-accent">0%</span>
                     </div>
-                    <div class="progress mt-1" style="height: 4px; background-color: rgba(255,255,255,0.1);">
-                      <div class="progress-bar progress-bar-striped progress-bar-animated bg-accent" id="stepUploadBar-${step.id}" role="progressbar" style="width: 0%; background-color: #d4873a !important;"></div>
+                    <div class="progress upload-progress-bar">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated" id="stepUploadBar-${step.id}" role="progressbar" style="width: 0%"></div>
                     </div>
                   </div>
                   <!-- Success Badge -->
-                  <div id="stepUploadSuccess-${step.id}" class="d-none text-success small fw-bold" style="font-size: 0.75rem;">
-                    <i class="bi bi-check-circle-fill me-1"></i> Uploaded! Save to apply.
+                  <div id="stepUploadSuccess-${step.id}" class="upload-success-badge d-none">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Uploaded! Save to apply.</span>
                   </div>
                   <!-- Error Badge -->
-                  <div id="stepUploadFailed-${step.id}" class="d-none text-danger small fw-bold" style="font-size: 0.75rem;">
+                  <div id="stepUploadFailed-${step.id}" class="alert alert-danger d-none small py-2 m-0">
                     <i class="bi bi-x-circle-fill me-1"></i> Upload failed.
                   </div>
                 </div>
@@ -706,6 +707,12 @@ function updateStepThumbnail(id) {
   }
 }
 
+function handleImageError(img) {
+  img.onerror = null; // Prevent infinite loop
+  img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/></svg>";
+}
+window.handleImageError = handleImageError;
+
 async function saveStep(id) {
   try {
     await updateStep(id, {  // replaces fetch('/api/admin/process/:id', PUT)
@@ -779,25 +786,26 @@ async function loadProducts() {
               <!-- Thumbnail & Upload Progress UI -->
               <div class="d-flex align-items-center gap-3 mt-2">
                 <div class="product-thumb-preview border rounded" style="width: 50px; height: 50px; overflow: hidden; background: rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center;">
-                  <img id="prodThumb-${p.id}" src="${p.image_url || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a6a6a6\'><path d=\'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\'/></svg>'}" class="w-100 h-100 object-fit-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a6a6a6\'><path d=\'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\'/></svg>'}">
+                  <img id="prodThumb-${p.id}" src="${p.image_url || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a6a6a6\'><path d=\'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\'/></svg>'}" class="w-100 h-100 object-fit-cover" onerror="handleImageError(this)">
                 </div>
                 <div class="flex-grow-1">
                   <!-- Progress Bar -->
-                  <div id="prodUploadProgress-${p.id}" class="d-none">
-                    <div class="d-flex justify-content-between small text-white-50" style="font-size: 0.75rem;">
-                      <span>Uploading...</span>
+                  <div id="prodUploadProgress-${p.id}" class="upload-progress-wrap d-none">
+                    <div class="d-flex justify-content-between small mb-1">
+                      <span class="text-muted">Uploading to Cloudinary...</span>
                       <span id="prodUploadPercent-${p.id}" class="fw-bold text-accent">0%</span>
                     </div>
-                    <div class="progress mt-1" style="height: 4px; background-color: rgba(255,255,255,0.1);">
-                      <div class="progress-bar progress-bar-striped progress-bar-animated bg-accent" id="prodUploadBar-${p.id}" role="progressbar" style="width: 0%; background-color: #d4873a !important;"></div>
+                    <div class="progress upload-progress-bar">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated" id="prodUploadBar-${p.id}" role="progressbar" style="width: 0%"></div>
                     </div>
                   </div>
                   <!-- Success Badge -->
-                  <div id="prodUploadSuccess-${p.id}" class="d-none text-success small fw-bold" style="font-size: 0.75rem;">
-                    <i class="bi bi-check-circle-fill me-1"></i> Uploaded! Save to apply.
+                  <div id="prodUploadSuccess-${p.id}" class="upload-success-badge d-none">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Uploaded! Save to apply.</span>
                   </div>
                   <!-- Error Badge -->
-                  <div id="prodUploadFailed-${p.id}" class="d-none text-danger small fw-bold" style="font-size: 0.75rem;">
+                  <div id="prodUploadFailed-${p.id}" class="alert alert-danger d-none small py-2 m-0">
                     <i class="bi bi-x-circle-fill me-1"></i> Upload failed.
                   </div>
                 </div>

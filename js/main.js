@@ -287,6 +287,7 @@ function renderProducts(products) {
 
   productsRow.innerHTML = '';
   products.forEach((p, i) => {
+    const isContactCard = p.card_type === 'contact';
     const hasDiscount  = p.discount > 0;
     const displayPrice = parseFloat(p.price);
     const oldPrice     = displayPrice + (parseFloat(p.discount) || 0);
@@ -302,39 +303,66 @@ function renderProducts(products) {
     col.className = 'col-lg-3 col-md-6';
     col.style.cssText = `opacity:0;transform:translateY(30px);transition:opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1) ${i * 0.1}s,transform 0.5s cubic-bezier(0.23, 1, 0.32, 1) ${i * 0.1}s`;
 
-    col.innerHTML = `
-      <div class="card h-100 product-card ${isOutOfStock ? 'opacity-75' : ''}"
-           data-id="${p.id}" data-title="${p.title}" data-img="${p.image_url}"
-           data-desc="${p.short_desc}" data-price="${p.price}"
-           data-discount="${p.discount}" data-stock="${p.stock_quantity}">
-        <div class="overflow-hidden" style="height:200px;position:relative;">
-          ${hasDiscount  ? `<span class="discount-badge position-absolute top-0 end-0 m-2" style="z-index:1;">${discountLabel}</span>` : ''}
-          ${isTopSeller  ? `<span class="topseller-badge position-absolute top-0 start-0 m-2" style="z-index:1;">TOP SELLER</span>` : ''}
-          <img src="${p.image_url}" alt="${p.title}" class="card-img-top h-100 w-100 object-fit-cover product-img" style="transition:transform 0.6s ease;">
-        </div>
-        <div class="card-body d-flex flex-column p-4">
-          <div class="d-flex justify-content-between align-items-start mb-1">
-            <h3 class="card-title fs-5 mb-0" style="font-family:'Oswald',sans-serif;">${p.title}</h3>
-            <small style="font-size:0.7rem;color:var(--text-secondary);">${p.total_sales} Sold</small>
+    if (isContactCard) {
+      // Render special Contact Us card
+      col.innerHTML = `
+        <div class="card h-100 product-card product-card-contact"
+             data-id="${p.id}" data-title="${p.title}" data-img="${p.image_url}"
+             data-desc="${p.short_desc}" data-price="0"
+             data-discount="0" data-stock="999">
+          <div class="contact-card-icon">
+            <div class="contact-icon-bg"></div>
+            <i class="fas fa-handshake"></i>
           </div>
-          <div class="mb-2">
-            <span class="fw-bold" style="color:var(--accent);">LKR ${displayPrice.toLocaleString()}</span>
-            ${hasDiscount ? `<small class="text-decoration-line-through ms-1" style="color:var(--text-secondary);font-size:0.8rem;">LKR ${oldPrice.toLocaleString()}</small>` : ''}
+          <div class="card-body d-flex flex-column p-4">
+            <div class="mb-2">
+              <span class="contact-card-badge">B2B Partner</span>
+            </div>
+            <h3 class="card-title fs-5 mb-2" style="font-family:'Oswald',sans-serif;">${p.title}</h3>
+            <p class="card-text small flex-grow-1" style="color:var(--text-secondary);">${p.short_desc}</p>
+            <div class="mt-3">
+              <a href="#contact" class="btn contact-us-btn fw-bold w-100 text-uppercase">
+                <i class="fas fa-envelope me-2"></i>Contact Us
+              </a>
+            </div>
           </div>
-          <div class="mb-3">
-            ${isOutOfStock ? '<span class="badge bg-secondary w-100" style="border-radius:6px;">OUT OF STOCK</span>' :
-              isLowStock   ? `<span class="badge bg-warning text-dark w-100" style="border-radius:6px;">LOW STOCK: ${p.stock_quantity} LEFT</span>` :
-                             `<small class="text-success" style="font-size:0.75rem;">✓ In Stock (${p.stock_quantity})</small>`}
+        </div>`;
+    } else {
+      // Render standard product card
+      col.innerHTML = `
+        <div class="card h-100 product-card ${isOutOfStock ? 'opacity-75' : ''}"
+             data-id="${p.id}" data-title="${p.title}" data-img="${p.image_url}"
+             data-desc="${p.short_desc}" data-price="${p.price}"
+             data-discount="${p.discount}" data-stock="${p.stock_quantity}">
+          <div class="overflow-hidden" style="height:200px;position:relative;">
+            ${hasDiscount  ? `<span class="discount-badge position-absolute top-0 end-0 m-2" style="z-index:1;">${discountLabel}</span>` : ''}
+            ${isTopSeller  ? `<span class="topseller-badge position-absolute top-0 start-0 m-2" style="z-index:1;">TOP SELLER</span>` : ''}
+            <img src="${p.image_url}" alt="${p.title}" class="card-img-top h-100 w-100 object-fit-cover product-img" style="transition:transform 0.6s ease;">
           </div>
-          <p class="card-text small flex-grow-1" style="color:var(--text-secondary);">${p.short_desc}</p>
-          <div class="mt-3 d-flex gap-2">
-            <span class="btn btn-outline-dark product-btn fw-bold flex-grow-1 text-uppercase" style="font-family:'Oswald',sans-serif;font-size:0.75rem;letter-spacing:1px;border-radius:8px;">Details</span>
-            ${isOutOfStock ?
-              '<button class="btn btn-secondary fw-bold flex-grow-1 text-uppercase disabled" style="font-family:\'Oswald\',sans-serif;font-size:0.75rem;border-radius:8px;">Sold Out</button>' :
-              `<button class="btn add-to-cart-btn fw-bold flex-grow-1 text-uppercase" data-id="${p.id}" style="background:var(--accent);border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:0.75rem;border-radius:8px;">Add to Cart</button>`}
+          <div class="card-body d-flex flex-column p-4">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <h3 class="card-title fs-5 mb-0" style="font-family:'Oswald',sans-serif;">${p.title}</h3>
+              <small style="font-size:0.7rem;color:var(--text-secondary);">${p.total_sales} Sold</small>
+            </div>
+            <div class="mb-2">
+              <span class="fw-bold" style="color:var(--accent);">LKR ${displayPrice.toLocaleString()}</span>
+              ${hasDiscount ? `<small class="text-decoration-line-through ms-1" style="color:var(--text-secondary);font-size:0.8rem;">LKR ${oldPrice.toLocaleString()}</small>` : ''}
+            </div>
+            <div class="mb-3">
+              ${isOutOfStock ? '<span class="badge bg-secondary w-100" style="border-radius:6px;">OUT OF STOCK</span>' :
+                isLowStock   ? `<span class="badge bg-warning text-dark w-100" style="border-radius:6px;">LOW STOCK: ${p.stock_quantity} LEFT</span>` :
+                               `<small class="text-success" style="font-size:0.75rem;">✓ In Stock (${p.stock_quantity})</small>`}
+            </div>
+            <p class="card-text small flex-grow-1" style="color:var(--text-secondary);">${p.short_desc}</p>
+            <div class="mt-3 d-flex gap-2">
+              <span class="btn btn-outline-dark product-btn fw-bold flex-grow-1 text-uppercase" style="font-family:'Oswald',sans-serif;font-size:0.75rem;letter-spacing:1px;border-radius:8px;">Details</span>
+              ${isOutOfStock ?
+                '<button class="btn btn-secondary fw-bold flex-grow-1 text-uppercase disabled" style="font-family:\'Oswald\',sans-serif;font-size:0.75rem;border-radius:8px;">Sold Out</button>' :
+                `<button class="btn add-to-cart-btn fw-bold flex-grow-1 text-uppercase" data-id="${p.id}" style="background:var(--accent);border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:0.75rem;border-radius:8px;">Add to Cart</button>`}
+            </div>
           </div>
-        </div>
-      </div>`;
+        </div>`;
+    }
 
     productsRow.appendChild(col);
     requestAnimationFrame(() => requestAnimationFrame(() => {
