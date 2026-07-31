@@ -218,6 +218,7 @@ async function loadSection(section) {
     if (section === 'settings')     return loadSettings();
     if (section === 'accounts')     return loadAccounts();
     if (section === 'admin-accounts') return loadAdminAccounts();
+    if (section === 'faq')            return loadFaqs();
 
     // Content sections (hero, about, factory, quality, contact-info)
     const content = await getContent();  // replaces fetch('/api/content')
@@ -1674,4 +1675,116 @@ async function savePopupSettings() {
     console.error(err);
   }
 }
+
+// ============================================================
+// FAQ CRUD OPERATIONS
+// ============================================================
+async function loadFaqs() {
+  const listDiv = document.getElementById('faqList');
+  if (!listDiv) return;
+  listDiv.innerHTML = '<p class="text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading FAQs...</p>';
+
+  try {
+    const faqs = await getFaqsAdmin();
+    let html = '';
+    
+    faqs.forEach(faq => {
+      const isActive = faq.is_active !== false;
+      html += `
+        <div class="item-card" id="faq-${faq.id}">
+          <div class="item-header">
+            <h5><span class="text-muted me-2">FAQ ID: ${faq.id}</span> ${faq.question || 'Untitled Question'}</h5>
+            <div>
+              <button class="btn btn-accent btn-sm me-1" onclick="saveFaq('${faq.id}')"><i class="bi bi-check-lg me-1"></i>Save</button>
+              <button class="btn btn-outline-danger btn-sm" onclick="deleteFaq('${faq.id}')"><i class="bi bi-trash"></i></button>
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-9">
+              <label class="form-label small fw-bold">Question</label>
+              <input type="text" class="form-control form-control-sm" id="faqQuestion-${faq.id}" value="${faq.question || ''}">
+            </div>
+            <div class="col-md-2 col-6">
+              <label class="form-label small fw-bold">Display Order</label>
+              <input type="number" class="form-control form-control-sm" id="faqOrder-${faq.id}" value="${faq.display_order || 0}">
+            </div>
+            <div class="col-md-1 col-6 d-flex align-items-center">
+              <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" id="faqActive-${faq.id}" ${isActive ? 'checked' : ''}>
+                <label class="form-check-label small fw-bold" for="faqActive-${faq.id}">Active</label>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">Answer</label>
+              <textarea class="form-control form-control-sm" id="faqAnswer-${faq.id}" rows="3">${faq.answer || ''}</textarea>
+            </div>
+          </div>
+        </div>`;
+    });
+
+    if (faqs.length === 0) {
+      html = '<div class="alert alert-warning py-2 small">No FAQs found. Click "Add FAQ" to create one.</div>';
+    }
+    listDiv.innerHTML = html;
+  } catch (err) {
+    console.error('Load FAQs error:', err);
+    listDiv.innerHTML = '<div class="alert alert-danger py-2 small">Failed to load FAQs from database.</div>';
+  }
+}
+
+async function saveFaq(id) {
+  try {
+    const question = document.getElementById(`faqQuestion-${id}`).value;
+    const answer = document.getElementById(`faqAnswer-${id}`).value;
+    const display_order = parseInt(document.getElementById(`faqOrder-${id}`).value) || 0;
+    const is_active = document.getElementById(`faqActive-${id}`).checked;
+
+    await updateFaq(id, {
+      question,
+      answer,
+      display_order,
+      is_active
+    });
+
+    showAdminToast('FAQ saved successfully!', 'success');
+    loadFaqs();
+  } catch (err) {
+    console.error('Save FAQ error:', err);
+    showAdminToast('Failed to save FAQ: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function addFaq() {
+  try {
+    // Determine high display order
+    const faqs = await getFaqsAdmin();
+    const maxOrder = faqs.reduce((max, f) => Math.max(max, f.display_order || 0), 0);
+    
+    await createFaq({
+      question: 'New FAQ Question',
+      answer: 'New FAQ Answer text.',
+      display_order: maxOrder + 1,
+      is_active: false
+    });
+
+    showAdminToast('New FAQ created! Scroll down to edit it.', 'success');
+    loadFaqs();
+  } catch (err) {
+    console.error('Add FAQ error:', err);
+    showAdminToast('Failed to create FAQ: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function deleteFaq(id) {
+  if (!confirm('Are you sure you want to delete this FAQ?')) return;
+  try {
+    await deleteFaqById(id);
+    showAdminToast('FAQ deleted successfully!', 'success');
+    loadFaqs();
+  } catch (err) {
+    console.error('Delete FAQ error:', err);
+    showAdminToast('Failed to delete FAQ: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
 
