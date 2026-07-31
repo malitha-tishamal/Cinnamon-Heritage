@@ -1793,3 +1793,50 @@ select.glass-input option:disabled {
 .cart-remove-btn:hover {
   color: #dc3545;
 }
+
+/* ========== FAQ Section ========== */
+.faq {
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+.faq-accordion .accordion-item {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px !important;
+  margin-bottom: 15px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.faq-accordion .accordion-item:hover {
+  border-color: rgba(212, 135, 58, 0.4);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.faq-accordion .accordion-button {
+  background: transparent;
+  color: var(--text-primary);
+  font-family: "Oswald", sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 1px;
+  padding: 20px 25px;
+  border: none;
+  box-shadow: none;
+  text-align: left;
+}
+.faq-accordion .accordion-button:not(.collapsed) {
+  color: var(--accent);
+  background: rgba(212, 135, 58, 0.05);
+}
+.faq-accordion .accordion-button::after {
+  filter: brightness(0) invert(1);
+}
+.faq-accordion .accordion-button:not(.collapsed)::after {
+  filter: none;
+}
+.faq-accordion .accordion-body {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+  padding: 0 25px 25px;
+  background: transparent;
+}
