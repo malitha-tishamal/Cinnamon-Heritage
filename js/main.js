@@ -41,7 +41,8 @@ const dataPromises = {
   products:      fetchWithCache('cache_products', getProducts, []),
   settings:      fetchWithCache('cache_settings', getSettings, {}),
   deliveryRates: fetchWithCache('cache_delivery_rates', getDeliveryRates, []),
-  processSteps:  fetchWithCache('cache_process_steps', getProcessSteps, [])
+  processSteps:  fetchWithCache('cache_process_steps', getProcessSteps, []),
+  faqs:          fetchWithCache('cache_faqs', getFaqs, [])
 };
 
 // Fallback content if Supabase is slow or unavailable
@@ -417,6 +418,44 @@ function renderProcessSteps(steps) {
 }
 
 // ============================================================
+// FAQ RENDERING
+// ============================================================
+function renderFaqs(faqs) {
+  const faqAccordion = document.getElementById('faqAccordion');
+  if (!faqAccordion) return;
+
+  const activeFaqs = (faqs || []).filter(f => f.is_active !== false);
+
+  if (activeFaqs.length === 0) {
+    faqAccordion.innerHTML = '<div class="text-center py-4 text-white-50">No FAQs available at the moment. Check back later!</div>';
+    return;
+  }
+
+  // Sort by display_order
+  const sortedFaqs = [...activeFaqs].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+
+  let html = '';
+  sortedFaqs.forEach(faq => {
+    html += `
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading-faq-${faq.id}">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-faq-${faq.id}" aria-expanded="false" aria-controls="collapse-faq-${faq.id}">
+            ${faq.question}
+          </button>
+        </h2>
+        <div id="collapse-faq-${faq.id}" class="accordion-collapse collapse" aria-labelledby="heading-faq-${faq.id}" data-bs-parent="#faqAccordion">
+          <div class="accordion-body">
+            ${faq.answer}
+          </div>
+        </div>
+      </div>`;
+  });
+
+  faqAccordion.innerHTML = html;
+}
+
+
+// ============================================================
 // Skeleton loaders
 // ============================================================
 function showSkeletons() {
@@ -578,12 +617,13 @@ function setupProfileLocationSelectors() {
 document.addEventListener('DOMContentLoaded', async () => {
   showSkeletons();
 
-  const [content, products, settings, rates, steps] = await Promise.all([
+  const [content, products, settings, rates, steps, faqs] = await Promise.all([
     dataPromises.content,
     dataPromises.products,
     dataPromises.settings,
     dataPromises.deliveryRates,
-    dataPromises.processSteps
+    dataPromises.processSteps,
+    dataPromises.faqs
   ]);
 
   allProducts = products;
@@ -597,6 +637,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applySettings(settings);
   renderProducts(products);
   renderProcessSteps(steps);
+  renderFaqs(faqs);
   
   setupSignupLocationSelectors();
   setupProfileLocationSelectors();
@@ -641,6 +682,12 @@ function initRealtimeUpdates() {
   if (typeof subscribeToProcessSteps === 'function') {
     subscribeToProcessSteps(steps => {
       renderProcessSteps(steps);
+    });
+  }
+
+  if (typeof subscribeToFaqs === 'function') {
+    subscribeToFaqs(faqs => {
+      renderFaqs(faqs);
     });
   }
 }
