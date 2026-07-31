@@ -991,6 +991,38 @@ async function deleteStepById(id) {
   }
 }
 
+async function seedFaqsIfNeeded() {
+  try {
+    const snapshot = await db.collection('faqs').limit(1).get();
+    if (!snapshot.empty) return; // Already seeded
+    
+    console.log("Seeding FAQs collection...");
+    const faqs = [
+      { question: 'What is Ceylon Cinnamon?', answer: 'Ceylon Cinnamon (Cinnamomum verum) is the "true cinnamon" native to Sri Lanka. It is distinguished by its delicate, multi-layered quills, light tan colour, subtle sweet flavour, and ultra-low coumarin content — making it the safest and most premium variety for daily culinary and wellness use.', display_order: 1, is_active: true },
+      { question: 'What is the difference between Ceylon Cinnamon and Cassia?', answer: 'Ceylon Cinnamon has thin, multi-layered bark, a mild sweet taste, and contains only trace amounts of coumarin (0.004%). Cassia (Cinnamomum cassia) has a single thick bark layer, a stronger spicy taste, and significantly higher coumarin levels (up to 1%), which can be harmful in large doses. Ceylon is considered the premium, health-safe choice.', display_order: 2, is_active: true },
+      { question: 'Do you supply cinnamon in bulk?', answer: 'Yes. We offer comprehensive bulk supply for wholesalers, distributors, food manufacturers and hospitality businesses. Our minimum order quantities are flexible, and we provide competitive pricing for large volumes across all product lines — quills, powder, chips, tea cut, and essential oils.', display_order: 3, is_active: true },
+      { question: 'What is Ceylon Cinnamon Leaf Oil?', answer: 'Cinnamon Leaf Oil is steam-distilled from fresh Ceylon Cinnamon leaves. It is rich in eugenol (70–85%) and is widely used in aromatherapy, natural skincare, massage therapy, and as a natural antiseptic. It has a warm, spicy-clove aroma.', display_order: 4, is_active: true },
+      { question: 'What is Ceylon Cinnamon Bark Oil?', answer: 'Cinnamon Bark Oil is steam-distilled from the inner bark of the Ceylon Cinnamon tree. It contains 60–75% cinnamaldehyde, making it one of the most potent essential oils available. It is used in premium perfumery, pharmaceutical applications, and high-end wellness products.', display_order: 5, is_active: true },
+      { question: 'What is the difference between Leaf Oil and Bark Oil?', answer: 'Leaf Oil is rich in eugenol (clove-like aroma) and is more affordable, making it popular for aromatherapy and skincare. Bark Oil is rich in cinnamaldehyde (warm cinnamon aroma), is rarer and more expensive, and is prized in perfumery and pharmaceutical use. Both are 100% pure and steam-distilled.', display_order: 6, is_active: true },
+      { question: 'Are your essential oils safe for direct use?', answer: 'Our essential oils are 100% pure and therapeutic-grade. However, they are highly concentrated and must be diluted with a carrier oil before topical application. They are not intended for internal consumption. Always perform a patch test and consult a healthcare professional if you have sensitivities.', display_order: 7, is_active: true },
+      { question: 'Do you offer Private Label / White Label services?', answer: 'Yes. We provide full private label and white label packaging services. You supply your branding and we handle everything from sourcing and processing to packaging and labelling, delivering shelf-ready products under your brand name.', display_order: 8, is_active: true },
+      { question: 'Can you provide a Certificate of Analysis (COA)?', answer: 'Absolutely. Every batch we produce is accompanied by a Certificate of Analysis from accredited laboratories. Our COAs include moisture content, volatile oil content, ash levels, coumarin levels, and microbiological test results.', display_order: 9, is_active: true },
+      { question: 'What certifications do you hold?', answer: 'Cinnamon Heritage holds ISO 22000 (Food Safety Management), HACCP (Hazard Analysis Critical Control Points), and Sri Lanka Standards Institution (SLSI) certifications. Our farming practices are sustainable and our products are 100% natural with no additives or preservatives.', display_order: 10, is_active: true },
+      { question: 'Can we visit your estate or processing facility?', answer: 'Yes! We welcome visits to our cinnamon estate and processing facility in Galle, Sri Lanka. Experience the entire cinnamon journey from plantation to product. Please contact us in advance to arrange a guided tour and tasting session.', display_order: 11, is_active: true },
+      { question: 'Do you ship internationally?', answer: 'Yes, we export to markets worldwide including Europe, North America, the Middle East, and East Asia. All shipments are professionally packed in food-grade, humidity-controlled containers. We handle customs documentation and provide CIF/FOB pricing depending on your requirements.', display_order: 12, is_active: true },
+      { question: 'Does cinnamon have medicinal properties?', answer: 'While Ceylon Cinnamon has been used in traditional medicine for centuries, we do not make specific medical claims about our products. Published scientific research suggests potential benefits for blood sugar regulation, anti-inflammatory properties, and antioxidant content. We recommend consulting a healthcare professional for medical advice.', display_order: 13, is_active: true }
+    ];
+
+    for (let i = 0; i < faqs.length; i++) {
+      const id = String(i + 1);
+      await db.collection('faqs').doc(id).set(faqs[i]);
+    }
+    console.log("FAQs seeded successfully!");
+  } catch (err) {
+    console.error("Error seeding FAQs:", err);
+  }
+}
+
 // ============================================================
 // FAQ HELPERS
 // ============================================================
@@ -998,6 +1030,7 @@ async function deleteStepById(id) {
 /** GET active FAQs */
 async function getFaqs() {
   await seedDatabaseIfNeeded();
+  await seedFaqsIfNeeded();
   return serveFromCache('cache_faqs', async () => {
     const snapshot = await db.collection('faqs')
       .where('is_active', '==', true)
@@ -1010,6 +1043,7 @@ async function getFaqs() {
 /** GET all FAQs (admin) */
 async function getFaqsAdmin() {
   await seedDatabaseIfNeeded();
+  await seedFaqsIfNeeded();
   try {
     const snapshot = await db.collection('faqs')
       .orderBy('display_order')
