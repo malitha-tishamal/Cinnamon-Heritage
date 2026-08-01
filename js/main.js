@@ -876,26 +876,51 @@ if (contactForm) {
     e.stopPropagation();
     if (!contactForm.checkValidity()) { contactForm.classList.add('was-validated'); return; }
 
+    const enquiryType = document.getElementById('contactEnquiryType').value;
+    
+    // If B2B enquiry, redirect to B2B form
+    if (enquiryType === 'b2b') {
+      const b2bModal = new bootstrap.Modal(document.getElementById('b2bEnquiryModal'));
+      
+      // Pre-fill B2B form with contact form data
+      document.getElementById('b2bContactPerson').value = document.getElementById('contactName').value;
+      document.getElementById('b2bEmail').value = document.getElementById('contactEmail').value;
+      document.getElementById('b2bPhone').value = document.getElementById('contactPhone').value;
+      document.getElementById('b2bMessage').value = document.getElementById('contactMessage').value;
+      
+      // Open B2B modal
+      b2bModal.show();
+      
+      // Reset contact form
+      contactForm.reset();
+      contactForm.classList.remove('was-validated');
+      return;
+    }
+
     const submitBtn = document.getElementById('contactSubmitBtn');
     const btnText   = document.getElementById('submitBtnText');
     const spinner   = document.getElementById('submitBtnSpinner');
+    const errorDiv  = document.getElementById('contactFormError');
+    
     submitBtn.disabled = true;
     btnText.textContent = 'Sending...';
     spinner.classList.remove('d-none');
+    errorDiv.classList.add('d-none');
 
     const formData = {
       from_name:  document.getElementById('contactName').value,
       from_email: document.getElementById('contactEmail').value,
       phone:      document.getElementById('contactPhone').value || 'Not provided',
       subject:    document.getElementById('contactSubject').value || 'General Enquiry',
-      message:    document.getElementById('contactMessage').value
+      message:    document.getElementById('contactMessage').value,
+      enquiry_type: 'general'
     };
 
     // Try EmailJS first (if configured), then Supabase
     if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
       emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, formData)
         .then(() => { showToast('Message sent successfully!', 'success'); contactForm.reset(); contactForm.classList.remove('was-validated'); })
-        .catch(() => { showToast('Failed to send. Please try again.', 'error'); })
+        .catch(() => { errorDiv.textContent = 'Failed to send. Please try again.'; errorDiv.classList.remove('d-none'); })
         .finally(() => { submitBtn.disabled = false; btnText.textContent = 'Send Message'; spinner.classList.add('d-none'); });
     } else {
       // *** SUPABASE: replaces fetch('/api/contact', ...) ***
@@ -905,9 +930,8 @@ if (contactForm) {
         contactForm.reset();
         contactForm.classList.remove('was-validated');
       } catch (err) {
-        showToast('Thank you! Message received.', 'success');
-        contactForm.reset();
-        contactForm.classList.remove('was-validated');
+        errorDiv.textContent = 'Failed to send. Please try again.';
+        errorDiv.classList.remove('d-none');
       } finally {
         submitBtn.disabled = false;
         btnText.textContent = 'Send Message';
@@ -1689,6 +1713,82 @@ function initCartAndAuthListeners() {
         return;
       }
       window.location.href = "checkout.html?cart=true";
+    });
+  }
+
+  // B2B Enquiry Form
+  const b2bEnquiryForm = document.getElementById('b2bEnquiryForm');
+  if (b2bEnquiryForm) {
+    b2bEnquiryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const errorDiv = document.getElementById('b2bEnquiryError');
+      const successDiv = document.getElementById('b2bEnquirySuccess');
+      const submitText = document.getElementById('b2bSubmitText');
+      const submitSpinner = document.getElementById('b2bSubmitSpinner');
+      
+      errorDiv.classList.add('d-none');
+      successDiv.classList.add('d-none');
+      submitText.textContent = 'Submitting...';
+      submitSpinner.classList.remove('d-none');
+
+      try {
+        // Collect form data
+        const certifications = [];
+        if (document.getElementById('b2bDocISO').checked) certifications.push('ISO 22000');
+        if (document.getElementById('b2bDocHACCP').checked) certifications.push('HACCP');
+        if (document.getElementById('b2bDocOrganic').checked) certifications.push('Organic Certificate');
+        if (document.getElementById('b2bDocCOA').checked) certifications.push('Certificate of Analysis (COA)');
+        if (document.getElementById('b2bDocExport').checked) certifications.push('Export Documents');
+        if (document.getElementById('b2bDocOther').checked) certifications.push('Other');
+
+        const enquiryData = {
+          company_name: document.getElementById('b2bCompanyName').value.trim(),
+          website: document.getElementById('b2bWebsite').value.trim(),
+          country: document.getElementById('b2bCountry').value.trim(),
+          destination_market: document.getElementById('b2bDestinationMarket').value.trim(),
+          contact_person: document.getElementById('b2bContactPerson').value.trim(),
+          position: document.getElementById('b2bPosition').value.trim(),
+          email: document.getElementById('b2bEmail').value.trim(),
+          phone: document.getElementById('b2bPhone').value.trim(),
+          industry: document.getElementById('b2bIndustry').value,
+          intended_product: document.getElementById('b2bIntendedProduct').value.trim(),
+          ingredient_required: document.getElementById('b2bIngredientRequired').value.trim(),
+          trial_quantity: document.getElementById('b2bTrialQuantity').value.trim(),
+          annual_volume: document.getElementById('b2bAnnualVolume').value.trim(),
+          pack_size: document.getElementById('b2bPackSize').value.trim(),
+          packaging_type: document.getElementById('b2bPackagingType').value.trim(),
+          certifications: certifications,
+          target_launch_date: document.getElementById('b2bTargetLaunchDate').value,
+          message: document.getElementById('b2bMessage').value.trim(),
+          created_at: new Date().toISOString(),
+          enquiry_id: 'B2B-' + Date.now().toString(36).toUpperCase()
+        };
+
+        // Save to Firestore
+        await saveB2BEnquiry(enquiryData);
+
+        // Send email via EmailJS
+        await sendB2BEnquiryEmail(enquiryData);
+
+        // Show success message
+        successDiv.classList.remove('d-none');
+        b2bEnquiryForm.reset();
+
+        // Close modal after delay
+        setTimeout(() => {
+          bootstrap.Modal.getInstance(document.getElementById('b2bEnquiryModal')).hide();
+          successDiv.classList.add('d-none');
+        }, 3000);
+
+      } catch (err) {
+        console.error('B2B enquiry submission error:', err);
+        errorDiv.textContent = 'Failed to submit enquiry. Please try again.';
+        errorDiv.classList.remove('d-none');
+      } finally {
+        submitText.textContent = 'Submit Enquiry';
+        submitSpinner.classList.add('d-none');
+      }
     });
   }
 }
