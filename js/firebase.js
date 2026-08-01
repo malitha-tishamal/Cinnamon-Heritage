@@ -1563,3 +1563,132 @@ async function getAccountsData() {
     return { dailyRevenue: [], monthlyRevenue: [], locationStats: [], productStats: [], paymentStats: [] };
   }
 }
+
+// ============================================================
+// B2B ENQUIRIES
+// ============================================================
+
+async function saveB2BEnquiry(enquiryData) {
+  try {
+    const docRef = await db.collection('b2b_enquiries').add(enquiryData);
+    console.log('B2B enquiry saved with ID:', docRef.id);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error('Error saving B2B enquiry:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function getB2BEnquiries() {
+  try {
+    const snapshot = await db.collection('b2b_enquiries')
+      .orderBy('created_at', 'desc')
+      .get();
+    
+    const enquiries = [];
+    snapshot.forEach(doc => {
+      enquiries.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return enquiries;
+  } catch (error) {
+    console.error('Error getting B2B enquiries:', error);
+    return [];
+  }
+}
+
+async function getB2BEnquiryById(enquiryId) {
+  try {
+    const doc = await db.collection('b2b_enquiries').doc(enquiryId).get();
+    if (doc.exists) {
+      return { id: doc.id, ...doc.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting B2B enquiry:', error);
+    return null;
+  }
+}
+
+async function updateB2BEnquiry(enquiryId, updates) {
+  try {
+    await db.collection('b2b_enquiries').doc(enquiryId).update(updates);
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating B2B enquiry:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function deleteB2BEnquiryById(enquiryId) {
+  try {
+    await db.collection('b2b_enquiries').doc(enquiryId).delete();
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting B2B enquiry:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function sendB2BEnquiryEmail(enquiryData) {
+  try {
+    // Get email configuration from settings
+    const settings = await getSettings();
+    const recipientEmail = settings.b2b_recipient_email || 'info@cinnamonheritage.com';
+    const EMAILJS_SERVICE_ID = settings.b2b_emailjs_service_id || 'YOUR_SERVICE_ID';
+    const EMAILJS_TEMPLATE_ID = settings.b2b_emailjs_template_id || 'YOUR_TEMPLATE_ID';
+    const EMAILJS_PUBLIC_KEY = settings.b2b_emailjs_public_key || 'YOUR_PUBLIC_KEY';
+
+    if (typeof emailjs === 'undefined') {
+      console.warn('EmailJS not loaded. Skipping email notification.');
+      return { success: true, warning: 'EmailJS not configured' };
+    }
+
+    if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') {
+      console.warn('EmailJS not configured. Please add your credentials in admin panel.');
+      return { success: true, warning: 'EmailJS not configured' };
+    }
+
+    // Initialize EmailJS if not already done
+    if (!emailjs.initialized) {
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+      emailjs.initialized = true;
+    }
+
+    const templateParams = {
+      to_email: recipientEmail,
+      enquiry_id: enquiryData.enquiry_id,
+      company_name: enquiryData.company_name,
+      website: enquiryData.website,
+      country: enquiryData.country,
+      destination_market: enquiryData.destination_market,
+      contact_person: enquiryData.contact_person,
+      position: enquiryData.position,
+      email: enquiryData.email,
+      phone: enquiryData.phone,
+      industry: enquiryData.industry,
+      intended_product: enquiryData.intended_product,
+      ingredient_required: enquiryData.ingredient_required,
+      trial_quantity: enquiryData.trial_quantity,
+      annual_volume: enquiryData.annual_volume,
+      pack_size: enquiryData.pack_size,
+      packaging_type: enquiryData.packaging_type,
+      certifications: enquiryData.certifications.join(', '),
+      target_launch_date: enquiryData.target_launch_date,
+      message: enquiryData.message,
+      created_at: enquiryData.created_at
+    };
+
+    const response = await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      templateParams
+    );
+
+    console.log('Email sent successfully:', response);
+    return { success: true, response };
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return { success: false, error: error.message };
+  }
+}
