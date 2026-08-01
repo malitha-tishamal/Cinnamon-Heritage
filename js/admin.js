@@ -264,6 +264,9 @@ async function loadSection(section) {
       document.getElementById('contactWhatsapp').value     = content.contact.whatsapp || '';
       document.getElementById('contactSubtitleText').value = content.contact.subtitle || '';
     }
+    if (section === 'b2b') {
+      loadB2BSection();
+    }
   } catch (err) {
     console.error('Load error:', err);
   }
@@ -309,6 +312,9 @@ async function saveContent(section) {
         whatsapp: document.getElementById('contactWhatsapp').value,
         subtitle: document.getElementById('contactSubtitleText').value
       };
+    } else if (section === 'b2b') {
+      // B2B is handled separately by saveB2BContent function
+      return;
     }
 
     await saveContentFields(section, fields);
@@ -1784,6 +1790,235 @@ async function deleteFaq(id) {
   } catch (err) {
     console.error('Delete FAQ error:', err);
     showAdminToast('Failed to delete FAQ: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+// ============================================================
+// B2B PARTNERSHIPS MANAGEMENT
+// ============================================================
+async function loadB2BSection() {
+  try {
+    const content = await getContent();
+    const b2bData = content?.b2b || {};
+
+    // Load content fields
+    document.getElementById('b2bSectionTitle').value = b2bData.title || 'B2B Partnerships';
+    document.getElementById('b2bSubtitle').value = b2bData.subtitle || 'Partner With Cinnamon Heritage';
+    document.getElementById('b2bDescription').value = b2bData.description || 'We provide authentic Ceylon Cinnamon solutions for global businesses, supporting industries with premium products, reliable supply and customized services from our family estate in Galle, Sri Lanka.';
+    document.getElementById('b2bCtaTitle').value = b2bData.cta_title || 'Become a Partner';
+    document.getElementById('b2bCtaDescription').value = b2bData.cta_description || 'Partner with Cinnamon Heritage for authentic Ceylon Cinnamon products and tailored business solutions.';
+    document.getElementById('b2bButtonText').value = b2bData.button_text || 'Partner With Us';
+
+    // Load partner types
+    const partnerTypes = b2bData.partner_types || [
+      { title: 'Manufacturers', description: 'Premium Ceylon Cinnamon ingredients for food, beverage, wellness and cosmetic manufacturers.', icon: 'industry' },
+      { title: 'Importers', description: 'Export-quality cinnamon supply with consistent quality and reliable sourcing.', icon: 'ship' },
+      { title: 'Distributors', description: 'Wholesale partnerships with flexible supply options and premium product ranges.', icon: 'truck' },
+      { title: 'Retailers', description: 'Authentic cinnamon products including quills, powder, tea and gift collections.', icon: 'store' },
+      { title: 'Hospitality', description: 'Custom cinnamon solutions for hotels, resorts, restaurants and cafés.', icon: 'hotel' },
+      { title: 'Product Developers', description: 'Collaborate with us to create innovative cinnamon-based products and concepts.', icon: 'lightbulb' }
+    ];
+
+    let partnerTypesHtml = '';
+    partnerTypes.forEach((pt, index) => {
+      partnerTypesHtml += `
+        <div class="col-md-6 col-lg-4">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-3">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="flex-grow-1">
+                  <input type="text" class="form-control form-control-sm mb-2" 
+                    id="partnerTitle-${index}" value="${pt.title || ''}" placeholder="Partner Type Title">
+                  <input type="text" class="form-control form-control-sm mb-2" 
+                    id="partnerIcon-${index}" value="${pt.icon || 'industry'}" placeholder="Icon (industry, ship, etc.)">
+                  <textarea class="form-control form-control-sm" rows="2" 
+                    id="partnerDesc-${index}" placeholder="Description">${pt.description || ''}</textarea>
+                </div>
+                <button class="btn btn-sm btn-outline-danger ms-2" onclick="removePartnerType(${index})">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+    document.getElementById('partnerTypesList').innerHTML = partnerTypesHtml;
+
+    // Load B2B solutions
+    const b2bSolutions = b2bData.solutions || [
+      { title: 'Bulk Supply', description: 'Large-scale supply of premium Ceylon Cinnamon products for local and international markets.', icon: 'boxes' },
+      { title: 'Private Label', description: 'Create your own branded cinnamon products with our manufacturing and packaging support.', icon: 'tag' },
+      { title: 'Co-Development', description: 'Work with our team to develop unique cinnamon products tailored to your market.', icon: 'handshake' },
+      { title: 'Custom Ingredient Solutions', description: 'Customized cinnamon formats including quills, powder, chips and essential oils based on your requirements.', icon: 'flask' }
+    ];
+
+    let solutionsHtml = '';
+    b2bSolutions.forEach((sol, index) => {
+      solutionsHtml += `
+        <div class="col-md-6 col-lg-3">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-3">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="flex-grow-1">
+                  <input type="text" class="form-control form-control-sm mb-2" 
+                    id="solutionTitle-${index}" value="${sol.title || ''}" placeholder="Solution Title">
+                  <input type="text" class="form-control form-control-sm mb-2" 
+                    id="solutionIcon-${index}" value="${sol.icon || 'boxes'}" placeholder="Icon (boxes, tag, etc.)">
+                  <textarea class="form-control form-control-sm" rows="2" 
+                    id="solutionDesc-${index}" placeholder="Description">${sol.description || ''}</textarea>
+                </div>
+                <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeB2BSolution(${index})">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+    document.getElementById('b2bSolutionsList').innerHTML = solutionsHtml;
+
+  } catch (err) {
+    console.error('Load B2B section error:', err);
+    showAdminToast('Failed to load B2B section: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function addPartnerType() {
+  try {
+    const partnerTypesList = document.getElementById('partnerTypesList');
+    const index = partnerTypesList.children.length;
+    
+    const newPartnerHtml = `
+      <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div class="flex-grow-1">
+                <input type="text" class="form-control form-control-sm mb-2" 
+                  id="partnerTitle-${index}" value="" placeholder="Partner Type Title">
+                <input type="text" class="form-control form-control-sm mb-2" 
+                  id="partnerIcon-${index}" value="industry" placeholder="Icon (industry, ship, etc.)">
+                <textarea class="form-control form-control-sm" rows="2" 
+                  id="partnerDesc-${index}" placeholder="Description"></textarea>
+              </div>
+              <button class="btn btn-sm btn-outline-danger ms-2" onclick="removePartnerType(${index})">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    
+    partnerTypesList.insertAdjacentHTML('beforeend', newPartnerHtml);
+    showAdminToast('New partner type added!', 'success');
+  } catch (err) {
+    console.error('Add partner type error:', err);
+    showAdminToast('Failed to add partner type: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function addB2BSolution() {
+  try {
+    const solutionsList = document.getElementById('b2bSolutionsList');
+    const index = solutionsList.children.length;
+    
+    const newSolutionHtml = `
+      <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div class="flex-grow-1">
+                <input type="text" class="form-control form-control-sm mb-2" 
+                  id="solutionTitle-${index}" value="" placeholder="Solution Title">
+                <input type="text" class="form-control form-control-sm mb-2" 
+                  id="solutionIcon-${index}" value="boxes" placeholder="Icon (boxes, tag, etc.)">
+                <textarea class="form-control form-control-sm" rows="2" 
+                  id="solutionDesc-${index}" placeholder="Description"></textarea>
+              </div>
+              <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeB2BSolution(${index})">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    
+    solutionsList.insertAdjacentHTML('beforeend', newSolutionHtml);
+    showAdminToast('New B2B solution added!', 'success');
+  } catch (err) {
+    console.error('Add B2B solution error:', err);
+    showAdminToast('Failed to add B2B solution: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+function removePartnerType(index) {
+  if (!confirm('Are you sure you want to remove this partner type?')) return;
+  const partnerTypesList = document.getElementById('partnerTypesList');
+  if (partnerTypesList.children[index]) {
+    partnerTypesList.children[index].remove();
+    showAdminToast('Partner type removed!', 'success');
+  }
+}
+
+function removeB2BSolution(index) {
+  if (!confirm('Are you sure you want to remove this B2B solution?')) return;
+  const solutionsList = document.getElementById('b2bSolutionsList');
+  if (solutionsList.children[index]) {
+    solutionsList.children[index].remove();
+    showAdminToast('B2B solution removed!', 'success');
+  }
+}
+
+async function saveB2BContent() {
+  try {
+    // Collect partner types
+    const partnerTypes = [];
+    const partnerTypesList = document.getElementById('partnerTypesList');
+    Array.from(partnerTypesList.children).forEach((col, index) => {
+      const title = document.getElementById(`partnerTitle-${index}`)?.value || '';
+      const icon = document.getElementById(`partnerIcon-${index}`)?.value || 'industry';
+      const description = document.getElementById(`partnerDesc-${index}`)?.value || '';
+      if (title) {
+        partnerTypes.push({ title, icon, description });
+      }
+    });
+
+    // Collect B2B solutions
+    const solutions = [];
+    const solutionsList = document.getElementById('b2bSolutionsList');
+    Array.from(solutionsList.children).forEach((col, index) => {
+      const title = document.getElementById(`solutionTitle-${index}`)?.value || '';
+      const icon = document.getElementById(`solutionIcon-${index}`)?.value || 'boxes';
+      const description = document.getElementById(`solutionDesc-${index}`)?.value || '';
+      if (title) {
+        solutions.push({ title, icon, description });
+      }
+    });
+
+    // Collect content fields
+    const b2bData = {
+      title: document.getElementById('b2bSectionTitle').value,
+      subtitle: document.getElementById('b2bSubtitle').value,
+      description: document.getElementById('b2bDescription').value,
+      cta_title: document.getElementById('b2bCtaTitle').value,
+      cta_description: document.getElementById('b2bCtaDescription').value,
+      button_text: document.getElementById('b2bButtonText').value,
+      partner_types: partnerTypes,
+      solutions: solutions
+    };
+
+    // Get existing content and update B2B section
+    const existingContent = await getContent();
+    const updatedContent = {
+      ...existingContent,
+      b2b: b2bData
+    };
+
+    await saveContentFields('b2b', b2bData);
+    showAdminToast('B2B content saved successfully!', 'success');
+  } catch (err) {
+    console.error('Save B2B content error:', err);
+    showAdminToast('Failed to save B2B content: ' + (err.message || 'Unknown error'), 'error');
   }
 }
 
