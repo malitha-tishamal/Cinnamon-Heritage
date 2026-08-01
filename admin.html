@@ -140,6 +140,7 @@
         <li data-section="process"><i class="bi bi-gear"></i> Process Steps</li>
         <li data-section="products"><i class="bi bi-box-seam"></i> Products</li>
         <li data-section="b2b"><i class="bi bi-handshake"></i> B2B Partnerships</li>
+        <li data-section="b2b-enquiries"><i class="bi bi-envelope-paper"></i> B2B Enquiries</li>
         <li data-section="popups"><i class="bi bi-megaphone-fill"></i> Manage Popups</li>
         <li data-section="orders"><i class="bi bi-cart-check"></i> Orders</li>
         <li data-section="accounts"><i class="bi bi-bank"></i> Accounts & Sales</li>
@@ -515,6 +516,93 @@
               <input type="text" class="form-control" id="b2bButtonText" placeholder="Partner With Us">
             </div>
             <button class="btn btn-accent" onclick="saveB2BContent()"><i class="bi bi-check-lg me-1"></i>Save B2B Content</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- B2B Enquiries Management -->
+      <div class="content-section d-none" id="sec-b2b-enquiries">
+        <h3 class="section-heading">B2B Enquiries</h3>
+        
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h6 class="text-muted mb-2">Total Enquiries</h6>
+                <h3 class="fw-bold mb-0" id="b2bTotalEnquiries">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h6 class="text-muted mb-2">This Month</h6>
+                <h3 class="fw-bold mb-0" id="b2bThisMonth">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h6 class="text-muted mb-2">Pending Review</h6>
+                <h3 class="fw-bold mb-0" id="b2bPending">0</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email Configuration -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-envelope me-2"></i>Email Configuration</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Recipient Email</label>
+                <input type="email" class="form-control" id="b2bRecipientEmail" placeholder="info@cinnamonheritage.com">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Service ID</label>
+                <input type="text" class="form-control" id="b2bEmailJSServiceId" placeholder="YOUR_SERVICE_ID">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Template ID</label>
+                <input type="text" class="form-control" id="b2bEmailJSTemplateId" placeholder="YOUR_TEMPLATE_ID">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Public Key</label>
+                <input type="text" class="form-control" id="b2bEmailJSPublicKey" placeholder="YOUR_PUBLIC_KEY">
+              </div>
+            </div>
+            <button class="btn btn-accent mt-3" onclick="saveB2BEmailConfig()"><i class="bi bi-check-lg me-1"></i>Save Email Configuration</button>
+          </div>
+        </div>
+
+        <!-- Enquiries Table -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4">Enquiry ID</th>
+                    <th>Company</th>
+                    <th>Contact Person</th>
+                    <th>Email</th>
+                    <th>Industry</th>
+                    <th>Product</th>
+                    <th>Date</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="b2bEnquiriesTableBody">
+                  <tr>
+                    <td colspan="9" class="text-center py-4 text-muted">Loading enquiries...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
