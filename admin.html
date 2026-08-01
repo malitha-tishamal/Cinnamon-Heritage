@@ -139,6 +139,7 @@
         <li data-section="factory"><i class="bi bi-building"></i> Factory</li>
         <li data-section="process"><i class="bi bi-gear"></i> Process Steps</li>
         <li data-section="products"><i class="bi bi-box-seam"></i> Products</li>
+        <li data-section="b2b"><i class="bi bi-handshake"></i> B2B Partnerships</li>
         <li data-section="popups"><i class="bi bi-megaphone-fill"></i> Manage Popups</li>
         <li data-section="orders"><i class="bi bi-cart-check"></i> Orders</li>
         <li data-section="accounts"><i class="bi bi-bank"></i> Accounts & Sales</li>
@@ -457,6 +458,65 @@
       <div class="content-section d-none" id="sec-products">
         <h3 class="section-heading">Products <button class="btn btn-accent btn-sm float-end" onclick="addProduct()"><i class="bi bi-plus-lg me-1"></i>Add Product</button></h3>
         <div id="productsList"></div>
+      </div>
+
+      <!-- B2B Partnerships Editor -->
+      <div class="content-section d-none" id="sec-b2b">
+        <h3 class="section-heading">B2B Partnerships</h3>
+        
+        <!-- Partner Types -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-people me-2"></i>Partner Types</h5>
+            <div class="row g-3" id="partnerTypesList">
+              <!-- Partner types will be loaded here -->
+            </div>
+            <button class="btn btn-accent mt-3" onclick="addPartnerType()"><i class="bi bi-plus-lg me-1"></i>Add Partner Type</button>
+          </div>
+        </div>
+
+        <!-- B2B Solutions -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-lightbulb me-2"></i>B2B Solutions</h5>
+            <div class="row g-3" id="b2bSolutionsList">
+              <!-- B2B solutions will be loaded here -->
+            </div>
+            <button class="btn btn-accent mt-3" onclick="addB2BSolution()"><i class="bi bi-plus-lg me-1"></i>Add Solution</button>
+          </div>
+        </div>
+
+        <!-- B2B Content -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>B2B Section Content</h5>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Section Title</label>
+              <input type="text" class="form-control" id="b2bSectionTitle" placeholder="B2B Partnerships">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Subtitle</label>
+              <input type="text" class="form-control" id="b2bSubtitle" placeholder="Partner With Cinnamon Heritage">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Description</label>
+              <textarea class="form-control" id="b2bDescription" rows="3" placeholder="We provide authentic Ceylon Cinnamon solutions for global businesses..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">CTA Title</label>
+              <input type="text" class="form-control" id="b2bCtaTitle" placeholder="Become a Partner">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">CTA Description</label>
+              <textarea class="form-control" id="b2bCtaDescription" rows="2" placeholder="Partner with Cinnamon Heritage for authentic Ceylon Cinnamon products..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Button Text</label>
+              <input type="text" class="form-control" id="b2bButtonText" placeholder="Partner With Us">
+            </div>
+            <button class="btn btn-accent" onclick="saveB2BContent()"><i class="bi bi-check-lg me-1"></i>Save B2B Content</button>
+          </div>
+        </div>
       </div>
 
       <!-- Popups Editor -->
