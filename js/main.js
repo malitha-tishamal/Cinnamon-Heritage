@@ -245,6 +245,62 @@ function applyB2BContent(content) {
   }
 }
 
+function applyExperienceContent(content) {
+  if (!content || !content.experience) return;
+  const experience = content.experience;
+  
+  // Update section title and subtitle using IDs
+  const sectionTitle = document.getElementById('experienceSectionTitle');
+  const sectionSubtitle = document.getElementById('experienceSubtitle');
+  const sectionDescription = document.getElementById('experienceDescription');
+  
+  if (sectionTitle && experience.title) {
+    sectionTitle.textContent = experience.title;
+  }
+  if (sectionSubtitle && experience.subtitle) {
+    sectionSubtitle.textContent = experience.subtitle;
+  }
+  if (sectionDescription && experience.description) {
+    sectionDescription.textContent = experience.description;
+  }
+
+  // Update experience items
+  if (experience.items && experience.items.length > 0) {
+    const experiencesRow = document.getElementById('experiencesRow');
+    if (experiencesRow) {
+      let experiencesHtml = '';
+      experience.items.forEach(item => {
+        experiencesHtml += `
+          <div class="col-md-6 col-lg-4">
+            <div class="experience-card h-100">
+              <div class="experience-icon">
+                <i class="fas fa-${item.icon || 'leaf'}"></i>
+              </div>
+              <h5 class="text-white">${item.title}</h5>
+              <p class="text-white-50">${item.description}</p>
+            </div>
+          </div>`;
+      });
+      experiencesRow.innerHTML = experiencesHtml;
+    }
+  }
+
+  // Update CTA section using IDs
+  const ctaTitle = document.getElementById('experienceCtaTitle');
+  const ctaDescription = document.getElementById('experienceCtaDescription');
+  const ctaButton = document.getElementById('experienceCtaButton');
+  
+  if (ctaTitle && experience.cta_title) {
+    ctaTitle.textContent = experience.cta_title;
+  }
+  if (ctaDescription && experience.cta_description) {
+    ctaDescription.textContent = experience.cta_description;
+  }
+  if (ctaButton && experience.button_text) {
+    ctaButton.textContent = experience.button_text;
+  }
+}
+
 // ============================================================
 // Sequential Multi-Product Promo Popup System
 // ============================================================
@@ -712,6 +768,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyFactoryContent(content);
   applyProcessContent(content);
   applyB2BContent(content);
+  applyExperienceContent(content);
   applySettings(settings);
   renderProducts(products);
   renderProcessSteps(steps);
@@ -748,6 +805,7 @@ function initRealtimeUpdates() {
     applyFactoryContent(content);
     applyProcessContent(content);
     applyB2BContent(content);
+    applyExperienceContent(content);
   });
 
   subscribeToProducts(products => {
@@ -1787,6 +1845,59 @@ function initCartAndAuthListeners() {
         errorDiv.classList.remove('d-none');
       } finally {
         submitText.textContent = 'Submit Enquiry';
+        submitSpinner.classList.add('d-none');
+      }
+    });
+  }
+
+  // Experience Booking Form
+  const experienceBookingForm = document.getElementById('experienceBookingForm');
+  if (experienceBookingForm) {
+    experienceBookingForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const errorDiv = document.getElementById('experienceBookingError');
+      const successDiv = document.getElementById('experienceBookingSuccess');
+      const submitText = document.getElementById('experienceSubmitText');
+      const submitSpinner = document.getElementById('experienceSubmitSpinner');
+      
+      errorDiv.classList.add('d-none');
+      successDiv.classList.add('d-none');
+      submitText.textContent = 'Submitting...';
+      submitSpinner.classList.remove('d-none');
+
+      try {
+        const bookingData = {
+          name: document.getElementById('experienceName').value.trim(),
+          email: document.getElementById('experienceEmail').value.trim(),
+          phone: document.getElementById('experiencePhone').value.trim(),
+          guests: document.getElementById('experienceGuests').value,
+          preferred_date: document.getElementById('experienceDate').value,
+          experience_type: document.getElementById('experienceType').value,
+          special_requests: document.getElementById('experienceRequests').value.trim(),
+          created_at: new Date().toISOString(),
+          booking_id: 'EXP-' + Date.now().toString(36).toUpperCase()
+        };
+
+        // Save to Firestore
+        await saveExperienceBooking(bookingData);
+
+        // Show success message
+        successDiv.classList.remove('d-none');
+        experienceBookingForm.reset();
+
+        // Close modal after delay
+        setTimeout(() => {
+          bootstrap.Modal.getInstance(document.getElementById('experienceBookingModal')).hide();
+          successDiv.classList.add('d-none');
+        }, 3000);
+
+      } catch (err) {
+        console.error('Experience booking submission error:', err);
+        errorDiv.textContent = 'Failed to submit booking request. Please try again.';
+        errorDiv.classList.remove('d-none');
+      } finally {
+        submitText.textContent = 'Submit Booking Request';
         submitSpinner.classList.add('d-none');
       }
     });
