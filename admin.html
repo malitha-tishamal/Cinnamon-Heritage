@@ -141,6 +141,7 @@
         <li data-section="products"><i class="bi bi-box-seam"></i> Products</li>
         <li data-section="b2b"><i class="bi bi-handshake"></i> B2B Partnerships</li>
         <li data-section="b2b-enquiries"><i class="bi bi-envelope-paper"></i> B2B Enquiries</li>
+        <li data-section="experience"><i class="bi bi-tree"></i> Cinnamon Experience</li>
         <li data-section="popups"><i class="bi bi-megaphone-fill"></i> Manage Popups</li>
         <li data-section="orders"><i class="bi bi-cart-check"></i> Orders</li>
         <li data-section="accounts"><i class="bi bi-bank"></i> Accounts & Sales</li>
@@ -603,6 +604,54 @@
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cinnamon Experience Editor -->
+      <div class="content-section d-none" id="sec-experience">
+        <h3 class="section-heading">Cinnamon Experience</h3>
+        
+        <!-- Experience Content -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>Experience Section Content</h5>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Section Title</label>
+              <input type="text" class="form-control" id="experienceSectionTitle" placeholder="Cinnamon Experience">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Subtitle</label>
+              <input type="text" class="form-control" id="experienceSubtitle" placeholder="Discover the Heart of Ceylon Cinnamon">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Description</label>
+              <textarea class="form-control" id="experienceDescription" rows="3" placeholder="Step into our family estate in Galle and experience the authentic journey of Ceylon Cinnamon..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">CTA Title</label>
+              <input type="text" class="form-control" id="experienceCtaTitle" placeholder="Book Your Experience">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">CTA Description</label>
+              <textarea class="form-control" id="experienceCtaDescription" rows="2" placeholder="Discover the heritage, craftsmanship and flavours of authentic Ceylon Cinnamon."></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Button Text</label>
+              <input type="text" class="form-control" id="experienceButtonText" placeholder="Book a Visit">
+            </div>
+            <button class="btn btn-accent" onclick="saveExperienceContent()"><i class="bi bi-check-lg me-1"></i>Save Experience Content</button>
+          </div>
+        </div>
+
+        <!-- Experience Items -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-list me-2"></i>Experience Items</h5>
+            <div class="row g-3" id="experienceItemsList">
+              <!-- Experience items will be loaded here -->
+            </div>
+            <button class="btn btn-accent mt-3" onclick="addExperienceItem()"><i class="bi bi-plus-lg me-1"></i>Add Experience Item</button>
           </div>
         </div>
       </div>
