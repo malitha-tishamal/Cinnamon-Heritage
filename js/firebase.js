@@ -1692,3 +1692,18 @@ async function sendB2BEnquiryEmail(enquiryData) {
     return { success: false, error: error.message };
   }
 }
+
+// ============================================================
+// EXPERIENCE BOOKINGS
+// ============================================================
+
+async function saveExperienceBooking(bookingData) {
+  try {
+    const docRef = await db.collection('experience_bookings').add(bookingData);
+    console.log('Experience booking saved with ID:', docRef.id);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error('Error saving experience booking:', error);
+    return { success: false, error: error.message };
+  }
+}
