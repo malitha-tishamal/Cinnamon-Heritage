@@ -382,7 +382,7 @@
             <div class="b2b-cta">
               <h4 id="b2bCtaTitle" class="text-white mb-3">Become a Partner</h4>
               <p id="b2bCtaDescription" class="text-white-50 mb-4">Partner with Cinnamon Heritage for authentic Ceylon Cinnamon products and tailored business solutions.</p>
-              <a href="#contact" id="b2bCtaButton" class="btn btn-primary btn-lg" style="background-color: var(--accent); border: none;">Partner With Us</a>
+              <button id="b2bCtaButton" class="btn btn-primary btn-lg" style="background-color: var(--accent); border: none;" data-bs-toggle="modal" data-bs-target="#b2bEnquiryModal">Partner With Us</button>
             </div>
           </div>
         </div>
@@ -476,6 +476,13 @@
             <div class="card border-0 rounded-0 shadow-lg p-5">
               <h3 class="mb-4" style="color: #333; font-family: 'Inter', sans-serif; font-weight: 600; text-transform: none;">Send Message</h3>
               <form id="contactForm" novalidate>
+                <div class="form-floating mb-3">
+                  <select class="form-select rounded-0 border-0 border-bottom" id="contactEnquiryType" required style="background: transparent;">
+                    <option value="general">General Enquiry</option>
+                    <option value="b2b">B2B Partnership Enquiry</option>
+                  </select>
+                  <label for="contactEnquiryType">Enquiry Type</label>
+                </div>
                 <div class="row g-3">
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
@@ -505,6 +512,7 @@
                   <label for="contactMessage">Your Message</label>
                   <div class="invalid-feedback">Please enter your message.</div>
                 </div>
+                <div id="contactFormError" class="alert alert-danger py-2 small d-none mb-3" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
                 <button type="submit" id="contactSubmitBtn" class="btn text-white rounded-0 px-5 py-3 fw-bold text-uppercase w-100" style="background-color: var(--accent); font-family: 'Oswald', sans-serif; letter-spacing: 1px; transition: all 0.3s ease;">
                   <span id="submitBtnText">Send Message</span>
                   <span id="submitBtnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
@@ -827,11 +835,177 @@
     </div>
   </div>
 
+  <!-- B2B Enquiry Modal -->
+  <div class="modal fade" id="b2bEnquiryModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content glass-auth-card">
+        <div class="modal-header border-0 pb-0">
+          <h4 class="modal-title text-white fw-bold" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-handshake me-2" style="color: var(--accent);"></i>Request a Partnership</h4>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body px-4 px-md-5 pb-5">
+          <p class="text-white-50 mb-4">Tell us about your business requirements and our team will get back to you with tailored Ceylon Cinnamon solutions.</p>
+          
+          <form id="b2bEnquiryForm">
+            <!-- Company Information -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Company Information</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Company Name *</label>
+                <input type="text" class="form-control glass-input" id="b2bCompanyName" placeholder="ABC Foods Ltd." required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Company Website</label>
+                <input type="url" class="form-control glass-input" id="b2bWebsite" placeholder="www.company.com">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Country *</label>
+                <input type="text" class="form-control glass-input" id="b2bCountry" placeholder="United Kingdom" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Destination Market *</label>
+                <input type="text" class="form-control glass-input" id="b2bDestinationMarket" placeholder="United Kingdom" required>
+              </div>
+            </div>
+
+            <!-- Contact Details -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Contact Details</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Contact Person *</label>
+                <input type="text" class="form-control glass-input" id="b2bContactPerson" placeholder="John Smith" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Position / Job Title</label>
+                <input type="text" class="form-control glass-input" id="b2bPosition" placeholder="Purchasing Manager">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Email Address *</label>
+                <input type="email" class="form-control glass-input" id="b2bEmail" placeholder="john@company.com" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Phone Number *</label>
+                <input type="tel" class="form-control glass-input" id="b2bPhone" placeholder="+44 20 1234 5678" required>
+              </div>
+            </div>
+
+            <!-- Business Information -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Business Information</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Industry *</label>
+                <select class="form-control glass-input" id="b2bIndustry" required>
+                  <option value="">Select Industry</option>
+                  <option value="Manufacturer">Manufacturer</option>
+                  <option value="Importer">Importer</option>
+                  <option value="Distributor">Distributor</option>
+                  <option value="Retailer">Retailer</option>
+                  <option value="Hospitality">Hospitality</option>
+                  <option value="Product Developer">Product Developer</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Product Requirements -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Product Requirements</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Intended Product *</label>
+                <input type="text" class="form-control glass-input" id="b2bIntendedProduct" placeholder="Ceylon Cinnamon Powder" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Ingredient Required *</label>
+                <input type="text" class="form-control glass-input" id="b2bIngredientRequired" placeholder="Ceylon Cinnamon Powder" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Trial Quantity</label>
+                <input type="text" class="form-control glass-input" id="b2bTrialQuantity" placeholder="100 kg">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Estimated Annual Volume</label>
+                <input type="text" class="form-control glass-input" id="b2bAnnualVolume" placeholder="5,000 kg">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Preferred Pack Size</label>
+                <input type="text" class="form-control glass-input" id="b2bPackSize" placeholder="25 kg">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Packaging Type</label>
+                <input type="text" class="form-control glass-input" id="b2bPackagingType" placeholder="Kraft Bag / Vacuum Pack">
+              </div>
+            </div>
+
+            <!-- Documentation & Certifications -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Documentation & Certifications</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Required Documentation / Certifications</label>
+                <div class="d-flex flex-wrap gap-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="b2bDocISO" value="ISO 22000">
+                    <label class="form-check-label text-white-50 small" for="b2bDocISO">ISO 22000</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="b2bDocHACCP" value="HACCP">
+                    <label class="form-check-label text-white-50 small" for="b2bDocHACCP">HACCP</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="b2bDocOrganic" value="Organic Certificate">
+                    <label class="form-check-label text-white-50 small" for="b2bDocOrganic">Organic Certificate</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="b2bDocCOA" value="Certificate of Analysis (COA)">
+                    <label class="form-check-label text-white-50 small" for="b2bDocCOA">Certificate of Analysis (COA)</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="b2bDocExport" value="Export Documents">
+                    <label class="form-check-label text-white-50 small" for="b2bDocExport">Export Documents</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="b2bDocOther" value="Other">
+                    <label class="form-check-label text-white-50 small" for="b2bDocOther">Other</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Project Information -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Project Information</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Target Launch Date</label>
+                <input type="date" class="form-control glass-input" id="b2bTargetLaunchDate">
+              </div>
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Message / Technical Requirements</label>
+                <textarea class="form-control glass-input" id="b2bMessage" rows="3" placeholder="Any specific requirements or technical specifications..."></textarea>
+              </div>
+            </div>
+
+            <div id="b2bEnquiryError" class="alert alert-danger py-2 small d-none" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+            <div id="b2bEnquirySuccess" class="alert alert-success py-2 small d-none" style="background: rgba(40,167,69,0.2); border: 1px solid rgba(40,167,69,0.4); color: #85ff93;">Thank you for your enquiry. Our B2B team will contact you within 2–3 business days.</div>
+            
+            <div class="d-flex gap-2 mt-4">
+              <button type="submit" class="btn flex-grow-1 py-3 fw-bold text-uppercase rounded-0" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">
+                <span id="b2bSubmitText">Submit Enquiry</span>
+                <span id="b2bSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+              </button>
+              <button type="button" class="btn py-3 fw-bold text-uppercase rounded-0" style="background: rgba(255,255,255,0.1); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:1px solid rgba(255,255,255,0.2);" onclick="document.getElementById('b2bEnquiryForm').reset();">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Custom Script -->
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script src="js/firebase.js"></script>
   <script src="js/main.js"></script>
 </body>
