@@ -270,6 +270,9 @@ async function loadSection(section) {
     if (section === 'b2b-enquiries') {
       loadB2BEnquiries();
     }
+    if (section === 'experience') {
+      loadExperienceSection();
+    }
   } catch (err) {
     console.error('Load error:', err);
   }
@@ -317,6 +320,9 @@ async function saveContent(section) {
       };
     } else if (section === 'b2b') {
       // B2B is handled separately by saveB2BContent function
+      return;
+    } else if (section === 'experience') {
+      // Experience is handled separately by saveExperienceContent function
       return;
     }
 
@@ -2191,6 +2197,142 @@ async function saveB2BEmailConfig() {
   } catch (err) {
     console.error('Save B2B email config error:', err);
     showAdminToast('Failed to save email configuration: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+// ============================================================
+// CINNAMON EXPERIENCE MANAGEMENT
+// ============================================================
+async function loadExperienceSection() {
+  try {
+    const content = await getContent();
+    const experienceData = content?.experience || {};
+
+    // Load content fields
+    document.getElementById('experienceSectionTitle').value = experienceData.title || 'Cinnamon Experience';
+    document.getElementById('experienceSubtitle').value = experienceData.subtitle || 'Discover the Heart of Ceylon Cinnamon';
+    document.getElementById('experienceDescription').value = experienceData.description || 'Step into our family estate in Galle and experience the authentic journey of Ceylon Cinnamon—from plantation to finished product.';
+    document.getElementById('experienceCtaTitle').value = experienceData.cta_title || 'Book Your Experience';
+    document.getElementById('experienceCtaDescription').value = experienceData.cta_description || 'Discover the heritage, craftsmanship and flavours of authentic Ceylon Cinnamon.';
+    document.getElementById('experienceButtonText').value = experienceData.button_text || 'Book a Visit';
+
+    // Load experience items
+    const experienceItems = experienceData.items || [
+      { title: 'Guided Cinnamon Estate Walk', description: 'Explore our lush cinnamon estate and learn about traditional cultivation methods.', icon: 'leaf' },
+      { title: 'Harvesting & Peeling Demonstration', description: 'Watch skilled artisans harvest and peel cinnamon using centuries-old techniques.', icon: 'cut' },
+      { title: 'Hands-on Cinnamon Activity', description: 'Take part in interactive cinnamon preparation and quill-making activities.', icon: 'hands' },
+      { title: 'Cinnamon Tea & Product Tasting', description: 'Enjoy premium cinnamon tea and sample our signature cinnamon products.', icon: 'mug-hot' },
+      { title: 'Sri Lankan Spice & Food Experience', description: 'Experience authentic Sri Lankan spices and traditional local cuisine.', icon: 'utensils' },
+      { title: 'Educational Visits', description: 'Special tours and educational programs for schools, universities and research groups.', icon: 'graduation-cap' },
+      { title: 'Business Visits', description: 'Customized visits for importers, distributors and business partners.', icon: 'briefcase' },
+      { title: 'Cinnamon Heritage Shop', description: 'Purchase authentic Ceylon cinnamon products directly from our estate.', icon: 'shopping-bag' },
+      { title: 'Cinnamon Villa — Coming Soon', description: 'Stay immersed in the beauty of Sri Lanka with our upcoming Cinnamon Villa experience.', icon: 'home' }
+    ];
+
+    let itemsHtml = '';
+    experienceItems.forEach((item, index) => {
+      itemsHtml += `
+        <div class="col-md-6 col-lg-4">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-3">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="flex-grow-1">
+                  <input type="text" class="form-control form-control-sm mb-2" 
+                    id="experienceTitle-${index}" value="${item.title || ''}" placeholder="Experience Title">
+                  <input type="text" class="form-control form-control-sm mb-2" 
+                    id="experienceIcon-${index}" value="${item.icon || 'leaf'}" placeholder="Icon (leaf, cut, etc.)">
+                  <textarea class="form-control form-control-sm" rows="2" 
+                    id="experienceDesc-${index}" placeholder="Description">${item.description || ''}</textarea>
+                </div>
+                <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeExperienceItem(${index})">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+    document.getElementById('experienceItemsList').innerHTML = itemsHtml;
+
+  } catch (err) {
+    console.error('Load Experience section error:', err);
+    showAdminToast('Failed to load Experience section: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function addExperienceItem() {
+  try {
+    const experienceItemsList = document.getElementById('experienceItemsList');
+    const index = experienceItemsList.children.length;
+    
+    const newExperienceHtml = `
+      <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div class="flex-grow-1">
+                <input type="text" class="form-control form-control-sm mb-2" 
+                  id="experienceTitle-${index}" value="" placeholder="Experience Title">
+                <input type="text" class="form-control form-control-sm mb-2" 
+                  id="experienceIcon-${index}" value="leaf" placeholder="Icon (leaf, cut, etc.)">
+                <textarea class="form-control form-control-sm" rows="2" 
+                  id="experienceDesc-${index}" placeholder="Description"></textarea>
+              </div>
+              <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeExperienceItem(${index})">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    
+    experienceItemsList.insertAdjacentHTML('beforeend', newExperienceHtml);
+    showAdminToast('New experience item added!', 'success');
+  } catch (err) {
+    console.error('Add experience item error:', err);
+    showAdminToast('Failed to add experience item: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+function removeExperienceItem(index) {
+  if (!confirm('Are you sure you want to remove this experience item?')) return;
+  const experienceItemsList = document.getElementById('experienceItemsList');
+  if (experienceItemsList.children[index]) {
+    experienceItemsList.children[index].remove();
+    showAdminToast('Experience item removed!', 'success');
+  }
+}
+
+async function saveExperienceContent() {
+  try {
+    // Collect experience items
+    const experienceItems = [];
+    const experienceItemsList = document.getElementById('experienceItemsList');
+    Array.from(experienceItemsList.children).forEach((col, index) => {
+      const title = document.getElementById(`experienceTitle-${index}`)?.value || '';
+      const icon = document.getElementById(`experienceIcon-${index}`)?.value || 'leaf';
+      const description = document.getElementById(`experienceDesc-${index}`)?.value || '';
+      if (title) {
+        experienceItems.push({ title, icon, description });
+      }
+    });
+
+    // Collect content fields
+    const experienceData = {
+      title: document.getElementById('experienceSectionTitle').value,
+      subtitle: document.getElementById('experienceSubtitle').value,
+      description: document.getElementById('experienceDescription').value,
+      cta_title: document.getElementById('experienceCtaTitle').value,
+      cta_description: document.getElementById('experienceCtaDescription').value,
+      button_text: document.getElementById('experienceButtonText').value,
+      items: experienceItems
+    };
+
+    await saveContentFields('experience', experienceData);
+    showAdminToast('Experience content saved successfully!', 'success');
+  } catch (err) {
+    console.error('Save Experience content error:', err);
+    showAdminToast('Failed to save Experience content: ' + (err.message || 'Unknown error'), 'error');
   }
 }
 
