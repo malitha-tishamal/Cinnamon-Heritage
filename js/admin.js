@@ -267,6 +267,9 @@ async function loadSection(section) {
     if (section === 'b2b') {
       loadB2BSection();
     }
+    if (section === 'b2b-enquiries') {
+      loadB2BEnquiries();
+    }
   } catch (err) {
     console.error('Load error:', err);
   }
@@ -2019,6 +2022,175 @@ async function saveB2BContent() {
   } catch (err) {
     console.error('Save B2B content error:', err);
     showAdminToast('Failed to save B2B content: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+// ============================================================
+// B2B ENQUIRIES MANAGEMENT
+// ============================================================
+async function loadB2BEnquiries() {
+  try {
+    const enquiries = await getB2BEnquiries();
+    
+    // Update stats
+    document.getElementById('b2bTotalEnquiries').textContent = enquiries.length;
+    
+    const thisMonth = enquiries.filter(e => {
+      const enquiryDate = new Date(e.created_at);
+      const now = new Date();
+      return enquiryDate.getMonth() === now.getMonth() && enquiryDate.getFullYear() === now.getFullYear();
+    }).length;
+    document.getElementById('b2bThisMonth').textContent = thisMonth;
+    
+    const pending = enquiries.filter(e => e.status === 'pending' || !e.status).length;
+    document.getElementById('b2bPending').textContent = pending;
+
+    // Load email configuration
+    const settings = await getSettings();
+    document.getElementById('b2bRecipientEmail').value = settings.b2b_recipient_email || 'info@cinnamonheritage.com';
+    document.getElementById('b2bEmailJSServiceId').value = settings.b2b_emailjs_service_id || '';
+    document.getElementById('b2bEmailJSTemplateId').value = settings.b2b_emailjs_template_id || '';
+    document.getElementById('b2bEmailJSPublicKey').value = settings.b2b_emailjs_public_key || '';
+
+    // Render enquiries table
+    renderB2BEnquiriesTable(enquiries);
+  } catch (err) {
+    console.error('Load B2B enquiries error:', err);
+    showAdminToast('Failed to load B2B enquiries: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+function renderB2BEnquiriesTable(enquiries) {
+  const tbody = document.getElementById('b2bEnquiriesTableBody');
+  
+  if (!enquiries || enquiries.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">No enquiries found</td></tr>';
+    return;
+  }
+
+  const sortedEnquiries = enquiries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  
+  let html = '';
+  sortedEnquiries.forEach(enquiry => {
+    const status = enquiry.status || 'pending';
+    const statusBadge = status === 'pending' 
+      ? '<span class="badge bg-warning text-dark">Pending</span>'
+      : status === 'contacted'
+        ? '<span class="badge bg-info">Contacted</span>'
+        : status === 'completed'
+          ? '<span class="badge bg-success">Completed</span>'
+          : '<span class="badge bg-secondary">Unknown</span>';
+
+    const date = new Date(enquiry.created_at).toLocaleDateString();
+    
+    html += `
+      <tr>
+        <td class="ps-4"><span class="fw-medium">${enquiry.enquiry_id || 'N/A'}</span></td>
+        <td>${enquiry.company_name || 'N/A'}</td>
+        <td>${enquiry.contact_person || 'N/A'}</td>
+        <td>${enquiry.email || 'N/A'}</td>
+        <td>${enquiry.industry || 'N/A'}</td>
+        <td>${enquiry.intended_product || 'N/A'}</td>
+        <td>${date}</td>
+        <td class="text-center">${statusBadge}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="viewB2BEnquiry('${enquiry.id}')" title="View Details">
+            <i class="bi bi-eye"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-success me-1" onclick="updateB2BEnquiryStatus('${enquiry.id}', 'contacted')" title="Mark as Contacted">
+            <i class="bi bi-check"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteB2BEnquiry('${enquiry.id}')" title="Delete">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>`;
+  });
+  
+  tbody.innerHTML = html;
+}
+
+async function viewB2BEnquiry(enquiryId) {
+  try {
+    const enquiry = await getB2BEnquiryById(enquiryId);
+    if (!enquiry) {
+      showAdminToast('Enquiry not found', 'error');
+      return;
+    }
+
+    const details = `
+      <strong>Enquiry ID:</strong> ${enquiry.enquiry_id || 'N/A'}
+      <strong>Company:</strong> ${enquiry.company_name || 'N/A'}
+      <strong>Website:</strong> ${enquiry.website || 'N/A'}
+      <strong>Country:</strong> ${enquiry.country || 'N/A'}
+      <strong>Destination Market:</strong> ${enquiry.destination_market || 'N/A'}
+      <strong>Contact Person:</strong> ${enquiry.contact_person || 'N/A'}
+      <strong>Position:</strong> ${enquiry.position || 'N/A'}
+      <strong>Email:</strong> ${enquiry.email || 'N/A'}
+      <strong>Phone:</strong> ${enquiry.phone || 'N/A'}
+      <strong>Industry:</strong> ${enquiry.industry || 'N/A'}
+      <strong>Intended Product:</strong> ${enquiry.intended_product || 'N/A'}
+      <strong>Ingredient Required:</strong> ${enquiry.ingredient_required || 'N/A'}
+      <strong>Trial Quantity:</strong> ${enquiry.trial_quantity || 'N/A'}
+      <strong>Annual Volume:</strong> ${enquiry.annual_volume || 'N/A'}
+      <strong>Pack Size:</strong> ${enquiry.pack_size || 'N/A'}
+      <strong>Packaging Type:</strong> ${enquiry.packaging_type || 'N/A'}
+      <strong>Certifications:</strong> ${enquiry.certifications ? enquiry.certifications.join(', ') : 'N/A'}
+      <strong>Target Launch Date:</strong> ${enquiry.target_launch_date || 'N/A'}
+      <strong>Message:</strong> ${enquiry.message || 'N/A'}
+      <strong>Status:</strong> ${enquiry.status || 'pending'}
+      <strong>Submitted:</strong> ${new Date(enquiry.created_at).toLocaleString()}
+    `;
+
+    alert(details.replace(/<strong>/g, '\n').replace(/<\/strong>/g, ': ').replace(/<br>/g, '\n'));
+  } catch (err) {
+    console.error('View B2B enquiry error:', err);
+    showAdminToast('Failed to load enquiry details: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function updateB2BEnquiryStatus(enquiryId, newStatus) {
+  try {
+    await updateB2BEnquiry(enquiryId, { status: newStatus });
+    showAdminToast('Enquiry status updated!', 'success');
+    loadB2BEnquiries();
+  } catch (err) {
+    console.error('Update B2B enquiry status error:', err);
+    showAdminToast('Failed to update status: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function deleteB2BEnquiry(enquiryId) {
+  if (!confirm('Are you sure you want to delete this enquiry?')) return;
+  
+  try {
+    await deleteB2BEnquiryById(enquiryId);
+    showAdminToast('Enquiry deleted successfully!', 'success');
+    loadB2BEnquiries();
+  } catch (err) {
+    console.error('Delete B2B enquiry error:', err);
+    showAdminToast('Failed to delete enquiry: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function saveB2BEmailConfig() {
+  try {
+    const config = {
+      b2b_recipient_email: document.getElementById('b2bRecipientEmail').value,
+      b2b_emailjs_service_id: document.getElementById('b2bEmailJSServiceId').value,
+      b2b_emailjs_template_id: document.getElementById('b2bEmailJSTemplateId').value,
+      b2b_emailjs_public_key: document.getElementById('b2bEmailJSPublicKey').value
+    };
+
+    // Save each setting individually
+    for (const [key, value] of Object.entries(config)) {
+      await saveSetting(key, value);
+    }
+
+    showAdminToast('Email configuration saved successfully!', 'success');
+  } catch (err) {
+    console.error('Save B2B email config error:', err);
+    showAdminToast('Failed to save email configuration: ' + (err.message || 'Unknown error'), 'error');
   }
 }
 
