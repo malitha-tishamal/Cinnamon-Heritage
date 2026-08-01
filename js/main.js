@@ -168,6 +168,83 @@ function applyProcessContent(content) {
   }
 }
 
+function applyB2BContent(content) {
+  if (!content || !content.b2b) return;
+  const b2b = content.b2b;
+  
+  // Update section title and subtitle using IDs
+  const sectionTitle = document.getElementById('b2bSectionTitle');
+  const sectionSubtitle = document.getElementById('b2bSubtitle');
+  const sectionDescription = document.getElementById('b2bDescription');
+  
+  if (sectionTitle && b2b.title) {
+    sectionTitle.textContent = b2b.title;
+  }
+  if (sectionSubtitle && b2b.subtitle) {
+    sectionSubtitle.textContent = b2b.subtitle;
+  }
+  if (sectionDescription && b2b.description) {
+    sectionDescription.textContent = b2b.description;
+  }
+
+  // Update partner types
+  if (b2b.partner_types && b2b.partner_types.length > 0) {
+    const partnerTypesRow = document.getElementById('partnerTypesRow');
+    if (partnerTypesRow) {
+      let partnerTypesHtml = '';
+      b2b.partner_types.forEach(pt => {
+        partnerTypesHtml += `
+          <div class="col-md-6 col-lg-4">
+            <div class="b2b-card h-100">
+              <div class="b2b-icon">
+                <i class="fas fa-${pt.icon || 'industry'}"></i>
+              </div>
+              <h5 class="text-white">${pt.title}</h5>
+              <p class="text-white-50">${pt.description}</p>
+            </div>
+          </div>`;
+      });
+      partnerTypesRow.innerHTML = partnerTypesHtml;
+    }
+  }
+
+  // Update B2B solutions
+  if (b2b.solutions && b2b.solutions.length > 0) {
+    const solutionsRow = document.getElementById('solutionsRow');
+    if (solutionsRow) {
+      let solutionsHtml = '';
+      b2b.solutions.forEach(sol => {
+        solutionsHtml += `
+          <div class="col-md-6 col-lg-3">
+            <div class="b2b-solution-card h-100">
+              <div class="b2b-solution-icon">
+                <i class="fas fa-${sol.icon || 'boxes'}"></i>
+              </div>
+              <h5 class="text-white">${sol.title}</h5>
+              <p class="text-white-50">${sol.description}</p>
+            </div>
+          </div>`;
+      });
+      solutionsRow.innerHTML = solutionsHtml;
+    }
+  }
+
+  // Update CTA section using IDs
+  const ctaTitle = document.getElementById('b2bCtaTitle');
+  const ctaDescription = document.getElementById('b2bCtaDescription');
+  const ctaButton = document.getElementById('b2bCtaButton');
+  
+  if (ctaTitle && b2b.cta_title) {
+    ctaTitle.textContent = b2b.cta_title;
+  }
+  if (ctaDescription && b2b.cta_description) {
+    ctaDescription.textContent = b2b.cta_description;
+  }
+  if (ctaButton && b2b.button_text) {
+    ctaButton.textContent = b2b.button_text;
+  }
+}
+
 // ============================================================
 // Sequential Multi-Product Promo Popup System
 // ============================================================
@@ -634,6 +711,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyAboutContent(content);
   applyFactoryContent(content);
   applyProcessContent(content);
+  applyB2BContent(content);
   applySettings(settings);
   renderProducts(products);
   renderProcessSteps(steps);
@@ -669,6 +747,7 @@ function initRealtimeUpdates() {
     applyAboutContent(content);
     applyFactoryContent(content);
     applyProcessContent(content);
+    applyB2BContent(content);
   });
 
   subscribeToProducts(products => {
