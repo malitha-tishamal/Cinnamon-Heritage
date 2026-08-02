@@ -1867,20 +1867,51 @@ function initCartAndAuthListeners() {
       submitSpinner.classList.remove('d-none');
 
       try {
+        // Collect selected experiences
+        const selectedExperiences = [];
+        if (document.getElementById('expGuidedWalk').checked) selectedExperiences.push('Guided Cinnamon Estate Walk');
+        if (document.getElementById('expHarvesting').checked) selectedExperiences.push('Harvesting & Peeling Demonstration');
+        if (document.getElementById('expHandsOn').checked) selectedExperiences.push('Hands-on Cinnamon Activity');
+        if (document.getElementById('expTeaTasting').checked) selectedExperiences.push('Cinnamon Tea & Product Tasting');
+        if (document.getElementById('expFoodExperience').checked) selectedExperiences.push('Sri Lankan Spice & Food Experience');
+        if (document.getElementById('expShopVisit').checked) selectedExperiences.push('Cinnamon Heritage Shop Visit');
+
         const bookingData = {
+          // Personal Information
           name: document.getElementById('experienceName').value.trim(),
           email: document.getElementById('experienceEmail').value.trim(),
           phone: document.getElementById('experiencePhone').value.trim(),
-          guests: document.getElementById('experienceGuests').value,
+          country: document.getElementById('experienceCountry').value.trim(),
+          
+          // Visit Details
+          visit_type: document.getElementById('experienceVisitType').value,
           preferred_date: document.getElementById('experienceDate').value,
-          experience_type: document.getElementById('experienceType').value,
-          special_requests: document.getElementById('experienceRequests').value.trim(),
+          preferred_time: document.getElementById('experienceTime').value,
+          number_of_visitors: document.getElementById('experienceVisitors').value,
+          
+          // Experience Selection
+          selected_experiences: selectedExperiences,
+          
+          // Business Information (Optional)
+          company_name: document.getElementById('experienceCompany').value.trim(),
+          position: document.getElementById('experiencePosition').value.trim(),
+          industry: document.getElementById('experienceIndustry').value.trim(),
+          
+          // Additional Information
+          special_requirements: document.getElementById('experienceSpecialRequirements').value.trim(),
+          message: document.getElementById('experienceMessage').value.trim(),
+          
+          // Metadata
           created_at: new Date().toISOString(),
-          booking_id: 'EXP-' + Date.now().toString(36).toUpperCase()
+          booking_id: 'EXP-' + Date.now().toString(36).toUpperCase(),
+          status: 'pending'
         };
 
         // Save to Firestore
         await saveExperienceBooking(bookingData);
+
+        // Send email notification
+        await sendExperienceBookingEmail(bookingData);
 
         // Show success message
         successDiv.classList.remove('d-none');
@@ -1897,7 +1928,7 @@ function initCartAndAuthListeners() {
         errorDiv.textContent = 'Failed to submit booking request. Please try again.';
         errorDiv.classList.remove('d-none');
       } finally {
-        submitText.textContent = 'Submit Booking Request';
+        submitText.textContent = 'Book Now';
         submitSpinner.classList.add('d-none');
       }
     });
