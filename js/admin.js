@@ -241,6 +241,17 @@ async function loadSection(section) {
       document.getElementById('aboutImage').value = imgUrl;
       document.getElementById('aboutImgPreviewImg').src = imgUrl;
     }
+    if (section === 'villa' && content?.villa) {
+      document.getElementById('villaTitle').value = content.villa.title || '';
+      document.getElementById('villaSubtitle').value = content.villa.subtitle || '';
+      document.getElementById('villaText').value  = content.villa.text  || '';
+      const bgUrl = content.villa.background_image || 'images/estate_bg.png';
+      document.getElementById('villaBackgroundImage').value = bgUrl;
+      document.getElementById('villaBgPreviewImg').src = bgUrl;
+      const imgUrl = content.villa.image || 'images/cinnamon_plantlings.jpg';
+      document.getElementById('villaImage').value = imgUrl;
+      document.getElementById('villaImgPreviewImg').src = imgUrl;
+    }
     if (section === 'factory' && content?.factory) {
       document.getElementById('factoryTitle').value = content.factory.title || '';
       document.getElementById('factoryText').value  = content.factory.text  || '';
@@ -306,6 +317,14 @@ async function saveContent(section) {
         text:             document.getElementById('aboutText').value,
         background_image: document.getElementById('aboutBackgroundImage').value || 'images/estate_bg.png',
         image:            document.getElementById('aboutImage').value || 'images/cinnamon_plantlings.jpg'
+      };
+    } else if (section === 'villa') {
+      fields = {
+        title:            document.getElementById('villaTitle').value,
+        subtitle:         document.getElementById('villaSubtitle').value,
+        text:             document.getElementById('villaText').value,
+        background_image: document.getElementById('villaBackgroundImage').value || 'images/estate_bg.png',
+        image:            document.getElementById('villaImage').value || 'images/cinnamon_plantlings.jpg'
       };
     } else if (section === 'factory') {
       fields = {
@@ -426,6 +445,106 @@ document.getElementById('aboutBgUpload')?.addEventListener('change', async funct
   } catch (err) {
     progressWrap.classList.add('d-none');
     showAdminToast('Upload failed: ' + err.message, 'error');
+  } finally {
+    this.value = '';
+  }
+});
+
+// Villa background upload with Cloudinary progress
+document.getElementById('villaBgUpload')?.addEventListener('change', async function() {
+  if (!this.files || !this.files.length) return;
+
+  const progressWrap = document.getElementById('villaBgUploadProgress');
+  const progressBar  = document.getElementById('villaBgUploadBar');
+  const progressPct  = document.getElementById('villaBgUploadPercent');
+  const successBadge = document.getElementById('villaBgUploadSuccess');
+  const failedBadge  = document.getElementById('villaBgUploadFailed');
+  const failedMsg    = document.getElementById('villaBgUploadFailedMsg');
+  const previewImg   = document.getElementById('villaBgPreviewImg');
+  const bgInput      = document.getElementById('villaBackgroundImage');
+
+  progressWrap.classList.remove('d-none');
+  successBadge.classList.add('d-none');
+  if(failedBadge) failedBadge.classList.add('d-none');
+  progressBar.style.width = '0%';
+  progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(this.files[0], (pct) => {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    });
+
+    bgInput.value = url;
+    previewImg.src = url;
+    previewImg.classList.add('preview-flash');
+
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      progressWrap.classList.add('d-none');
+      successBadge.classList.remove('d-none');
+      previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    progressWrap.classList.add('d-none');
+    if(failedBadge) {
+      failedBadge.classList.remove('d-none');
+      if(failedMsg) failedMsg.textContent = 'Upload failed: ' + err.message;
+    } else {
+      showAdminToast('Upload failed: ' + err.message, 'error');
+    }
+  } finally {
+    this.value = '';
+  }
+});
+
+// Villa image upload with Cloudinary progress
+document.getElementById('villaImgUpload')?.addEventListener('change', async function() {
+  if (!this.files || !this.files.length) return;
+
+  const progressWrap = document.getElementById('villaImgUploadProgress');
+  const progressBar  = document.getElementById('villaImgUploadBar');
+  const progressPct  = document.getElementById('villaImgUploadPercent');
+  const successBadge = document.getElementById('villaImgUploadSuccess');
+  const failedBadge  = document.getElementById('villaImgUploadFailed');
+  const failedMsg    = document.getElementById('villaImgUploadFailedMsg');
+  const previewImg   = document.getElementById('villaImgPreviewImg');
+  const imgInput     = document.getElementById('villaImage');
+
+  progressWrap.classList.remove('d-none');
+  successBadge.classList.add('d-none');
+  if(failedBadge) failedBadge.classList.add('d-none');
+  progressBar.style.width = '0%';
+  progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(this.files[0], (pct) => {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    });
+
+    imgInput.value = url;
+    previewImg.src = url;
+    previewImg.classList.add('preview-flash');
+
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      progressWrap.classList.add('d-none');
+      successBadge.classList.remove('d-none');
+      previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    progressWrap.classList.add('d-none');
+    if(failedBadge) {
+      failedBadge.classList.remove('d-none');
+      if(failedMsg) failedMsg.textContent = 'Upload failed: ' + err.message;
+    } else {
+      showAdminToast('Upload failed: ' + err.message, 'error');
+    }
   } finally {
     this.value = '';
   }
