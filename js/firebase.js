@@ -1707,3 +1707,113 @@ async function saveExperienceBooking(bookingData) {
     return { success: false, error: error.message };
   }
 }
+
+async function getExperienceBookings() {
+  try {
+    const snapshot = await db.collection('experience_bookings')
+      .orderBy('created_at', 'desc')
+      .get();
+    
+    const bookings = [];
+    snapshot.forEach(doc => {
+      bookings.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return bookings;
+  } catch (error) {
+    console.error('Error getting experience bookings:', error);
+    return [];
+  }
+}
+
+async function getExperienceBookingById(bookingId) {
+  try {
+    const doc = await db.collection('experience_bookings').doc(bookingId).get();
+    if (doc.exists) {
+      return { id: doc.id, ...doc.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting experience booking:', error);
+    return null;
+  }
+}
+
+async function updateExperienceBooking(bookingId, updates) {
+  try {
+    await db.collection('experience_bookings').doc(bookingId).update(updates);
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating experience booking:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function deleteExperienceBookingById(bookingId) {
+  try {
+    await db.collection('experience_bookings').doc(bookingId).delete();
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting experience booking:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function sendExperienceBookingEmail(bookingData) {
+  try {
+    // Get email configuration from settings
+    const settings = await getSettings();
+    const recipientEmail = settings.exp_recipient_email || 'info@cinnamonheritage.com';
+    const EMAILJS_SERVICE_ID = settings.exp_emailjs_service_id || 'YOUR_SERVICE_ID';
+    const EMAILJS_TEMPLATE_ID = settings.exp_emailjs_template_id || 'YOUR_TEMPLATE_ID';
+    const EMAILJS_PUBLIC_KEY = settings.exp_emailjs_public_key || 'YOUR_PUBLIC_KEY';
+
+    if (typeof emailjs === 'undefined') {
+      console.warn('EmailJS not loaded. Skipping email notification.');
+      return { success: true, warning: 'EmailJS not configured' };
+    }
+
+    if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') {
+      console.warn('EmailJS not configured. Please add your credentials in admin panel.');
+      return { success: true, warning: 'EmailJS not configured' };
+    }
+
+    // Initialize EmailJS if not already done
+    if (!emailjs.initialized) {
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+      emailjs.initialized = true;
+    }
+
+    const templateParams = {
+      to_email: recipientEmail,
+      booking_id: bookingData.booking_id,
+      name: bookingData.name,
+      email: bookingData.email,
+      phone: bookingData.phone,
+      country: bookingData.country,
+      visit_type: bookingData.visit_type,
+      preferred_date: bookingData.preferred_date,
+      preferred_time: bookingData.preferred_time,
+      number_of_visitors: bookingData.number_of_visitors,
+      selected_experiences: bookingData.selected_experiences.join(', '),
+      company_name: bookingData.company_name,
+      position: bookingData.position,
+      industry: bookingData.industry,
+      special_requirements: bookingData.special_requirements,
+      message: bookingData.message,
+      created_at: bookingData.created_at
+    };
+
+    const response = await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      templateParams
+    );
+
+    console.log('Experience booking email sent successfully:', response);
+    return { success: true, response };
+  } catch (error) {
+    console.error('Error sending experience booking email:', error);
+    return { success: false, error: error.message };
+  }
+}
