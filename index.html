@@ -1117,17 +1117,19 @@
 
   <!-- Experience Booking Modal -->
   <div class="modal fade" id="experienceBookingModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content glass-auth-card">
         <div class="modal-header border-0 pb-0">
           <h4 class="modal-title text-white fw-bold" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-calendar-alt me-2" style="color: var(--accent);"></i>Book Your Experience</h4>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body px-4 px-md-5 pb-5">
-          <p class="text-white-50 mb-4">Schedule your visit to our cinnamon estate and experience the authentic journey of Ceylon Cinnamon.</p>
+          <p class="text-white-50 mb-4">Plan your visit to Cinnamon Heritage and immerse yourself in the authentic world of Ceylon Cinnamon.</p>
           
           <form id="experienceBookingForm">
-            <div class="row g-2 mb-3">
+            <!-- Personal Information -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Personal Information</h6>
+            <div class="row g-2 mb-4">
               <div class="col-md-6 mb-2">
                 <label class="form-label text-white-50 small">Full Name *</label>
                 <input type="text" class="form-control glass-input" id="experienceName" placeholder="Your Name" required>
@@ -1136,49 +1138,116 @@
                 <label class="form-label text-white-50 small">Email Address *</label>
                 <input type="email" class="form-control glass-input" id="experienceEmail" placeholder="your@email.com" required>
               </div>
-            </div>
-            <div class="row g-2 mb-3">
               <div class="col-md-6 mb-2">
                 <label class="form-label text-white-50 small">Phone Number *</label>
                 <input type="tel" class="form-control glass-input" id="experiencePhone" placeholder="+94 XX XXX XXXX" required>
               </div>
               <div class="col-md-6 mb-2">
-                <label class="form-label text-white-50 small">Number of Guests *</label>
-                <input type="number" class="form-control glass-input" id="experienceGuests" placeholder="2" min="1" required>
+                <label class="form-label text-white-50 small">Country / Region *</label>
+                <input type="text" class="form-control glass-input" id="experienceCountry" placeholder="Sri Lanka" required>
               </div>
             </div>
-            <div class="row g-2 mb-3">
+
+            <!-- Visit Details -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Visit Details</h6>
+            <div class="row g-2 mb-4">
               <div class="col-md-6 mb-2">
-                <label class="form-label text-white-50 small">Preferred Date *</label>
+                <label class="form-label text-white-50 small">Visit Type *</label>
+                <select class="form-control glass-input" id="experienceVisitType" required>
+                  <option value="">Select Visit Type</option>
+                  <option value="Guided Estate Tour">Guided Estate Tour</option>
+                  <option value="Educational Visit">Educational Visit</option>
+                  <option value="Business Visit">Business Visit</option>
+                  <option value="Family Experience">Family Experience</option>
+                  <option value="Group Tour">Group Tour</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Preferred Visit Date *</label>
                 <input type="date" class="form-control glass-input" id="experienceDate" required>
               </div>
               <div class="col-md-6 mb-2">
-                <label class="form-label text-white-50 small">Experience Type *</label>
-                <select class="form-control glass-input" id="experienceType" required>
-                  <option value="">Select Experience</option>
-                  <option value="Guided Estate Walk">Guided Estate Walk</option>
-                  <option value="Harvesting Demo">Harvesting & Peeling Demo</option>
-                  <option value="Hands-on Activity">Hands-on Activity</option>
-                  <option value="Tea Tasting">Tea & Product Tasting</option>
-                  <option value="Food Experience">Spice & Food Experience</option>
-                  <option value="Educational Visit">Educational Visit</option>
-                  <option value="Business Visit">Business Visit</option>
-                  <option value="Full Experience">Full Experience Package</option>
-                </select>
+                <label class="form-label text-white-50 small">Preferred Time *</label>
+                <input type="time" class="form-control glass-input" id="experienceTime" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Number of Visitors *</label>
+                <input type="number" class="form-control glass-input" id="experienceVisitors" placeholder="2" min="1" required>
               </div>
             </div>
-            <div class="mb-3">
-              <label class="form-label text-white-50 small">Special Requests</label>
-              <textarea class="form-control glass-input" id="experienceRequests" rows="3" placeholder="Any special requirements or requests..."></textarea>
+
+            <!-- Experience Selection -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Experience Selection</h6>
+            <div class="mb-4">
+              <label class="form-label text-white-50 small">Select the experiences you would like to enjoy:</label>
+              <div class="d-flex flex-wrap gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expGuidedWalk" value="Guided Cinnamon Estate Walk">
+                  <label class="form-check-label text-white-50 small" for="expGuidedWalk">Guided Cinnamon Estate Walk</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expHarvesting" value="Harvesting & Peeling Demonstration">
+                  <label class="form-check-label text-white-50 small" for="expHarvesting">Harvesting & Peeling Demonstration</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expHandsOn" value="Hands-on Cinnamon Activity">
+                  <label class="form-check-label text-white-50 small" for="expHandsOn">Hands-on Cinnamon Activity</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expTeaTasting" value="Cinnamon Tea & Product Tasting">
+                  <label class="form-check-label text-white-50 small" for="expTeaTasting">Cinnamon Tea & Product Tasting</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expFoodExperience" value="Sri Lankan Spice & Food Experience">
+                  <label class="form-check-label text-white-50 small" for="expFoodExperience">Sri Lankan Spice & Food Experience</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expShopVisit" value="Cinnamon Heritage Shop Visit">
+                  <label class="form-check-label text-white-50 small" for="expShopVisit">Cinnamon Heritage Shop Visit</label>
+                </div>
+              </div>
             </div>
 
-            <div id="experienceBookingError" class="alert alert-danger py-2 small d-none" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
-            <div id="experienceBookingSuccess" class="alert alert-success py-2 small d-none" style="background: rgba(40,167,69,0.2); border: 1px solid rgba(40,167,69,0.4); color: #85ff93;">Thank you! We'll contact you shortly to confirm your booking.</div>
+            <!-- Business Information (Optional) -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Business / Organization Information (Optional)</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Company / Organization Name</label>
+                <input type="text" class="form-control glass-input" id="experienceCompany" placeholder="Company Name">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Position / Designation</label>
+                <input type="text" class="form-control glass-input" id="experiencePosition" placeholder="Your Position">
+              </div>
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Industry / Institution</label>
+                <input type="text" class="form-control glass-input" id="experienceIndustry" placeholder="Your Industry">
+              </div>
+            </div>
+
+            <!-- Additional Information -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Additional Information</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Special Requirements</label>
+                <input type="text" class="form-control glass-input" id="experienceSpecialRequirements" placeholder="Dietary restrictions, accessibility needs, etc.">
+              </div>
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Message / Notes</label>
+                <textarea class="form-control glass-input" id="experienceMessage" rows="3" placeholder="Any additional information or requests..."></textarea>
+              </div>
+            </div>
+
+            <div id="experienceBookingError" class="alert alert-danger py-2 small d-none mb-3" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+            <div id="experienceBookingSuccess" class="alert alert-success py-2 small d-none mb-3" style="background: rgba(40,167,69,0.2); border: 1px solid rgba(40,167,69,0.4); color: #85ff93;">Thank you for your booking request. Our team will contact you within 24–48 hours to confirm your visit.</div>
             
-            <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">
-              <span id="experienceSubmitText">Submit Booking Request</span>
-              <span id="experienceSubmitSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
-            </button>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn flex-grow-1 py-3 fw-bold text-uppercase rounded-0" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">
+                <span id="experienceSubmitText">Book Now</span>
+                <span id="experienceSubmitSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+              </button>
+              <button type="button" class="btn py-3 fw-bold text-uppercase rounded-0" style="background: rgba(255,255,255,0.1); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:1px solid rgba(255,255,255,0.2);" onclick="document.getElementById('experienceBookingForm').reset();">Reset</button>
+            </div>
           </form>
         </div>
       </div>
