@@ -139,6 +139,7 @@
         <li data-section="factory"><i class="bi bi-building"></i> Factory</li>
         <li data-section="process"><i class="bi bi-gear"></i> Process Steps</li>
         <li data-section="products"><i class="bi bi-box-seam"></i> Products</li>
+        <li data-section="essential-oils"><i class="bi bi-droplet"></i> Essential Oils</li>
         <li data-section="b2b"><i class="bi bi-handshake"></i> B2B Partnerships</li>
         <li data-section="b2b-enquiries"><i class="bi bi-envelope-paper"></i> B2B Enquiries</li>
         <li data-section="experience"><i class="bi bi-tree"></i> Cinnamon Experience</li>
@@ -461,6 +462,179 @@
       <div class="content-section d-none" id="sec-products">
         <h3 class="section-heading">Products <button class="btn btn-accent btn-sm float-end" onclick="addProduct()"><i class="bi bi-plus-lg me-1"></i>Add Product</button></h3>
         <div id="productsList"></div>
+      </div>
+
+      <!-- Essential Oils Editor -->
+      <div class="content-section d-none" id="sec-essential-oils">
+        <h3 class="section-heading">Essential Oils</h3>
+        
+        <!-- Section Content -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>Section Content</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Section Title</label>
+                <input type="text" class="form-control" id="eoTitle" placeholder="Essential Oils">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Subtitle</label>
+                <input type="text" class="form-control" id="eoSubtitle" placeholder="Pure Ceylon Cinnamon Essential Oils">
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Description</label>
+                <textarea class="form-control" id="eoDescription" rows="2" placeholder="Steam Distilled From Authentic Ceylon Cinnamon"></textarea>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Main Text</label>
+                <textarea class="form-control" id="eoText" rows="3" placeholder="Experience the natural power of authentic Ceylon Cinnamon..."></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Sample Button Text</label>
+                <input type="text" class="form-control" id="eoSampleBtn" placeholder="Request B2B Sample">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Tech Button Text</label>
+                <input type="text" class="form-control" id="eoTechBtn" placeholder="Technical Discussion">
+              </div>
+            </div>
+            <button class="btn btn-accent mt-3" onclick="saveEssentialOilsContent()"><i class="bi bi-check-lg me-1"></i>Save Section Content</button>
+          </div>
+        </div>
+
+        <!-- Cinnamon Leaf Oil -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-leaf me-2"></i>Cinnamon Leaf Oil</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Title</label>
+                <input type="text" class="form-control" id="eoLeafTitle" placeholder="Cinnamon Leaf Oil">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Subtitle</label>
+                <input type="text" class="form-control" id="eoLeafSubtitle" placeholder="Pure Ceylon Cinnamon Leaf Oil">
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Description</label>
+                <textarea class="form-control" id="eoLeafDescription" rows="3" placeholder="Our Cinnamon Leaf Oil is produced through steam distillation..."></textarea>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Key Features (one per line)</label>
+                <textarea class="form-control" id="eoLeafFeatures" rows="3" placeholder="✓ Steam distilled from authentic Ceylon cinnamon leaves&#10;✓ High natural eugenol content..."></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Main Constituents</label>
+                <input type="text" class="form-control" id="eoLeafConstituents" placeholder="Eugenol, Benzyl Benzoate, Linalool...">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Applications</label>
+                <input type="text" class="form-control" id="eoLeafApplications" placeholder="Aromatherapy products, Natural fragrances...">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cinnamon Bark Oil -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-tree me-2"></i>Cinnamon Bark Oil</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Title</label>
+                <input type="text" class="form-control" id="eoBarkTitle" placeholder="Cinnamon Bark Oil">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Subtitle</label>
+                <input type="text" class="form-control" id="eoBarkSubtitle" placeholder="Premium Ceylon Cinnamon Bark Oil">
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Description</label>
+                <textarea class="form-control" id="eoBarkDescription" rows="3" placeholder="Cinnamon Bark Oil is one of the most valuable essential oils..."></textarea>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Key Features (one per line)</label>
+                <textarea class="form-control" id="eoBarkFeatures" rows="3" placeholder="✓ Produced from premium Ceylon cinnamon bark&#10;✓ High cinnamaldehyde content..."></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Main Constituents</label>
+                <input type="text" class="form-control" id="eoBarkConstituents" placeholder="Cinnamaldehyde, Eugenol, Benzyl Benzoate...">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Applications</label>
+                <input type="text" class="form-control" id="eoBarkApplications" placeholder="Premium fragrances, Food flavouring solutions...">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aroma Profiles -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-music-note me-2"></i>Aroma Profiles</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Leaf Oil Aroma Title</label>
+                <input type="text" class="form-control" id="eoLeafAromaTitle" placeholder="Cinnamon Leaf Oil Aroma">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Bark Oil Aroma Title</label>
+                <input type="text" class="form-control" id="eoBarkAromaTitle" placeholder="Cinnamon Bark Oil Aroma">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Leaf Aroma Description</label>
+                <textarea class="form-control" id="eoLeafAromaDescription" rows="2" placeholder="Warm and spicy with a distinctive clove-like character."></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Bark Aroma Description</label>
+                <textarea class="form-control" id="eoBarkAromaDescription" rows="2" placeholder="A powerful traditional cinnamon fragrance..."></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Leaf Aroma Notes (comma separated)</label>
+                <input type="text" class="form-control" id="eoLeafAromaNotes" placeholder="Herbal, Spicy, Woody, Slightly sweet">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Bark Aroma Notes (comma separated)</label>
+                <input type="text" class="form-control" id="eoBarkAromaNotes" placeholder="Sweet, Rich, Warm, Intense cinnamon">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Statement -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Footer Statement</h5>
+            <textarea class="form-control" id="eoFooter" rows="3" placeholder="Authentic Ceylon Cinnamon Quality - From our family estate in Galle, Sri Lanka..."></textarea>
+            <button class="btn btn-accent mt-3" onclick="saveEssentialOilsFooter()"><i class="bi bi-check-lg me-1"></i>Save Footer Statement</button>
+          </div>
+        </div>
+
+        <!-- Email Configuration -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-envelope me-2"></i>Essential Oils Email Configuration</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Recipient Email</label>
+                <input type="email" class="form-control" id="eoRecipientEmail" placeholder="info@cinnamonheritage.com">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Service ID</label>
+                <input type="text" class="form-control" id="eoEmailJSServiceId" placeholder="YOUR_SERVICE_ID">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Template ID</label>
+                <input type="text" class="form-control" id="eoEmailJSTemplateId" placeholder="YOUR_TEMPLATE_ID">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Public Key</label>
+                <input type="text" class="form-control" id="eoEmailJSPublicKey" placeholder="YOUR_PUBLIC_KEY">
+              </div>
+            </div>
+            <button class="btn btn-accent mt-3" onclick="saveEssentialOilsEmailConfig()"><i class="bi bi-check-lg me-1"></i>Save Email Configuration</button>
+          </div>
+        </div>
       </div>
 
       <!-- B2B Partnerships Editor -->
