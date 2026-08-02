@@ -142,6 +142,7 @@
         <li data-section="b2b"><i class="bi bi-handshake"></i> B2B Partnerships</li>
         <li data-section="b2b-enquiries"><i class="bi bi-envelope-paper"></i> B2B Enquiries</li>
         <li data-section="experience"><i class="bi bi-tree"></i> Cinnamon Experience</li>
+        <li data-section="experience-bookings"><i class="bi bi-calendar-check"></i> Experience Bookings</li>
         <li data-section="popups"><i class="bi bi-megaphone-fill"></i> Manage Popups</li>
         <li data-section="orders"><i class="bi bi-cart-check"></i> Orders</li>
         <li data-section="accounts"><i class="bi bi-bank"></i> Accounts & Sales</li>
@@ -652,6 +653,92 @@
               <!-- Experience items will be loaded here -->
             </div>
             <button class="btn btn-accent mt-3" onclick="addExperienceItem()"><i class="bi bi-plus-lg me-1"></i>Add Experience Item</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experience Bookings Management -->
+      <div class="content-section d-none" id="sec-experience-bookings">
+        <h3 class="section-heading">Experience Bookings</h3>
+        
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h6 class="text-muted mb-2">Total Bookings</h6>
+                <h3 class="fw-bold mb-0" id="expTotalBookings">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h6 class="text-muted mb-2">This Month</h6>
+                <h3 class="fw-bold mb-0" id="expThisMonth">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h6 class="text-muted mb-2">Pending Confirmation</h6>
+                <h3 class="fw-bold mb-0" id="expPending">0</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email Configuration -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-envelope me-2"></i>Experience Booking Email Configuration</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Recipient Email</label>
+                <input type="email" class="form-control" id="expRecipientEmail" placeholder="info@cinnamonheritage.com">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Service ID</label>
+                <input type="text" class="form-control" id="expEmailJSServiceId" placeholder="YOUR_SERVICE_ID">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Template ID</label>
+                <input type="text" class="form-control" id="expEmailJSTemplateId" placeholder="YOUR_TEMPLATE_ID">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Public Key</label>
+                <input type="text" class="form-control" id="expEmailJSPublicKey" placeholder="YOUR_PUBLIC_KEY">
+              </div>
+            </div>
+            <button class="btn btn-accent mt-3" onclick="saveExperienceEmailConfig()"><i class="bi bi-check-lg me-1"></i>Save Email Configuration</button>
+          </div>
+        </div>
+
+        <!-- Bookings Table -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4">Booking ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Visit Type</th>
+                    <th>Date</th>
+                    <th>Visitors</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="experienceBookingsTableBody">
+                  <tr>
+                    <td colspan="8" class="text-center py-4 text-muted">Loading bookings...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
