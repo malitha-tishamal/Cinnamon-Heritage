@@ -1817,3 +1817,74 @@ async function sendExperienceBookingEmail(bookingData) {
     return { success: false, error: error.message };
   }
 }
+
+// ============================================================
+// ESSENTIAL OILS ENQUIRIES
+// ============================================================
+
+async function saveEssentialOilsEnquiry(enquiryData) {
+  try {
+    const docRef = await db.collection('essential_oils_enquiries').add(enquiryData);
+    console.log('Essential oils enquiry saved with ID:', docRef.id);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error('Error saving essential oils enquiry:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function sendEssentialOilsEmail(enquiryData) {
+  try {
+    // Get email configuration from settings
+    const settings = await getSettings();
+    const recipientEmail = settings.eo_recipient_email || 'info@cinnamonheritage.com';
+    const EMAILJS_SERVICE_ID = settings.eo_emailjs_service_id || 'YOUR_SERVICE_ID';
+    const EMAILJS_TEMPLATE_ID = settings.eo_emailjs_template_id || 'YOUR_TEMPLATE_ID';
+    const EMAILJS_PUBLIC_KEY = settings.eo_emailjs_public_key || 'YOUR_PUBLIC_KEY';
+
+    if (typeof emailjs === 'undefined') {
+      console.warn('EmailJS not loaded. Skipping email notification.');
+      return { success: true, warning: 'EmailJS not configured' };
+    }
+
+    if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') {
+      console.warn('EmailJS not configured. Please add your credentials in admin panel.');
+      return { success: true, warning: 'EmailJS not configured' };
+    }
+
+    // Initialize EmailJS if not already done
+    if (!emailjs.initialized) {
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+      emailjs.initialized = true;
+    }
+
+    const templateParams = {
+      to_email: recipientEmail,
+      request_id: enquiryData.request_id,
+      type: enquiryData.type,
+      name: enquiryData.name,
+      company: enquiryData.company,
+      email: enquiryData.email,
+      phone: enquiryData.phone,
+      country: enquiryData.country,
+      sample_size: enquiryData.sample_size,
+      selected_oils: enquiryData.selected_oils ? enquiryData.selected_oils.join(', ') : 'N/A',
+      industry: enquiryData.industry,
+      requirements: enquiryData.requirements,
+      message: enquiryData.message,
+      created_at: enquiryData.created_at
+    };
+
+    const response = await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      templateParams
+    );
+
+    console.log('Essential oils email sent successfully:', response);
+    return { success: true, response };
+  } catch (error) {
+    console.error('Error sending essential oils email:', error);
+    return { success: false, error: error.message };
+  }
+}
