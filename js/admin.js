@@ -273,6 +273,9 @@ async function loadSection(section) {
     if (section === 'experience') {
       loadExperienceSection();
     }
+    if (section === 'experience-bookings') {
+      loadExperienceBookings();
+    }
   } catch (err) {
     console.error('Load error:', err);
   }
@@ -2196,6 +2199,172 @@ async function saveB2BEmailConfig() {
     showAdminToast('Email configuration saved successfully!', 'success');
   } catch (err) {
     console.error('Save B2B email config error:', err);
+    showAdminToast('Failed to save email configuration: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+// ============================================================
+// EXPERIENCE BOOKINGS MANAGEMENT
+// ============================================================
+async function loadExperienceBookings() {
+  try {
+    const bookings = await getExperienceBookings();
+    
+    // Update stats
+    document.getElementById('expTotalBookings').textContent = bookings.length;
+    
+    const thisMonth = bookings.filter(b => {
+      const bookingDate = new Date(b.created_at);
+      const now = new Date();
+      return bookingDate.getMonth() === now.getMonth() && bookingDate.getFullYear() === now.getFullYear();
+    }).length;
+    document.getElementById('expThisMonth').textContent = thisMonth;
+    
+    const pending = bookings.filter(b => b.status === 'pending' || !b.status).length;
+    document.getElementById('expPending').textContent = pending;
+
+    // Load email configuration
+    const settings = await getSettings();
+    document.getElementById('expRecipientEmail').value = settings.exp_recipient_email || 'info@cinnamonheritage.com';
+    document.getElementById('expEmailJSServiceId').value = settings.exp_emailjs_service_id || '';
+    document.getElementById('expEmailJSTemplateId').value = settings.exp_emailjs_template_id || '';
+    document.getElementById('expEmailJSPublicKey').value = settings.exp_emailjs_public_key || '';
+
+    // Render bookings table
+    renderExperienceBookingsTable(bookings);
+  } catch (err) {
+    console.error('Load Experience bookings error:', err);
+    showAdminToast('Failed to load Experience bookings: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+function renderExperienceBookingsTable(bookings) {
+  const tbody = document.getElementById('experienceBookingsTableBody');
+  
+  if (!bookings || bookings.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No bookings found</td></tr>';
+    return;
+  }
+
+  const sortedBookings = bookings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  
+  let html = '';
+  sortedBookings.forEach(booking => {
+    const status = booking.status || 'pending';
+    const statusBadge = status === 'pending' 
+      ? '<span class="badge bg-warning text-dark">Pending</span>'
+      : status === 'confirmed'
+        ? '<span class="badge bg-success">Confirmed</span>'
+        : status === 'completed'
+          ? '<span class="badge bg-info">Completed</span>'
+          : status === 'cancelled'
+            ? '<span class="badge bg-danger">Cancelled</span>'
+            : '<span class="badge bg-secondary">Unknown</span>';
+
+    const date = booking.preferred_date ? new Date(booking.preferred_date).toLocaleDateString() : 'N/A';
+    
+    html += `
+      <tr>
+        <td class="ps-4"><span class="fw-medium">${booking.booking_id || 'N/A'}</span></td>
+        <td>${booking.name || 'N/A'}</td>
+        <td>${booking.email || 'N/A'}</td>
+        <td>${booking.visit_type || 'N/A'}</td>
+        <td>${date}</td>
+        <td>${booking.number_of_visitors || 'N/A'}</td>
+        <td class="text-center">${statusBadge}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="viewExperienceBooking('${booking.id}')" title="View Details">
+            <i class="bi bi-eye"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-success me-1" onclick="updateExperienceBookingStatus('${booking.id}', 'confirmed')" title="Confirm">
+            <i class="bi bi-check"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteExperienceBooking('${booking.id}')" title="Delete">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>`;
+  });
+  
+  tbody.innerHTML = html;
+}
+
+async function viewExperienceBooking(bookingId) {
+  try {
+    const booking = await getExperienceBookingById(bookingId);
+    if (!booking) {
+      showAdminToast('Booking not found', 'error');
+      return;
+    }
+
+    const details = `
+      <strong>Booking ID:</strong> ${booking.booking_id || 'N/A'}
+      <strong>Name:</strong> ${booking.name || 'N/A'}
+      <strong>Email:</strong> ${booking.email || 'N/A'}
+      <strong>Phone:</strong> ${booking.phone || 'N/A'}
+      <strong>Country:</strong> ${booking.country || 'N/A'}
+      <strong>Visit Type:</strong> ${booking.visit_type || 'N/A'}
+      <strong>Preferred Date:</strong> ${booking.preferred_date || 'N/A'}
+      <strong>Preferred Time:</strong> ${booking.preferred_time || 'N/A'}
+      <strong>Number of Visitors:</strong> ${booking.number_of_visitors || 'N/A'}
+      <strong>Selected Experiences:</strong> ${booking.selected_experiences ? booking.selected_experiences.join(', ') : 'N/A'}
+      <strong>Company Name:</strong> ${booking.company_name || 'N/A'}
+      <strong>Position:</strong> ${booking.position || 'N/A'}
+      <strong>Industry:</strong> ${booking.industry || 'N/A'}
+      <strong>Special Requirements:</strong> ${booking.special_requirements || 'N/A'}
+      <strong>Message:</strong> ${booking.message || 'N/A'}
+      <strong>Status:</strong> ${booking.status || 'pending'}
+      <strong>Submitted:</strong> ${new Date(booking.created_at).toLocaleString()}
+    `;
+
+    alert(details.replace(/<strong>/g, '\n').replace(/<\/strong>/g, ': ').replace(/<br>/g, '\n'));
+  } catch (err) {
+    console.error('View Experience booking error:', err);
+    showAdminToast('Failed to load booking details: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function updateExperienceBookingStatus(bookingId, newStatus) {
+  try {
+    await updateExperienceBooking(bookingId, { status: newStatus });
+    showAdminToast('Booking status updated!', 'success');
+    loadExperienceBookings();
+  } catch (err) {
+    console.error('Update Experience booking status error:', err);
+    showAdminToast('Failed to update status: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function deleteExperienceBooking(bookingId) {
+  if (!confirm('Are you sure you want to delete this booking?')) return;
+  
+  try {
+    await deleteExperienceBookingById(bookingId);
+    showAdminToast('Booking deleted successfully!', 'success');
+    loadExperienceBookings();
+  } catch (err) {
+    console.error('Delete Experience booking error:', err);
+    showAdminToast('Failed to delete booking: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function saveExperienceEmailConfig() {
+  try {
+    const config = {
+      exp_recipient_email: document.getElementById('expRecipientEmail').value,
+      exp_emailjs_service_id: document.getElementById('expEmailJSServiceId').value,
+      exp_emailjs_template_id: document.getElementById('expEmailJSTemplateId').value,
+      exp_emailjs_public_key: document.getElementById('expEmailJSPublicKey').value
+    };
+
+    // Save each setting individually
+    for (const [key, value] of Object.entries(config)) {
+      await saveSetting(key, value);
+    }
+
+    showAdminToast('Email configuration saved successfully!', 'success');
+  } catch (err) {
+    console.error('Save Experience email config error:', err);
     showAdminToast('Failed to save email configuration: ' + (err.message || 'Unknown error'), 'error');
   }
 }
