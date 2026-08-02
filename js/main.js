@@ -301,6 +301,93 @@ function applyExperienceContent(content) {
   }
 }
 
+function applyEssentialOilsContent(content) {
+  if (!content || !content.essential_oils) return;
+  const eo = content.essential_oils;
+  
+  // Update section content
+  const title = document.getElementById('essentialOilsTitle');
+  const subtitle = document.getElementById('essentialOilsSubtitle');
+  const description = document.getElementById('essentialOilsDescription');
+  const text = document.getElementById('essentialOilsText');
+  const sampleBtn = document.getElementById('essentialOilsSampleBtn');
+  const techBtn = document.getElementById('essentialOilsTechBtn');
+  
+  if (title && eo.title) title.textContent = eo.title;
+  if (subtitle && eo.subtitle) subtitle.textContent = eo.subtitle;
+  if (description && eo.description) description.textContent = eo.description;
+  if (text && eo.text) text.textContent = eo.text;
+  if (sampleBtn && eo.sample_button) sampleBtn.textContent = eo.sample_button;
+  if (techBtn && eo.tech_button) techBtn.textContent = eo.tech_button;
+
+  // Update leaf oil content
+  if (eo.leaf) {
+    const leafTitle = document.getElementById('leafOilTitle');
+    const leafSubtitle = document.getElementById('leafOilSubtitle');
+    const leafDescription = document.getElementById('leafOilDescription');
+    const leafFeatures = document.getElementById('leafOilFeatures');
+    const leafConstituents = document.getElementById('leafOilConstituents');
+    const leafApplications = document.getElementById('leafOilApplications');
+    
+    if (leafTitle && eo.leaf.title) leafTitle.textContent = eo.leaf.title;
+    if (leafSubtitle && eo.leaf.subtitle) leafSubtitle.textContent = eo.leaf.subtitle;
+    if (leafDescription && eo.leaf.description) leafDescription.textContent = eo.leaf.description;
+    if (leafFeatures && eo.leaf.features) {
+      const features = eo.leaf.features.split('\n').filter(f => f.trim());
+      leafFeatures.innerHTML = features.map(f => `<li>${f.trim()}</li>`).join('');
+    }
+    if (leafConstituents && eo.leaf.constituents) leafConstituents.textContent = eo.leaf.constituents;
+    if (leafApplications && eo.leaf.applications) leafApplications.textContent = eo.leaf.applications;
+  }
+
+  // Update bark oil content
+  if (eo.bark) {
+    const barkTitle = document.getElementById('barkOilTitle');
+    const barkSubtitle = document.getElementById('barkOilSubtitle');
+    const barkDescription = document.getElementById('barkOilDescription');
+    const barkFeatures = document.getElementById('barkOilFeatures');
+    const barkConstituents = document.getElementById('barkOilConstituents');
+    const barkApplications = document.getElementById('barkOilApplications');
+    
+    if (barkTitle && eo.bark.title) barkTitle.textContent = eo.bark.title;
+    if (barkSubtitle && eo.bark.subtitle) barkSubtitle.textContent = eo.bark.subtitle;
+    if (barkDescription && eo.bark.description) barkDescription.textContent = eo.bark.description;
+    if (barkFeatures && eo.bark.features) {
+      const features = eo.bark.features.split('\n').filter(f => f.trim());
+      barkFeatures.innerHTML = features.map(f => `<li>${f.trim()}</li>`).join('');
+    }
+    if (barkConstituents && eo.bark.constituents) barkConstituents.textContent = eo.bark.constituents;
+    if (barkApplications && eo.bark.applications) barkApplications.textContent = eo.bark.applications;
+  }
+
+  // Update aroma profiles
+  if (eo.aroma) {
+    const leafAromaTitle = document.getElementById('leafAromaTitle');
+    const leafAromaDescription = document.getElementById('leafAromaDescription');
+    const leafAromaNotes = document.getElementById('leafAromaNotes');
+    const barkAromaTitle = document.getElementById('barkAromaTitle');
+    const barkAromaDescription = document.getElementById('barkAromaDescription');
+    const barkAromaNotes = document.getElementById('barkAromaNotes');
+    
+    if (leafAromaTitle && eo.aroma.leaf_title) leafAromaTitle.textContent = eo.aroma.leaf_title;
+    if (leafAromaDescription && eo.aroma.leaf_description) leafAromaDescription.textContent = eo.aroma.leaf_description;
+    if (leafAromaNotes && eo.aroma.leaf_notes) {
+      const notes = eo.aroma.leaf_notes.split(',').map(n => n.trim());
+      leafAromaNotes.innerHTML = notes.map(n => `<li>${n}</li>`).join('');
+    }
+    if (barkAromaTitle && eo.aroma.bark_title) barkAromaTitle.textContent = eo.aroma.bark_title;
+    if (barkAromaDescription && eo.aroma.bark_description) barkAromaDescription.textContent = eo.aroma.bark_description;
+    if (barkAromaNotes && eo.aroma.bark_notes) {
+      const notes = eo.aroma.bark_notes.split(',').map(n => n.trim());
+      barkAromaNotes.innerHTML = notes.map(n => `<li>${n}</li>`).join('');
+    }
+  }
+
+  // Update footer
+  const footer = document.getElementById('essentialOilsFooter');
+  if (footer && eo.footer) footer.textContent = eo.footer;
+}
+
 // ============================================================
 // Sequential Multi-Product Promo Popup System
 // ============================================================
@@ -769,6 +856,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyProcessContent(content);
   applyB2BContent(content);
   applyExperienceContent(content);
+  applyEssentialOilsContent(content);
   applySettings(settings);
   renderProducts(products);
   renderProcessSteps(steps);
@@ -806,6 +894,7 @@ function initRealtimeUpdates() {
     applyProcessContent(content);
     applyB2BContent(content);
     applyExperienceContent(content);
+    applyEssentialOilsContent(content);
   });
 
   subscribeToProducts(products => {
@@ -1929,6 +2018,125 @@ function initCartAndAuthListeners() {
         errorDiv.classList.remove('d-none');
       } finally {
         submitText.textContent = 'Book Now';
+        submitSpinner.classList.add('d-none');
+      }
+    });
+  }
+
+  // Essential Oils Sample Request Form
+  const essentialOilsSampleForm = document.getElementById('essentialOilsSampleForm');
+  if (essentialOilsSampleForm) {
+    essentialOilsSampleForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const errorDiv = document.getElementById('sampleError');
+      const successDiv = document.getElementById('sampleSuccess');
+      const submitText = document.getElementById('sampleSubmitText');
+      const submitSpinner = document.getElementById('sampleSubmitSpinner');
+      
+      errorDiv.classList.add('d-none');
+      successDiv.classList.add('d-none');
+      submitText.textContent = 'Submitting...';
+      submitSpinner.classList.remove('d-none');
+
+      try {
+        // Collect selected oils
+        const selectedOils = [];
+        if (document.getElementById('sampleLeafOil').checked) selectedOils.push('Cinnamon Leaf Oil');
+        if (document.getElementById('sampleBarkOil').checked) selectedOils.push('Cinnamon Bark Oil');
+
+        const sampleData = {
+          name: document.getElementById('sampleName').value.trim(),
+          company: document.getElementById('sampleCompany').value.trim(),
+          email: document.getElementById('sampleEmail').value.trim(),
+          phone: document.getElementById('samplePhone').value.trim(),
+          country: document.getElementById('sampleCountry').value.trim(),
+          sample_size: document.getElementById('sampleSize').value,
+          selected_oils: selectedOils,
+          message: document.getElementById('sampleMessage').value.trim(),
+          created_at: new Date().toISOString(),
+          request_id: 'EO-' + Date.now().toString(36).toUpperCase(),
+          type: 'sample_request'
+        };
+
+        // Save to Firestore
+        await saveEssentialOilsEnquiry(sampleData);
+
+        // Send email notification
+        await sendEssentialOilsEmail(sampleData);
+
+        // Show success message
+        successDiv.classList.remove('d-none');
+        essentialOilsSampleForm.reset();
+
+        // Close modal after delay
+        setTimeout(() => {
+          bootstrap.Modal.getInstance(document.getElementById('essentialOilsSampleModal')).hide();
+          successDiv.classList.add('d-none');
+        }, 3000);
+
+      } catch (err) {
+        console.error('Essential Oils sample request error:', err);
+        errorDiv.textContent = 'Failed to submit sample request. Please try again.';
+        errorDiv.classList.remove('d-none');
+      } finally {
+        submitText.textContent = 'Request Sample';
+        submitSpinner.classList.add('d-none');
+      }
+    });
+  }
+
+  // Essential Oils Technical Discussion Form
+  const essentialOilsTechForm = document.getElementById('essentialOilsTechForm');
+  if (essentialOilsTechForm) {
+    essentialOilsTechForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const errorDiv = document.getElementById('techError');
+      const successDiv = document.getElementById('techSuccess');
+      const submitText = document.getElementById('techSubmitText');
+      const submitSpinner = document.getElementById('techSubmitSpinner');
+      
+      errorDiv.classList.add('d-none');
+      successDiv.classList.add('d-none');
+      submitText.textContent = 'Submitting...';
+      submitSpinner.classList.remove('d-none');
+
+      try {
+        const techData = {
+          name: document.getElementById('techName').value.trim(),
+          company: document.getElementById('techCompany').value.trim(),
+          email: document.getElementById('techEmail').value.trim(),
+          phone: document.getElementById('techPhone').value.trim(),
+          industry: document.getElementById('techIndustry').value.trim(),
+          requirements: document.getElementById('techRequirements').value.trim(),
+          created_at: new Date().toISOString(),
+          request_id: 'EO-' + Date.now().toString(36).toUpperCase(),
+          type: 'technical_discussion'
+        };
+
+        // Save to Firestore
+        await saveEssentialOilsEnquiry(techData);
+
+        // Send email notification
+        await sendEssentialOilsEmail(techData);
+
+        // Show success message
+        successDiv.classList.remove('d-none');
+        essentialOilsTechForm.reset();
+
+        // Close modal after delay
+        setTimeout(() => {
+          bootstrap.Modal.getInstance(document.getElementById('essentialOilsTechModal')).hide();
+          successDiv.classList.add('d-none');
+        }, 3000);
+
+      } catch (err) {
+        console.error('Essential Oils technical discussion error:', err);
+        errorDiv.textContent = 'Failed to submit request. Please try again.';
+        errorDiv.classList.remove('d-none');
+      } finally {
+        submitText.textContent = 'Contact Technical Team';
         submitSpinner.classList.add('d-none');
       }
     });
