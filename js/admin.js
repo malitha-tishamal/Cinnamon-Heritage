@@ -276,6 +276,9 @@ async function loadSection(section) {
     if (section === 'experience-bookings') {
       loadExperienceBookings();
     }
+    if (section === 'essential-oils') {
+      loadEssentialOilsSection();
+    }
   } catch (err) {
     console.error('Load error:', err);
   }
@@ -326,6 +329,9 @@ async function saveContent(section) {
       return;
     } else if (section === 'experience') {
       // Experience is handled separately by saveExperienceContent function
+      return;
+    } else if (section === 'essential-oils') {
+      // Essential Oils is handled separately by saveEssentialOilsContent function
       return;
     }
 
@@ -2365,6 +2371,141 @@ async function saveExperienceEmailConfig() {
     showAdminToast('Email configuration saved successfully!', 'success');
   } catch (err) {
     console.error('Save Experience email config error:', err);
+    showAdminToast('Failed to save email configuration: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+// ============================================================
+// ESSENTIAL OILS MANAGEMENT
+// ============================================================
+async function loadEssentialOilsSection() {
+  try {
+    const content = await getContent();
+    const eoData = content?.essential_oils || {};
+
+    // Load section content
+    document.getElementById('eoTitle').value = eoData.title || 'Essential Oils';
+    document.getElementById('eoSubtitle').value = eoData.subtitle || 'Pure Ceylon Cinnamon Essential Oils';
+    document.getElementById('eoDescription').value = eoData.description || 'Steam Distilled From Authentic Ceylon Cinnamon';
+    document.getElementById('eoText').value = eoData.text || 'Experience the natural power of authentic Ceylon Cinnamon through our premium essential oils...';
+    document.getElementById('eoSampleBtn').value = eoData.sample_button || 'Request B2B Sample';
+    document.getElementById('eoTechBtn').value = eoData.tech_button || 'Technical Discussion';
+
+    // Load leaf oil data
+    document.getElementById('eoLeafTitle').value = eoData.leaf?.title || 'Cinnamon Leaf Oil';
+    document.getElementById('eoLeafSubtitle').value = eoData.leaf?.subtitle || 'Pure Ceylon Cinnamon Leaf Oil';
+    document.getElementById('eoLeafDescription').value = eoData.leaf?.description || 'Our Cinnamon Leaf Oil is produced through steam distillation...';
+    document.getElementById('eoLeafFeatures').value = eoData.leaf?.features || '✓ Steam distilled from authentic Ceylon cinnamon leaves\n✓ High natural eugenol content\n✓ Warm spicy aroma profile\n✓ Suitable for industrial and commercial applications\n✓ Available for bulk export supply';
+    document.getElementById('eoLeafConstituents').value = eoData.leaf?.constituents || 'Eugenol, Benzyl Benzoate, Linalool, Cinnamaldehyde (minor component)';
+    document.getElementById('eoLeafApplications').value = eoData.leaf?.applications || 'Aromatherapy products, Natural fragrances, Cosmetic formulations, Personal care products, Wellness products, Home fragrance solutions';
+
+    // Load bark oil data
+    document.getElementById('eoBarkTitle').value = eoData.bark?.title || 'Cinnamon Bark Oil';
+    document.getElementById('eoBarkSubtitle').value = eoData.bark?.subtitle || 'Premium Ceylon Cinnamon Bark Oil';
+    document.getElementById('eoBarkDescription').value = eoData.bark?.description || 'Cinnamon Bark Oil is one of the most valuable essential oils...';
+    document.getElementById('eoBarkFeatures').value = eoData.bark?.features || '✓ Produced from premium Ceylon cinnamon bark\n✓ High cinnamaldehyde content\n✓ Strong sweet cinnamon fragrance\n✓ Premium ingredient for international markets\n✓ Suitable for food, fragrance and wellness industries';
+    document.getElementById('eoBarkConstituents').value = eoData.bark?.constituents || 'Cinnamaldehyde, Eugenol, Benzyl Benzoate, Linalool';
+    document.getElementById('eoBarkApplications').value = eoData.bark?.applications || 'Premium fragrances, Food flavouring solutions, Beverage concepts, Wellness products, Natural aroma formulations, Cosmetic industries';
+
+    // Load aroma profiles
+    document.getElementById('eoLeafAromaTitle').value = eoData.aroma?.leaf_title || 'Cinnamon Leaf Oil Aroma';
+    document.getElementById('eoLeafAromaDescription').value = eoData.aroma?.leaf_description || 'Warm and spicy with a distinctive clove-like character.';
+    document.getElementById('eoBarkAromaTitle').value = eoData.aroma?.bark_title || 'Cinnamon Bark Oil Aroma';
+    document.getElementById('eoBarkAromaDescription').value = eoData.aroma?.bark_description || 'A powerful traditional cinnamon fragrance with a sweet and luxurious character.';
+    document.getElementById('eoLeafAromaNotes').value = eoData.aroma?.leaf_notes || 'Herbal, Spicy, Woody, Slightly sweet';
+    document.getElementById('eoBarkAromaNotes').value = eoData.aroma?.bark_notes || 'Sweet, Rich, Warm, Intense cinnamon';
+
+    // Load footer
+    document.getElementById('eoFooter').value = eoData.footer || 'Authentic Ceylon Cinnamon Quality - From our family estate in Galle, Sri Lanka, every drop represents generations of cinnamon craftsmanship, sustainable farming and uncompromising quality. Pure. Natural. Authentic Ceylon Cinnamon.';
+
+    // Load email configuration
+    const settings = await getSettings();
+    document.getElementById('eoRecipientEmail').value = settings.eo_recipient_email || 'info@cinnamonheritage.com';
+    document.getElementById('eoEmailJSServiceId').value = settings.eo_emailjs_service_id || '';
+    document.getElementById('eoEmailJSTemplateId').value = settings.eo_emailjs_template_id || '';
+    document.getElementById('eoEmailJSPublicKey').value = settings.eo_emailjs_public_key || '';
+
+  } catch (err) {
+    console.error('Load Essential Oils section error:', err);
+    showAdminToast('Failed to load Essential Oils section: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function saveEssentialOilsContent() {
+  try {
+    const eoData = {
+      title: document.getElementById('eoTitle').value,
+      subtitle: document.getElementById('eoSubtitle').value,
+      description: document.getElementById('eoDescription').value,
+      text: document.getElementById('eoText').value,
+      sample_button: document.getElementById('eoSampleBtn').value,
+      tech_button: document.getElementById('eoTechBtn').value,
+      leaf: {
+        title: document.getElementById('eoLeafTitle').value,
+        subtitle: document.getElementById('eoLeafSubtitle').value,
+        description: document.getElementById('eoLeafDescription').value,
+        features: document.getElementById('eoLeafFeatures').value,
+        constituents: document.getElementById('eoLeafConstituents').value,
+        applications: document.getElementById('eoLeafApplications').value
+      },
+      bark: {
+        title: document.getElementById('eoBarkTitle').value,
+        subtitle: document.getElementById('eoBarkSubtitle').value,
+        description: document.getElementById('eoBarkDescription').value,
+        features: document.getElementById('eoBarkFeatures').value,
+        constituents: document.getElementById('eoBarkConstituents').value,
+        applications: document.getElementById('eoBarkApplications').value
+      },
+      aroma: {
+        leaf_title: document.getElementById('eoLeafAromaTitle').value,
+        leaf_description: document.getElementById('eoLeafAromaDescription').value,
+        bark_title: document.getElementById('eoBarkAromaTitle').value,
+        bark_description: document.getElementById('eoBarkAromaDescription').value,
+        leaf_notes: document.getElementById('eoLeafAromaNotes').value,
+        bark_notes: document.getElementById('eoBarkAromaNotes').value
+      },
+      footer: document.getElementById('eoFooter').value
+    };
+
+    await saveContentFields('essential_oils', eoData);
+    showAdminToast('Essential Oils content saved successfully!', 'success');
+  } catch (err) {
+    console.error('Save Essential Oils content error:', err);
+    showAdminToast('Failed to save Essential Oils content: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function saveEssentialOilsFooter() {
+  try {
+    const content = await getContent();
+    const eoData = content?.essential_oils || {};
+    eoData.footer = document.getElementById('eoFooter').value;
+    
+    await saveContentFields('essential_oils', eoData);
+    showAdminToast('Footer statement saved successfully!', 'success');
+  } catch (err) {
+    console.error('Save Essential Oils footer error:', err);
+    showAdminToast('Failed to save footer statement: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function saveEssentialOilsEmailConfig() {
+  try {
+    const config = {
+      eo_recipient_email: document.getElementById('eoRecipientEmail').value,
+      eo_emailjs_service_id: document.getElementById('eoEmailJSServiceId').value,
+      eo_emailjs_template_id: document.getElementById('eoEmailJSTemplateId').value,
+      eo_emailjs_public_key: document.getElementById('eoEmailJSPublicKey').value
+    };
+
+    // Save each setting individually
+    for (const [key, value] of Object.entries(config)) {
+      await saveSetting(key, value);
+    }
+
+    showAdminToast('Email configuration saved successfully!', 'success');
+  } catch (err) {
+    console.error('Save Essential Oils email config error:', err);
     showAdminToast('Failed to save email configuration: ' + (err.message || 'Unknown error'), 'error');
   }
 }
