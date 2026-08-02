@@ -237,6 +237,9 @@ async function loadSection(section) {
       const bgUrl = content.about.background_image || 'images/estate_bg.png';
       document.getElementById('aboutBackgroundImage').value = bgUrl;
       document.getElementById('aboutBgPreviewImg').src = bgUrl;
+      const imgUrl = content.about.image || 'images/cinnamon_plantlings.jpg';
+      document.getElementById('aboutImage').value = imgUrl;
+      document.getElementById('aboutImgPreviewImg').src = imgUrl;
     }
     if (section === 'factory' && content?.factory) {
       document.getElementById('factoryTitle').value = content.factory.title || '';
@@ -301,7 +304,8 @@ async function saveContent(section) {
       fields = {
         title:            document.getElementById('aboutTitle').value,
         text:             document.getElementById('aboutText').value,
-        background_image: document.getElementById('aboutBackgroundImage').value || 'images/estate_bg.png'
+        background_image: document.getElementById('aboutBackgroundImage').value || 'images/estate_bg.png',
+        image:            document.getElementById('aboutImage').value || 'images/cinnamon_plantlings.jpg'
       };
     } else if (section === 'factory') {
       fields = {
@@ -422,6 +426,56 @@ document.getElementById('aboutBgUpload')?.addEventListener('change', async funct
   } catch (err) {
     progressWrap.classList.add('d-none');
     showAdminToast('Upload failed: ' + err.message, 'error');
+  } finally {
+    this.value = '';
+  }
+});
+
+// About image upload with Cloudinary progress
+document.getElementById('aboutImgUpload')?.addEventListener('change', async function() {
+  if (!this.files || !this.files.length) return;
+
+  const progressWrap = document.getElementById('aboutImgUploadProgress');
+  const progressBar  = document.getElementById('aboutImgUploadBar');
+  const progressPct  = document.getElementById('aboutImgUploadPercent');
+  const successBadge = document.getElementById('aboutImgUploadSuccess');
+  const failedBadge  = document.getElementById('aboutImgUploadFailed');
+  const failedMsg    = document.getElementById('aboutImgUploadFailedMsg');
+  const previewImg   = document.getElementById('aboutImgPreviewImg');
+  const imgInput     = document.getElementById('aboutImage');
+
+  progressWrap.classList.remove('d-none');
+  successBadge.classList.add('d-none');
+  if(failedBadge) failedBadge.classList.add('d-none');
+  progressBar.style.width = '0%';
+  progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(this.files[0], (pct) => {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    });
+
+    imgInput.value = url;
+    previewImg.src = url;
+    previewImg.classList.add('preview-flash');
+
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      progressWrap.classList.add('d-none');
+      successBadge.classList.remove('d-none');
+      previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    progressWrap.classList.add('d-none');
+    if(failedBadge) {
+      failedBadge.classList.remove('d-none');
+      if(failedMsg) failedMsg.textContent = 'Upload failed: ' + err.message;
+    } else {
+      showAdminToast('Upload failed: ' + err.message, 'error');
+    }
   } finally {
     this.value = '';
   }
