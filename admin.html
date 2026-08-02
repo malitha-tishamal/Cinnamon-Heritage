@@ -143,6 +143,7 @@
         <li data-section="b2b"><i class="bi bi-handshake"></i> B2B Partnerships</li>
         <li data-section="b2b-enquiries"><i class="bi bi-envelope-paper"></i> B2B Enquiries</li>
         <li data-section="experience"><i class="bi bi-tree"></i> Cinnamon Experience</li>
+        <li data-section="villa"><i class="bi bi-house-door"></i> Cinnamon Villa</li>
         <li data-section="experience-bookings"><i class="bi bi-calendar-check"></i> Experience Bookings</li>
         <li data-section="popups"><i class="bi bi-megaphone-fill"></i> Manage Popups</li>
         <li data-section="orders"><i class="bi bi-cart-check"></i> Orders</li>
@@ -832,6 +833,99 @@
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cinnamon Villa Editor -->
+      <div class="content-section d-none" id="sec-villa">
+        <h3 class="section-heading">Cinnamon Villa</h3>
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>Villa Section Content</h5>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">Section Title</label>
+              <input type="text" class="form-control" id="villaTitle" placeholder="Cinnamon Villa">
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">Subtitle</label>
+              <input type="text" class="form-control" id="villaSubtitle" placeholder="A Unique Cinnamon Estate Stay Experience">
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-bold">Description Text</label>
+              <textarea class="form-control" id="villaText" rows="4" placeholder="Enter description paragraphs separated by empty lines..."></textarea>
+            </div>
+
+            <!-- Background Image -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Section Background Overlay Image</label>
+              <div class="about-bg-preview mb-3" style="max-width: 400px;">
+                <img id="villaBgPreviewImg" src="images/estate_bg.png" alt="Villa background preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+              </div>
+              <input type="hidden" id="villaBackgroundImage" value="">
+              <input type="file" class="d-none" id="villaBgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('villaBgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+              </button>
+              
+              <div id="villaBgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="villaBgUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="villaBgUploadBar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              
+              <div id="villaBgUploadSuccess" class="upload-success-badge d-none mt-3 text-success small">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Background uploaded! Click Save to apply on the website.</span>
+              </div>
+              <div id="villaBgUploadFailed" class="upload-success-badge d-none mt-3 text-danger small">
+                <i class="bi bi-x-circle-fill"></i>
+                <span id="villaBgUploadFailedMsg">Upload failed. Please try again.</span>
+              </div>
+            </div>
+
+            <!-- Section Image -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Main Section Image</label>
+              <div class="about-bg-preview mb-3" style="max-width: 400px;">
+                <img id="villaImgPreviewImg" src="images/cinnamon_plantlings.jpg" alt="Villa image preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+              </div>
+              <input type="hidden" id="villaImage" value="">
+              <input type="file" class="d-none" id="villaImgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('villaImgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Image
+              </button>
+              
+              <div id="villaImgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="villaImgUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="villaImgUploadBar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              
+              <div id="villaImgUploadSuccess" class="upload-success-badge d-none mt-3 text-success small">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Image uploaded! Click Save to apply on the website.</span>
+              </div>
+              <div id="villaImgUploadFailed" class="upload-success-badge d-none mt-3 text-danger small">
+                <i class="bi bi-x-circle-fill"></i>
+                <span id="villaImgUploadFailedMsg">Upload failed. Please try again.</span>
+              </div>
+            </div>
+
+            <button class="btn btn-accent mt-3" onclick="saveContent('villa')">
+              <i class="bi bi-check-lg me-1"></i> Save Villa Changes
+            </button>
           </div>
         </div>
       </div>
