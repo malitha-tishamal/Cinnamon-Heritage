@@ -250,6 +250,36 @@ function applyB2BContent(content) {
   }
 }
 
+function applyVillaContent(content) {
+  if (!content || !content.villa) return;
+  const villa = content.villa;
+  
+  const villaSection = document.getElementById('villa');
+  if (villaSection && villa.background_image) {
+    villaSection.style.backgroundImage = `url('${villa.background_image}')`;
+    villaSection.style.backgroundSize = 'cover';
+    villaSection.style.backgroundPosition = 'center';
+    villaSection.style.backgroundAttachment = 'fixed';
+  }
+
+  const titleEl = document.getElementById('villa-title');
+  if (titleEl && villa.title) titleEl.textContent = villa.title;
+
+  const subtitleEl = document.getElementById('villa-subtitle');
+  if (subtitleEl && villa.subtitle) subtitleEl.textContent = villa.subtitle;
+
+  const textEl = document.getElementById('villa-text-container');
+  if (textEl && villa.text) {
+    const paragraphs = villa.text.split('\n\n').filter(p => p.trim());
+    textEl.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+  }
+
+  const imgEl = document.getElementById('villa-image');
+  if (imgEl && villa.image) {
+    imgEl.src = villa.image;
+  }
+}
+
 function applyExperienceContent(content) {
   if (!content || !content.experience) return;
   const experience = content.experience;
@@ -860,6 +890,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyFactoryContent(content);
   applyProcessContent(content);
   applyB2BContent(content);
+  applyVillaContent(content);
   applyExperienceContent(content);
   applyEssentialOilsContent(content);
   applySettings(settings);
@@ -898,6 +929,7 @@ function initRealtimeUpdates() {
     applyFactoryContent(content);
     applyProcessContent(content);
     applyB2BContent(content);
+    applyVillaContent(content);
     applyExperienceContent(content);
     applyEssentialOilsContent(content);
   });
