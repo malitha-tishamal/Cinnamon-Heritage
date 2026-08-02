@@ -337,6 +337,37 @@
                 <span>Background uploaded! Click Save to apply on the website.</span>
               </div>
             </div>
+
+            <!-- About Section Image Upload -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">About Section Image</label>
+              <div class="about-bg-preview mb-3" id="aboutImgPreviewWrap" style="max-width: 400px;">
+                <img id="aboutImgPreviewImg" src="images/cinnamon_plantlings.jpg" alt="About image preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+              </div>
+              <input type="hidden" id="aboutImage" value="">
+              <input type="file" class="d-none" id="aboutImgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('aboutImgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Image
+              </button>
+              <div id="aboutImgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="aboutImgUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="aboutImgUploadBar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              <div id="aboutImgUploadSuccess" class="upload-success-badge d-none mt-3 text-success small">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Image uploaded! Click Save to apply on the website.</span>
+              </div>
+              <div id="aboutImgUploadFailed" class="upload-success-badge d-none mt-3 text-danger small">
+                <i class="bi bi-x-circle-fill"></i>
+                <span id="aboutImgUploadFailedMsg">Upload failed. Please try again.</span>
+              </div>
+            </div>
+
             <button class="btn btn-accent" onclick="saveContent('about')"><i class="bi bi-check-lg me-1"></i> Save Changes</button>
           </div>
         </div>
