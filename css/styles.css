@@ -361,6 +361,44 @@ h1,h2,h3,h4,h5,h6 {
   border-color: rgba(255,255,255,0.12);
 }
 
+/* ========== Safety Warning Card ========== */
+.safety-warning-card {
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(220, 53, 69, 0.1) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 2px solid rgba(220, 53, 69, 0.4);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: var(--glass-shadow);
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.safety-warning-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(220, 53, 69, 0.3);
+  border-color: rgba(220, 53, 69, 0.6);
+}
+
+.safety-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  color: #fff;
+  font-size: 1.8rem;
+  animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* ========== Announcement Bar ========== */
 .announcement-bar {
   background: linear-gradient(135deg, var(--accent) 0%, #e8a04e 100%);
