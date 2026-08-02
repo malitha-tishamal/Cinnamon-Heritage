@@ -122,6 +122,11 @@ function applyAboutContent(content) {
     aboutSection.style.backgroundPosition = 'center';
     aboutSection.style.backgroundAttachment = 'fixed';
   }
+
+  const aboutImage = document.getElementById('about-image');
+  if (aboutImage && about.image) {
+    aboutImage.src = about.image;
+  }
 }
 
 function applyFactoryContent(content) {
