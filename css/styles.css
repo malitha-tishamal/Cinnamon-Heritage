@@ -1652,50 +1652,156 @@ footer {
 
 /* ========== Footer ========== */
 .footer-glass {
-  background: rgba(10, 10, 15, 0.8);
+  background: linear-gradient(135deg, rgba(10, 10, 15, 0.95) 0%, rgba(18, 18, 26, 0.95) 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,0.05);
+  border-top: 1px solid rgba(212, 135, 58, 0.15);
+  position: relative;
+  overflow: hidden;
 }
+
+.footer-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 135, 58, 0.5), transparent);
+}
+
+.footer-glass h4, .footer-glass h5 {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.footer-glass h4 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.footer-glass h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
 .social-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 50%;
-  color: #fff;
-  transition: all 0.3s ease;
+  color: rgba(255,255,255,0.7);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   text-decoration: none;
+  font-size: 1.2rem;
 }
+
 .social-icon:hover {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent) 0%, #c47a2e 100%);
   color: #fff;
   border-color: var(--accent);
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(212, 135, 58, 0.3);
+  transform: translateY(-5px) scale(1.1);
+  box-shadow: 0 8px 25px rgba(212, 135, 58, 0.4);
 }
-.footer-links li { margin-bottom: 10px; }
+
+.footer-links li { margin-bottom: 12px; }
+
 .footer-links a {
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.6);
   text-decoration: none;
   transition: all 0.3s ease;
+  display: inline-block;
+  position: relative;
+  font-size: 0.9rem;
 }
+
+.footer-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
 .footer-links a:hover {
   color: var(--accent);
-  padding-left: 5px;
+  padding-left: 8px;
 }
+
+.footer-links a:hover::after {
+  width: 100%;
+}
+
+.footer-contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 15px;
+  color: rgba(255,255,255,0.6);
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.footer-contact-item:hover {
+  color: var(--accent);
+  transform: translateX(5px);
+}
+
+.footer-contact-item i {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin-top: 2px;
+}
+
 .cert-badge {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 5px 12px;
+  background: linear-gradient(135deg, rgba(212, 135, 58, 0.1) 0%, rgba(212, 135, 58, 0.05) 100%);
+  border: 1px solid rgba(212, 135, 58, 0.3);
+  padding: 6px 14px;
   border-radius: 20px;
   font-size: 0.75rem;
-  color: rgba(255,255,255,0.7);
+  color: var(--accent);
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
+
+.cert-badge:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
 .hover-accent:hover { color: var(--accent) !important; }
+
+/* Footer bottom bar enhancements */
+.footer-glass .border-bottom {
+  border-color: rgba(212, 135, 58, 0.15) !important;
+}
+
+/* Responsive footer adjustments */
+@media (max-width: 768px) {
+  .footer-glass {
+    padding-top: 2rem;
+  }
+  
+  .footer-glass h4 {
+    font-size: 1.3rem;
+  }
+  
+  .social-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+}
 
 /* ========== Floating Promo Alert Card ========== */
 .promo-alert-card {
