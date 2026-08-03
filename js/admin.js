@@ -2050,6 +2050,9 @@ async function loadB2BSection() {
     document.getElementById('b2bSectionTitle').value = b2bData.title || 'B2B Partnerships';
     document.getElementById('b2bSubtitle').value = b2bData.subtitle || 'Partner With Cinnamon Heritage';
     document.getElementById('b2bDescription').value = b2bData.description || 'We provide authentic Ceylon Cinnamon solutions for global businesses, supporting industries with premium products, reliable supply and customized services from our family estate in Galle, Sri Lanka.';
+    const bgUrl = b2bData.background_image || 'images/estate_bg.png';
+    document.getElementById('b2bBackgroundImage').value = bgUrl;
+    document.getElementById('b2bBgPreviewImg').src = bgUrl;
     document.getElementById('b2bCtaTitle').value = b2bData.cta_title || 'Become a Partner';
     document.getElementById('b2bCtaDescription').value = b2bData.cta_description || 'Partner with Cinnamon Heritage for authentic Ceylon Cinnamon products and tailored business solutions.';
     document.getElementById('b2bButtonText').value = b2bData.button_text || 'Partner With Us';
@@ -2214,6 +2217,50 @@ function removeB2BSolution(index) {
   }
 }
 
+document.getElementById('b2bBgUpload')?.addEventListener('change', async function() {
+  if (!this.files || !this.files.length) return;
+
+  const progressWrap  = document.getElementById('b2bBgUploadProgress');
+  const progressBar   = document.getElementById('b2bBgUploadBar');
+  const progressPct   = document.getElementById('b2bBgUploadPercent');
+  const successBadge  = document.getElementById('b2bBgUploadSuccess');
+  const failedBadge   = document.getElementById('b2bBgUploadFailed');
+  const failedMsg     = document.getElementById('b2bBgUploadFailedMsg');
+  const previewImg    = document.getElementById('b2bBgPreviewImg');
+  const bgInput       = document.getElementById('b2bBackgroundImage');
+
+  progressWrap.classList.remove('d-none');
+  successBadge.classList.add('d-none');
+  failedBadge.classList.add('d-none');
+  progressBar.style.width = '0%';
+  progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(this.files[0], (pct) => {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    });
+
+    bgInput.value = url;
+    previewImg.src = url;
+    previewImg.classList.add('preview-flash');
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      progressWrap.classList.add('d-none');
+      successBadge.classList.remove('d-none');
+      previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    progressWrap.classList.add('d-none');
+    failedMsg.textContent = 'Upload failed: ' + err.message;
+    failedBadge.classList.remove('d-none');
+  } finally {
+    this.value = '';
+  }
+});
+
 async function saveB2BContent() {
   try {
     // Collect partner types
@@ -2245,6 +2292,7 @@ async function saveB2BContent() {
       title: document.getElementById('b2bSectionTitle').value,
       subtitle: document.getElementById('b2bSubtitle').value,
       description: document.getElementById('b2bDescription').value,
+      background_image: document.getElementById('b2bBackgroundImage').value || 'images/estate_bg.png',
       cta_title: document.getElementById('b2bCtaTitle').value,
       cta_description: document.getElementById('b2bCtaDescription').value,
       button_text: document.getElementById('b2bButtonText').value,
