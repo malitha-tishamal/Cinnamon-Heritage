@@ -768,6 +768,33 @@
               <label class="form-label fw-bold">Description</label>
               <textarea class="form-control" id="b2bDescription" rows="3" placeholder="We provide authentic Ceylon Cinnamon solutions for global businesses..."></textarea>
             </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold">B2B Section Background Wallpaper</label>
+              <div class="about-bg-preview mb-3" style="max-width: 400px;">
+                <img id="b2bBgPreviewImg" src="images/estate_bg.png" alt="B2B background preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+              </div>
+              <input type="hidden" id="b2bBackgroundImage" value="">
+              <input type="file" class="d-none" id="b2bBgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="document.getElementById('b2bBgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+              </button>
+              <div id="b2bBgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="b2bBgUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="b2bBgUploadBar" role="progressbar" style="width:0%"></div>
+                </div>
+              </div>
+              <div id="b2bBgUploadSuccess" class="upload-success-badge d-none mt-3">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Background uploaded! Click Save B2B Content to apply.</span>
+              </div>
+              <div id="b2bBgUploadFailed" class="alert alert-danger d-none mt-3 small py-2">
+                <i class="bi bi-x-circle-fill me-1"></i> <span id="b2bBgUploadFailedMsg">Upload failed.</span>
+              </div>
+            </div>
             <div class="mb-3">
               <label class="form-label fw-bold">CTA Title</label>
               <input type="text" class="form-control" id="b2bCtaTitle" placeholder="Become a Partner">
