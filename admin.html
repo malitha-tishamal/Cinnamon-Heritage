@@ -556,6 +556,33 @@
                 <label class="form-label fw-bold">Main Text</label>
                 <textarea class="form-control" id="eoText" rows="3" placeholder="Experience the natural power of authentic Ceylon Cinnamon..."></textarea>
               </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Essential Oils Section Background Wallpaper</label>
+                <div class="about-bg-preview mb-3" style="max-width: 400px;">
+                  <img id="eoBgPreviewImg" src="images/estate_bg.png" alt="Essential Oils background preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+                </div>
+                <input type="hidden" id="eoBackgroundImage" value="">
+                <input type="file" class="d-none" id="eoBgUpload" accept="image/*">
+                <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="document.getElementById('eoBgUpload').click()">
+                  <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+                </button>
+                <div id="eoBgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                  <div class="d-flex justify-content-between small mb-1">
+                    <span class="text-muted">Uploading to Cloudinary...</span>
+                    <span id="eoBgUploadPercent" class="fw-bold text-accent">0%</span>
+                  </div>
+                  <div class="progress upload-progress-bar">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="eoBgUploadBar" role="progressbar" style="width:0%"></div>
+                  </div>
+                </div>
+                <div id="eoBgUploadSuccess" class="upload-success-badge d-none mt-3">
+                  <i class="bi bi-check-circle-fill"></i>
+                  <span>Background uploaded! Click Save Section Content to apply.</span>
+                </div>
+                <div id="eoBgUploadFailed" class="alert alert-danger d-none mt-3 small py-2">
+                  <i class="bi bi-x-circle-fill me-1"></i> <span id="eoBgUploadFailedMsg">Upload failed.</span>
+                </div>
+              </div>
               <div class="col-md-6">
                 <label class="form-label fw-bold">Sample Button Text</label>
                 <input type="text" class="form-control" id="eoSampleBtn" placeholder="Request B2B Sample">
