@@ -188,6 +188,15 @@ function applyProductsContent(content) {
 function applyB2BContent(content) {
   if (!content || !content.b2b) return;
   const b2b = content.b2b;
+  const b2bSection = document.getElementById('b2b');
+  
+  if (b2bSection) {
+    const bgUrl = b2b.background_image || 'images/estate_bg.png';
+    b2bSection.style.backgroundImage = `linear-gradient(rgba(10, 10, 15, 0.72), rgba(10, 10, 15, 0.9)), url('${bgUrl}')`;
+    b2bSection.style.backgroundSize = 'cover';
+    b2bSection.style.backgroundPosition = 'center';
+    b2bSection.style.backgroundAttachment = 'fixed';
+  }
   
   // Update section title and subtitle using IDs
   const sectionTitle = document.getElementById('b2bSectionTitle');
