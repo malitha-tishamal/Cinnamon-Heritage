@@ -495,6 +495,39 @@
       <!-- Products Editor -->
       <div class="content-section d-none" id="sec-products">
         <h3 class="section-heading">Products <button class="btn btn-accent btn-sm float-end" onclick="addProduct()"><i class="bi bi-plus-lg me-1"></i>Add Product</button></h3>
+        
+        <!-- Products Section Background Image -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h6 class="fw-bold mb-3"><i class="bi bi-image me-2 text-accent"></i>Products Section Background Image</h6>
+            <div class="about-bg-preview mb-3" style="max-width:400px;">
+              <img id="productsBgPreviewImg" src="images/estate_bg.png" alt="Products section background preview" class="img-fluid rounded border shadow-sm" style="max-height:200px;width:100%;object-fit:cover;">
+            </div>
+            <input type="hidden" id="productsBackgroundImage" value="">
+            <input type="file" class="d-none" id="productsBgUpload" accept="image/*">
+            <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="document.getElementById('productsBgUpload').click()">
+              <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+            </button>
+            <button class="btn btn-accent btn-sm" onclick="saveContent('products')"><i class="bi bi-check-lg me-1"></i> Save Background</button>
+            <div id="productsBgUploadProgress" class="upload-progress-wrap d-none mt-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-muted">Uploading to Cloudinary...</span>
+                <span id="productsBgUploadPercent" class="fw-bold text-accent">0%</span>
+              </div>
+              <div class="progress upload-progress-bar">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" id="productsBgUploadBar" role="progressbar" style="width:0%"></div>
+              </div>
+            </div>
+            <div id="productsBgUploadSuccess" class="upload-success-badge d-none mt-3">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>Background uploaded! Click Save Background to apply.</span>
+            </div>
+            <div id="productsBgUploadFailed" class="alert alert-danger d-none mt-3 small py-2">
+              <i class="bi bi-x-circle-fill me-1"></i> <span id="productsBgUploadFailedMsg">Upload failed.</span>
+            </div>
+          </div>
+        </div>
+
         <div id="productsList"></div>
       </div>
 
