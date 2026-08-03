@@ -2663,6 +2663,9 @@ async function loadEssentialOilsSection() {
     document.getElementById('eoSubtitle').value = eoData.subtitle || 'Pure Ceylon Cinnamon Essential Oils';
     document.getElementById('eoDescription').value = eoData.description || 'Steam Distilled From Authentic Ceylon Cinnamon';
     document.getElementById('eoText').value = eoData.text || 'Experience the natural power of authentic Ceylon Cinnamon through our premium essential oils...';
+    const bgUrl = eoData.background_image || 'images/estate_bg.png';
+    document.getElementById('eoBackgroundImage').value = bgUrl;
+    document.getElementById('eoBgPreviewImg').src = bgUrl;
     document.getElementById('eoSampleBtn').value = eoData.sample_button || 'Request B2B Sample';
     document.getElementById('eoTechBtn').value = eoData.tech_button || 'Technical Discussion';
 
@@ -2706,6 +2709,50 @@ async function loadEssentialOilsSection() {
   }
 }
 
+document.getElementById('eoBgUpload')?.addEventListener('change', async function() {
+  if (!this.files || !this.files.length) return;
+
+  const progressWrap  = document.getElementById('eoBgUploadProgress');
+  const progressBar   = document.getElementById('eoBgUploadBar');
+  const progressPct   = document.getElementById('eoBgUploadPercent');
+  const successBadge  = document.getElementById('eoBgUploadSuccess');
+  const failedBadge   = document.getElementById('eoBgUploadFailed');
+  const failedMsg     = document.getElementById('eoBgUploadFailedMsg');
+  const previewImg    = document.getElementById('eoBgPreviewImg');
+  const bgInput       = document.getElementById('eoBackgroundImage');
+
+  progressWrap.classList.remove('d-none');
+  successBadge.classList.add('d-none');
+  failedBadge.classList.add('d-none');
+  progressBar.style.width = '0%';
+  progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(this.files[0], (pct) => {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    });
+
+    bgInput.value = url;
+    previewImg.src = url;
+    previewImg.classList.add('preview-flash');
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      progressWrap.classList.add('d-none');
+      successBadge.classList.remove('d-none');
+      previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    progressWrap.classList.add('d-none');
+    failedMsg.textContent = 'Upload failed: ' + err.message;
+    failedBadge.classList.remove('d-none');
+  } finally {
+    this.value = '';
+  }
+});
+
 async function saveEssentialOilsContent() {
   try {
     const eoData = {
@@ -2713,6 +2760,7 @@ async function saveEssentialOilsContent() {
       subtitle: document.getElementById('eoSubtitle').value,
       description: document.getElementById('eoDescription').value,
       text: document.getElementById('eoText').value,
+      background_image: document.getElementById('eoBackgroundImage').value || 'images/estate_bg.png',
       sample_button: document.getElementById('eoSampleBtn').value,
       tech_button: document.getElementById('eoTechBtn').value,
       leaf: {
