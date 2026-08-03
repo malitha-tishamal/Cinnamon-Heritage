@@ -304,6 +304,15 @@ function applyVillaContent(content) {
 function applyExperienceContent(content) {
   if (!content || !content.experience) return;
   const experience = content.experience;
+  const experienceSection = document.getElementById('experience');
+
+  if (experienceSection) {
+    const bgUrl = experience.background_image || 'images/estate_bg.png';
+    experienceSection.style.backgroundImage = `linear-gradient(rgba(10, 10, 15, 0.72), rgba(10, 10, 15, 0.9)), url('${bgUrl}')`;
+    experienceSection.style.backgroundSize = 'cover';
+    experienceSection.style.backgroundPosition = 'center';
+    experienceSection.style.backgroundAttachment = 'fixed';
+  }
   
   // Update section title and subtitle using IDs
   const sectionTitle = document.getElementById('experienceSectionTitle');
