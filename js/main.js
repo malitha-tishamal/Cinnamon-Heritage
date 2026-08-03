@@ -173,6 +173,18 @@ function applyProcessContent(content) {
   }
 }
 
+function applyProductsContent(content) {
+  if (!content || !content.products) return;
+  const products = content.products;
+  const productsSection = document.getElementById('products');
+  if (productsSection && products.background_image) {
+    productsSection.style.backgroundImage = `url('${products.background_image}')`;
+    productsSection.style.backgroundSize = 'cover';
+    productsSection.style.backgroundPosition = 'center';
+    productsSection.style.backgroundAttachment = 'fixed';
+  }
+}
+
 function applyB2BContent(content) {
   if (!content || !content.b2b) return;
   const b2b = content.b2b;
@@ -889,6 +901,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyAboutContent(content);
   applyFactoryContent(content);
   applyProcessContent(content);
+  applyProductsContent(content);
   applyB2BContent(content);
   applyVillaContent(content);
   applyExperienceContent(content);
@@ -928,6 +941,7 @@ function initRealtimeUpdates() {
     applyAboutContent(content);
     applyFactoryContent(content);
     applyProcessContent(content);
+    applyProductsContent(content);
     applyB2BContent(content);
     applyVillaContent(content);
     applyExperienceContent(content);
