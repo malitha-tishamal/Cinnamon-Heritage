@@ -369,6 +369,15 @@ function applyExperienceContent(content) {
 function applyEssentialOilsContent(content) {
   if (!content || !content.essential_oils) return;
   const eo = content.essential_oils;
+  const essentialOilsSection = document.getElementById('essential-oils');
+
+  if (essentialOilsSection) {
+    const bgUrl = eo.background_image || 'images/estate_bg.png';
+    essentialOilsSection.style.backgroundImage = `linear-gradient(rgba(10, 10, 15, 0.72), rgba(10, 10, 15, 0.9)), url('${bgUrl}')`;
+    essentialOilsSection.style.backgroundSize = 'cover';
+    essentialOilsSection.style.backgroundPosition = 'center';
+    essentialOilsSection.style.backgroundAttachment = 'fixed';
+  }
   
   // Update section content
   const title = document.getElementById('essentialOilsTitle');
