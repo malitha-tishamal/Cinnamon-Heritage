@@ -2797,6 +2797,9 @@ async function loadExperienceSection() {
     document.getElementById('experienceSectionTitle').value = experienceData.title || 'Cinnamon Experience';
     document.getElementById('experienceSubtitle').value = experienceData.subtitle || 'Discover the Heart of Ceylon Cinnamon';
     document.getElementById('experienceDescription').value = experienceData.description || 'Step into our family estate in Galle and experience the authentic journey of Ceylon Cinnamon—from plantation to finished product.';
+    const bgUrl = experienceData.background_image || 'images/estate_bg.png';
+    document.getElementById('experienceBackgroundImage').value = bgUrl;
+    document.getElementById('experienceBgPreviewImg').src = bgUrl;
     document.getElementById('experienceCtaTitle').value = experienceData.cta_title || 'Book Your Experience';
     document.getElementById('experienceCtaDescription').value = experienceData.cta_description || 'Discover the heritage, craftsmanship and flavours of authentic Ceylon Cinnamon.';
     document.getElementById('experienceButtonText').value = experienceData.button_text || 'Book a Visit';
@@ -2888,6 +2891,50 @@ function removeExperienceItem(index) {
   }
 }
 
+document.getElementById('experienceBgUpload')?.addEventListener('change', async function() {
+  if (!this.files || !this.files.length) return;
+
+  const progressWrap  = document.getElementById('experienceBgUploadProgress');
+  const progressBar   = document.getElementById('experienceBgUploadBar');
+  const progressPct   = document.getElementById('experienceBgUploadPercent');
+  const successBadge  = document.getElementById('experienceBgUploadSuccess');
+  const failedBadge   = document.getElementById('experienceBgUploadFailed');
+  const failedMsg     = document.getElementById('experienceBgUploadFailedMsg');
+  const previewImg    = document.getElementById('experienceBgPreviewImg');
+  const bgInput       = document.getElementById('experienceBackgroundImage');
+
+  progressWrap.classList.remove('d-none');
+  successBadge.classList.add('d-none');
+  failedBadge.classList.add('d-none');
+  progressBar.style.width = '0%';
+  progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(this.files[0], (pct) => {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    });
+
+    bgInput.value = url;
+    previewImg.src = url;
+    previewImg.classList.add('preview-flash');
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      progressWrap.classList.add('d-none');
+      successBadge.classList.remove('d-none');
+      previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    progressWrap.classList.add('d-none');
+    failedMsg.textContent = 'Upload failed: ' + err.message;
+    failedBadge.classList.remove('d-none');
+  } finally {
+    this.value = '';
+  }
+});
+
 async function saveExperienceContent() {
   try {
     // Collect experience items
@@ -2907,6 +2954,7 @@ async function saveExperienceContent() {
       title: document.getElementById('experienceSectionTitle').value,
       subtitle: document.getElementById('experienceSubtitle').value,
       description: document.getElementById('experienceDescription').value,
+      background_image: document.getElementById('experienceBackgroundImage').value || 'images/estate_bg.png',
       cta_title: document.getElementById('experienceCtaTitle').value,
       cta_description: document.getElementById('experienceCtaDescription').value,
       button_text: document.getElementById('experienceButtonText').value,
