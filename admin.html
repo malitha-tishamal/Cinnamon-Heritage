@@ -1012,6 +1012,33 @@
               <label class="form-label fw-bold">Description</label>
               <textarea class="form-control" id="experienceDescription" rows="3" placeholder="Step into our family estate in Galle and experience the authentic journey of Ceylon Cinnamon..."></textarea>
             </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold">Experience Section Background Wallpaper</label>
+              <div class="about-bg-preview mb-3" style="max-width: 400px;">
+                <img id="experienceBgPreviewImg" src="images/estate_bg.png" alt="Experience background preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+              </div>
+              <input type="hidden" id="experienceBackgroundImage" value="">
+              <input type="file" class="d-none" id="experienceBgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="document.getElementById('experienceBgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+              </button>
+              <div id="experienceBgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="experienceBgUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="experienceBgUploadBar" role="progressbar" style="width:0%"></div>
+                </div>
+              </div>
+              <div id="experienceBgUploadSuccess" class="upload-success-badge d-none mt-3">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Background uploaded! Click Save Experience Content to apply.</span>
+              </div>
+              <div id="experienceBgUploadFailed" class="alert alert-danger d-none mt-3 small py-2">
+                <i class="bi bi-x-circle-fill me-1"></i> <span id="experienceBgUploadFailedMsg">Upload failed.</span>
+              </div>
+            </div>
             <div class="mb-3">
               <label class="form-label fw-bold">CTA Title</label>
               <input type="text" class="form-control" id="experienceCtaTitle" placeholder="Book Your Experience">
