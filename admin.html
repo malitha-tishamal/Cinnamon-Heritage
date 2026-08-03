@@ -148,6 +148,8 @@
         <li data-section="popups"><i class="bi bi-megaphone-fill"></i> Manage Popups</li>
         <li data-section="orders"><i class="bi bi-cart-check"></i> Orders</li>
         <li data-section="accounts"><i class="bi bi-bank"></i> Accounts & Sales</li>
+        <li data-section="footer-management"><i class="bi bi-layout-text-sidebar"></i> Footer Management</li>
+        <li data-section="social-media"><i class="bi bi-share"></i> Social Media</li>
         <li data-section="settings"><i class="bi bi-sliders"></i> E-commerce Settings</li>
         <li data-section="quality"><i class="bi bi-shield-check"></i> Quality</li>
         <li data-section="faq"><i class="bi bi-question-circle"></i> FAQ</li>
@@ -1281,6 +1283,118 @@
           </div>
         </div>
       </div>
+
+      <!-- Footer Management Section -->
+      <div id="sec-footer-management" class="content-section d-none">
+        <h3 class="section-heading">Footer Management</h3>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Brand Information</h5>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Footer Title</label>
+                  <input type="text" class="form-control" id="footerBrandTitle" placeholder="CINNAMON HERITAGE">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Footer Description</label>
+                  <textarea class="form-control" id="footerBrandDescription" rows="4" placeholder="Premium Ceylon Cinnamon straight from our family estate..."></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Copyright Text</label>
+                  <input type="text" class="form-control" id="footerBrandCopyright" placeholder="© 2026 CINNAMON HERITAGE. ALL RIGHTS RESERVED.">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Certifications</label>
+                  <input type="text" class="form-control" id="footerBrandCertifications" placeholder="100% Organic • Pure Ceylon • ISO 22000 • HACCP">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Developer Name</label>
+                  <input type="text" class="form-control" id="developerName" placeholder="Malitha Tishamal">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Developer Website</label>
+                  <input type="url" class="form-control" id="developerWebsite" placeholder="https://www.malithatishamal.42web.io">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Developer LinkedIn</label>
+                  <input type="url" class="form-control" id="developerLinkedin" placeholder="https://linkedin.com/in/malithatishamal">
+                </div>
+                <button class="btn btn-accent w-100" onclick="saveFooterBrandSettings()"><i class="bi bi-check-lg me-1"></i>Save Brand Settings</button>
+              </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt me-2"></i>Contact Information</h5>
+                <div id="contactInfoEditor">
+                  <!-- Contact items will be loaded dynamically -->
+                </div>
+                <button class="btn btn-outline-primary w-100 mt-3" onclick="addContactItem()"><i class="bi bi-plus-lg me-1"></i>Add Contact Item</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-link-45deg me-2"></i>Explore Links</h5>
+                <div id="exploreLinksEditor">
+                  <!-- Explore links will be loaded dynamically -->
+                </div>
+                <button class="btn btn-outline-primary w-100 mt-3" onclick="addExploreLink()"><i class="bi bi-plus-lg me-1"></i>Add Explore Link</button>
+              </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>Policy Links</h5>
+                <div id="policyLinksEditor">
+                  <!-- Policy links will be loaded dynamically -->
+                </div>
+                <button class="btn btn-outline-primary w-100 mt-3" onclick="addPolicyLink()"><i class="bi bi-plus-lg me-1"></i>Add Policy Link</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Media Section -->
+      <div id="sec-social-media" class="content-section d-none">
+        <h3 class="section-heading">Social Media Management</h3>
+        <div class="row g-4">
+          <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-share me-2"></i>Social Media Platforms</h5>
+                <div id="socialMediaEditor">
+                  <!-- Social media platforms will be loaded dynamically -->
+                </div>
+                <button class="btn btn-outline-primary w-100 mt-3" onclick="addSocialPlatform()"><i class="bi bi-plus-lg me-1"></i>Add Social Platform</button>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Available Icons</h5>
+                <div class="small text-muted mb-3">
+                  Bootstrap Icons class names for social media platforms:
+                </div>
+                <ul class="list-unstyled small">
+                  <li><code>bi-facebook</code> - Facebook</li>
+                  <li><code>bi-instagram</code> - Instagram</li>
+                  <li><code>bi-linkedin</code> - LinkedIn</li>
+                  <li><code>bi-tiktok</code> - TikTok</li>
+                  <li><code>bi-youtube</code> - YouTube</li>
+                  <li><code>bi-twitter-x</code> - X (Twitter)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="sec-settings" class="content-section d-none">
         <h3 class="section-heading">E-commerce Settings</h3>
         <div class="row g-4">
@@ -1561,5 +1675,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase.js"></script>
   <script src="js/admin.js"></script>
+  <script src="js/admin-footer.js"></script>
 </body>
 </html>
