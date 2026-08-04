@@ -733,7 +733,7 @@ function renderFaqs(faqs) {
     html += `
       <div class="accordion-item">
         <h2 class="accordion-header" id="heading-faq-${faq.id}">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-faq-${faq.id}" aria-expanded="false" aria-controls="collapse-faq-${faq.id}">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-faq-${faq.id}" aria-expanded="false" aria-controls="#collapse-faq-${faq.id}">
             ${faq.question}
           </button>
         </h2>
@@ -746,6 +746,23 @@ function renderFaqs(faqs) {
   });
 
   faqAccordion.innerHTML = html;
+}
+
+// Load FAQ Background Image
+async function loadFaqBackground() {
+  const faqBackground = document.getElementById('faqBackground');
+  if (!faqBackground) return;
+
+  try {
+    const content = await getContent();
+    const bgUrl = content?.faq?.background_image;
+    
+    if (bgUrl) {
+      faqBackground.style.backgroundImage = `url('${bgUrl}')`;
+    }
+  } catch (error) {
+    console.error('Error loading FAQ background:', error);
+  }
 }
 
 
@@ -933,6 +950,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyVillaContent(content);
   applyExperienceContent(content);
   applyEssentialOilsContent(content);
+  loadFaqBackground();
   applySettings(settings);
   renderProducts(products);
   renderProcessSteps(steps);
@@ -992,6 +1010,18 @@ function initRealtimeUpdates() {
   if (typeof subscribeToFaqs === 'function') {
     subscribeToFaqs(faqs => {
       renderFaqs(faqs);
+    });
+  }
+
+  // Subscribe to content changes for FAQ background
+  if (typeof subscribeToContent === 'function') {
+    subscribeToContent(content => {
+      if (content?.faq?.background_image) {
+        const faqBackground = document.getElementById('faqBackground');
+        if (faqBackground) {
+          faqBackground.style.backgroundImage = `url('${content.faq.background_image}')`;
+        }
+      }
     });
   }
 }
