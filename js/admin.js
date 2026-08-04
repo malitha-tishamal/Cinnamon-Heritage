@@ -218,7 +218,7 @@ async function loadSection(section) {
     if (section === 'settings')     return loadSettings();
     if (section === 'accounts')     return loadAccounts();
     if (section === 'admin-accounts') return loadAdminAccounts();
-    if (section === 'faq')            return loadFaqs();
+    if (section === 'faq')            { loadFaqs(); loadFaqBackground(); return; }
 
     // Content sections (hero, about, factory, quality, contact-info)
     const content = await getContent();  // replaces fetch('/api/content')
@@ -2028,6 +2028,13 @@ async function addFaq() {
 
 async function deleteFaq(id) {
   if (!confirm('Are you sure you want to delete this FAQ?')) return;
+  
+  // Clear any existing timeout for this FAQ
+  if (faqSaveTimeouts[id]) {
+    clearTimeout(faqSaveTimeouts[id]);
+    delete faqSaveTimeouts[id];
+  }
+  
   try {
     await deleteFaqById(id);
     showAdminToast('FAQ deleted successfully!', 'success');
@@ -2035,6 +2042,94 @@ async function deleteFaq(id) {
   } catch (err) {
     console.error('Delete FAQ error:', err);
     showAdminToast('Failed to delete FAQ: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+// FAQ Background Image Upload with Cloudinary Progress
+document.getElementById('faqBgImageInput')?.addEventListener('change', async function() {
+  if (!this.files || !this.files.length) return;
+
+  const progressWrap = document.getElementById('faqBgUploadProgress');
+  const progressBar  = document.getElementById('faqBgProgressBar');
+  const progressPct  = document.getElementById('faqBgProgressPercent');
+  const statusDiv    = document.getElementById('faqBgUploadStatus');
+  const previewImg   = document.getElementById('faqBgPreview');
+  const placeholder  = document.getElementById('faqBgPlaceholder');
+
+  progressWrap.classList.remove('d-none');
+  statusDiv.classList.add('d-none');
+  progressBar.style.width = '0%';
+  progressPct.textContent = '0%';
+
+  try {
+    const url = await uploadImageWithProgress(this.files[0], (pct) => {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    });
+
+    previewImg.src = url;
+    previewImg.style.display = 'block';
+    placeholder.style.display = 'none';
+    previewImg.classList.add('preview-flash');
+
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+
+    setTimeout(() => {
+      progressWrap.classList.add('d-none');
+      statusDiv.innerHTML = '<div class="upload-success-badge"><i class="bi bi-check-circle"></i> Image uploaded successfully!</div>';
+      statusDiv.classList.remove('d-none');
+      previewImg.classList.remove('preview-flash');
+    }, 400);
+  } catch (err) {
+    progressWrap.classList.add('d-none');
+    statusDiv.innerHTML = '<div class="alert alert-danger py-2 small">Upload failed: ' + err.message + '</div>';
+    statusDiv.classList.remove('d-none');
+    showAdminToast('Upload failed: ' + err.message, 'error');
+  } finally {
+    this.value = '';
+  }
+});
+
+// Save FAQ Background
+async function saveFaqBackground() {
+  const previewImg = document.getElementById('faqBgPreview');
+  const statusDiv = document.getElementById('faqBgUploadStatus');
+  
+  if (!previewImg.src || previewImg.style.display === 'none') {
+    showAdminToast('Please upload a background image first', 'error');
+    return;
+  }
+
+  try {
+    statusDiv.innerHTML = '<div class="alert alert-info py-2 small"><span class="spinner-border spinner-border-sm me-2"></span>Saving background...</div>';
+    
+    await updateFaqBackground(previewImg.src);
+    
+    statusDiv.innerHTML = '<div class="upload-success-badge"><i class="bi bi-check-circle"></i> Background saved successfully!</div>';
+    showAdminToast('FAQ background saved successfully!', 'success');
+  } catch (err) {
+    console.error('Save FAQ background error:', err);
+    statusDiv.innerHTML = '<div class="alert alert-danger py-2 small">Failed to save background: ' + err.message + '</div>';
+    showAdminToast('Failed to save background: ' + err.message, 'error');
+  }
+}
+
+// Load FAQ Background on section load
+async function loadFaqBackground() {
+  const previewImg = document.getElementById('faqBgPreview');
+  const placeholder = document.getElementById('faqBgPlaceholder');
+  
+  try {
+    const bgUrl = await getFaqBackground();
+    
+    if (bgUrl) {
+      previewImg.src = bgUrl;
+      previewImg.style.display = 'block';
+      placeholder.style.display = 'none';
+    }
+  } catch (err) {
+    console.error('Load FAQ background error:', err);
   }
 }
 
