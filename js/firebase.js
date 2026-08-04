@@ -145,7 +145,8 @@ async function seedDatabaseIfNeeded() {
       { id: 'quality', title: 'QUALITY ASSURANCE', text: 'Every batch of Cinnamon Heritage products undergoes rigorous laboratory testing for purity, moisture content and coumarin levels. We hold ISO 22000, HACCP and Sri Lanka Standards Institution certifications. Our sustainable farming practices protect the environment, empower our local community and guarantee that our cinnamon reaches you 100% natural – free of additives, preservatives and artificial colouring.' },
       { id: 'contact', title: 'Contact Us', subtitle: 'Whether you are a wholesaler, retailer or artisan brand looking for authentic Ceylon cinnamon, we would love to hear from you. Reach out to discuss bulk orders, private labelling or any enquiries about our products.', address: 'Galle Unanwitiya, Sri Lanka', phone: '+94 77 123 4567', email: 'info@cinnamonheritage.com', whatsapp: '94771234567' },
       { id: 'products', background_image: 'images/estate_bg.png' },
-      { id: 'process', background_image: 'images/estate_bg.png' }
+      { id: 'process', background_image: 'images/estate_bg.png' },
+      { id: 'faq', background_image: '' }
     ];
     
     for (const c of content) {
@@ -722,6 +723,27 @@ async function saveContentFields(section_name, fields) {
 /** Upsert site content field */
 async function saveContentField(section_name, field_name, field_value) {
   return saveContentFields(section_name, { [field_name]: field_value });
+}
+
+/** Get FAQ background image */
+async function getFaqBackground() {
+  try {
+    const content = await getContent();
+    return content?.faq?.background_image || null;
+  } catch (error) {
+    console.error("Error getting FAQ background:", error);
+    return null;
+  }
+}
+
+/** Update FAQ background image */
+async function updateFaqBackground(imageUrl) {
+  try {
+    await saveContentFields('faq', { background_image: imageUrl });
+  } catch (error) {
+    console.error("Error updating FAQ background:", error);
+    throw error;
+  }
 }
 
 // ============================================================
