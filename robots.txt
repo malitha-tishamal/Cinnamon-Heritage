@@ -1,0 +1,10 @@
+# Robots.txt for Cinnamon Heritage (https://www.cinnamonheritage.lk/)
+
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /scratch/
+Disallow: /database.sql
+Disallow: /*.sql
+
+Sitemap: https://www.cinnamonheritage.lk/sitemap.xml
