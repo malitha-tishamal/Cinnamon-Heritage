@@ -1308,7 +1308,11 @@ async function checkAuthStatus() {
     updateCartUI();
   } else {
     currentUser = null;
-    currentCart = [];
+    try {
+      currentCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+    } catch (e) {
+      currentCart = [];
+    }
     if (authButtons) authButtons.classList.remove('d-none');
     if (profileMenu) profileMenu.classList.add('d-none');
     if (authButtonsMobile) authButtonsMobile.classList.remove('d-none');
@@ -1418,24 +1422,27 @@ async function changeCartQty(productId, delta) {
   
   item.quantity = newQty;
   updateCartUI();
-  await saveCartItems(currentUser.id, currentCart);
+  await persistCart();
+}
+
+async function persistCart() {
+  if (currentUser && (currentUser.id || currentUser.userId)) {
+    const uid = currentUser.id || currentUser.userId;
+    await saveCartItems(uid, currentCart);
+  }
+  try {
+    localStorage.setItem('guestCart', JSON.stringify(currentCart));
+  } catch (e) {}
 }
 
 async function removeFromCart(productId) {
-  if (!currentUser) return;
   currentCart = currentCart.filter(i => i.product_id !== productId);
   updateCartUI();
-  await saveCartItems(currentUser.id, currentCart);
+  await persistCart();
   showToast("Product removed from cart", "success");
 }
 
 async function addToCart(productId) {
-  if (!currentUser) {
-    openAuthModal('login');
-    showToast("Please log in to add products to cart.", "error");
-    return;
-  }
-  
   const product = allProducts.find(p => p.id === productId);
   if (!product) return;
   
@@ -1459,7 +1466,7 @@ async function addToCart(productId) {
   }
   
   updateCartUI();
-  await saveCartItems(currentUser.id, currentCart);
+  await persistCart();
   showToast(`${product.title} added to cart!`, "success");
   
   // Open Cart Drawer
@@ -1962,7 +1969,8 @@ function initCartAndAuthListeners() {
   // Checkout Button
   const cartCheckoutBtn = document.getElementById('cartCheckoutBtn');
   if (cartCheckoutBtn) {
-    cartCheckoutBtn.addEventListener('click', () => {
+    cartCheckoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       if (currentCart.length === 0) {
         showToast("Your cart is empty!", "error");
         return;
