@@ -650,10 +650,10 @@ async function getCartItems(userId) {
 /** Save cart items to profile */
 async function saveCartItems(userId, cartItems) {
   try {
-    await db.collection('profiles').doc(userId).update({
+    await db.collection('profiles').doc(userId).set({
       cart_items: cartItems,
       updated_at: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    }, { merge: true });
     return { success: true };
   } catch (error) {
     console.error("Failed to save cart items:", error);
