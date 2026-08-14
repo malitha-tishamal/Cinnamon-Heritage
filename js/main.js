@@ -1305,6 +1305,16 @@ async function checkAuthStatus() {
     }
     
     currentCart = await getCartItems(status.userId);
+    if (!currentCart || currentCart.length === 0) {
+      try {
+        currentCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+        if (currentCart.length > 0) {
+          await saveCartItems(status.userId, currentCart);
+        }
+      } catch (e) {
+        currentCart = [];
+      }
+    }
     updateCartUI();
   } else {
     currentUser = null;
