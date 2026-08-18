@@ -1793,13 +1793,14 @@ function initCartAndAuthListeners() {
 
       const res = await authSignup(username, email, password, extraData);
       if (res.success) {
-        showToast(res.message, "success");
         if (role === 'admin') {
           // Admin needs approval, don't auto login
+          showToast(res.message, res.is_approved ? "success" : "info");
           bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
           clientSignupForm.reset();
         } else {
           // Auto login customer
+          showToast(res.message || "Account created successfully!", "success");
           const loginRes = await authLogin(email, password);
           if (loginRes.success) {
             bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
@@ -1985,6 +1986,10 @@ function initCartAndAuthListeners() {
         showToast("Your cart is empty!", "error");
         return;
       }
+      // Always sync cart to localStorage before navigating so checkout.html can read it
+      try {
+        localStorage.setItem('guestCart', JSON.stringify(currentCart));
+      } catch (err) {}
       window.location.href = "checkout.html?cart=true";
     });
   }
