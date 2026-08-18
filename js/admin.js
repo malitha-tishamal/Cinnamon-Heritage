@@ -8,14 +8,37 @@
 // ============================================================
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  const email    = document.getElementById('loginEmail').value;
+  const email    = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
   const errorDiv = document.getElementById('loginError');
+  const submitBtn = this.querySelector('button[type="submit"]');
 
   errorDiv.classList.add('d-none');
+  const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing In...';
+  }
 
-  const result = await authLogin(email, password);   // replaces fetch('/api/auth/login')
+  const result = await authLogin(email, password);   // Supabase / Firebase helper
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalBtnHtml;
+  }
+
   if (result.success) {
+    if (result.role !== 'admin') {
+      await authLogout();
+      errorDiv.textContent = 'Access denied. You do not have administrator permissions.';
+      errorDiv.classList.remove('d-none');
+      return;
+    }
+    if (result.is_approved === false || result.status === 'pending') {
+      await authLogout();
+      errorDiv.textContent = 'Your admin account is pending approval. Please wait for an administrator to approve your account before logging in.';
+      errorDiv.classList.remove('d-none');
+      return;
+    }
     document.getElementById('adminUsername').textContent = result.username;
     document.getElementById('loginScreen').classList.add('d-none');
     document.getElementById('dashboardScreen').classList.remove('d-none');
@@ -30,12 +53,13 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 document.getElementById('adminSetupForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const result = await authSignup(   // replaces fetch('/api/auth/setup')
-    document.getElementById('setupUsername').value,
-    document.getElementById('setupEmail').value,
-    document.getElementById('setupPassword').value
+    document.getElementById('setupUsername').value.trim(),
+    document.getElementById('setupEmail').value.trim(),
+    document.getElementById('setupPassword').value,
+    { role: 'admin' }
   );
   if (result.success) {
-    showAdminToast('Admin account created! Please login.', 'success');
+    showAdminToast(result.message || 'Admin account created! Please login.', 'success');
     document.getElementById('setupForm').classList.add('d-none');
     document.getElementById('loginForm').classList.remove('d-none');
   } else {
@@ -82,16 +106,37 @@ document.getElementById('showLoginFromForgot')?.addEventListener('click', e => {
 signupForm?.addEventListener('submit', async function(e) {
   e.preventDefault();
   const errorDiv = document.getElementById('signupError');
-  const result   = await authSignup(   // replaces fetch('/api/auth/signup')
-    document.getElementById('regUsername').value,
-    document.getElementById('regEmail').value,
-    document.getElementById('regPassword').value
+  errorDiv.classList.add('d-none');
+  const regBtn = this.querySelector('button[type="submit"]');
+  const originalBtnHtml = regBtn ? regBtn.innerHTML : '';
+  if (regBtn) {
+    regBtn.disabled = true;
+    regBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating account...';
+  }
+
+  const result = await authSignup(
+    document.getElementById('regUsername').value.trim(),
+    document.getElementById('regEmail').value.trim(),
+    document.getElementById('regPassword').value,
+    { role: 'admin' }
   );
+
+  if (regBtn) {
+    regBtn.disabled = false;
+    regBtn.innerHTML = originalBtnHtml;
+  }
+
   if (result.success) {
-    showAdminToast('Account created! Please log in.', 'success');
+    showAdminToast(result.message, result.is_approved ? 'success' : 'info');
     signupForm.reset();
     signupForm.classList.add('d-none');
     loginForm.classList.remove('d-none');
+    const loginError = document.getElementById('loginError');
+    if (loginError && !result.is_approved) {
+      loginError.className = 'alert alert-warning small';
+      loginError.innerHTML = '<i class="bi bi-clock-history me-1"></i> Admin account created! Status is <strong>Pending</strong>. An administrator must approve your account before you can log in.';
+      loginError.classList.remove('d-none');
+    }
   } else {
     errorDiv.textContent = result.error || 'Signup failed';
     errorDiv.classList.remove('d-none');
@@ -165,6 +210,25 @@ async function loadDashboard() {
       badge.classList.remove('d-none');
     } else {
       badge.classList.add('d-none');
+    }
+
+    // Update pending admin accounts badge in sidebar
+    try {
+      const pendingAdminsSnap = await db.collection('profiles')
+        .where('role', '==', 'admin')
+        .where('is_approved', '==', false)
+        .get();
+      const pendingAdminBadge = document.getElementById('pendingAdminBadge');
+      if (pendingAdminBadge) {
+        if (pendingAdminsSnap.size > 0) {
+          pendingAdminBadge.textContent = pendingAdminsSnap.size;
+          pendingAdminBadge.classList.remove('d-none');
+        } else {
+          pendingAdminBadge.classList.add('d-none');
+        }
+      }
+    } catch (e) {
+      console.warn('Could not update pending admin badge count:', e);
     }
 
     // Product performance table
@@ -1745,6 +1809,18 @@ function renderTopLocations(locationStats) {
 // ============================================================
 // ADMIN ACCOUNT MANAGEMENT
 // ============================================================
+function updatePendingAdminBadge(count) {
+  const badge = document.getElementById('pendingAdminBadge');
+  if (badge) {
+    if (count > 0) {
+      badge.textContent = count;
+      badge.classList.remove('d-none');
+    } else {
+      badge.classList.add('d-none');
+    }
+  }
+}
+
 async function loadAdminAccounts() {
   const listEl = document.getElementById('adminAccountsList');
   if (listEl) listEl.innerHTML = '<p class="text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Loading accounts...</p>';
@@ -1752,41 +1828,79 @@ async function loadAdminAccounts() {
   try {
     const snapshot = await db.collection('profiles').orderBy('created_at', 'desc').get();
     let html = '';
+    let pendingCount = 0;
+    let totalAdmins = 0;
+    let approvedAdmins = 0;
 
     snapshot.forEach(doc => {
       const p = doc.data();
       const uid = doc.id;
       const createdAt = p.created_at ? new Date(p.created_at.seconds * 1000).toLocaleString() : 'N/A';
-      const isApproved = p.is_approved === true;
+      const isApproved = p.is_approved === true && p.status !== 'pending';
       const isAdmin    = p.role === 'admin';
 
+      if (isAdmin) {
+        totalAdmins++;
+        if (!isApproved) pendingCount++;
+        else approvedAdmins++;
+      }
+
       html += `
-        <div class="item-card" id="account-${uid}">
+        <div class="item-card mb-3 ${!isApproved && isAdmin ? 'border-warning shadow-sm' : ''}" id="account-${uid}" style="${!isApproved && isAdmin ? 'border-left: 4px solid #ffc107 !important;' : ''}">
           <div class="item-header d-flex align-items-center gap-3">
             <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                 style="width:46px;height:46px;background:linear-gradient(135deg,#a65d25,#d4873a);font-family:'Oswald',sans-serif;font-size:1.3rem;color:#fff;font-weight:700;">
+                 style="width:46px;height:46px;background:${isAdmin ? 'linear-gradient(135deg,#a65d25,#d4873a)' : 'linear-gradient(135deg,#6c757d,#495057)'};font-family:'Oswald',sans-serif;font-size:1.3rem;color:#fff;font-weight:700;">
               ${(p.username || p.email || '?')[0].toUpperCase()}
             </div>
             <div class="flex-grow-1">
-              <div class="fw-bold">${p.username || '(no username)'}</div>
-              <div class="small text-muted">${p.email}</div>
-              <div class="small text-muted">Joined: ${createdAt}</div>
-            </div>
-            <div class="d-flex flex-column align-items-end gap-1">
-              <span class="badge ${isAdmin ? 'bg-primary' : 'bg-secondary'}">${isAdmin ? 'Admin' : 'User'}</span>
-              <span class="badge ${isApproved ? 'bg-success' : 'bg-warning text-dark'}">${isApproved ? 'Approved' : 'Pending'}</span>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="fw-bold fs-6">${p.username || (p.first_name ? `${p.first_name} ${p.last_name}` : '(no username)')}</span>
+                ${isAdmin ? '<span class="badge bg-primary">Admin</span>' : '<span class="badge bg-secondary">Customer</span>'}
+                ${isApproved ? '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Approved</span>' : '<span class="badge bg-warning text-dark"><i class="bi bi-clock-history me-1"></i>Pending Approval</span>'}
+              </div>
+              <div class="small text-muted mt-1"><i class="bi bi-envelope me-1"></i>${p.email} ${p.mobile ? ` | <i class="bi bi-telephone me-1"></i>${p.mobile}` : ''} ${p.city ? ` | <i class="bi bi-geo-alt me-1"></i>${p.city}` : ''}</div>
+              <div class="small text-muted">Registered: ${createdAt}</div>
             </div>
           </div>
-          <div class="d-flex gap-2 mt-3 flex-wrap">
-            ${!isApproved ? `<button class="btn btn-success btn-sm" onclick="approveAccount('${uid}')"><i class="bi bi-check-circle me-1"></i>Approve</button>` : ''}
-            ${isApproved  ? `<button class="btn btn-warning btn-sm text-dark" onclick="revokeAccount('${uid}')"><i class="bi bi-slash-circle me-1"></i>Revoke</button>` : ''}
+          <div class="d-flex gap-2 mt-3 flex-wrap align-items-center border-top pt-2">
+            ${!isApproved ? `<button class="btn btn-success btn-sm fw-bold" onclick="approveAccount('${uid}')"><i class="bi bi-check-circle me-1"></i>Approve Admin</button>` : ''}
+            ${isApproved  ? `<button class="btn btn-outline-warning btn-sm text-dark" onclick="revokeAccount('${uid}')"><i class="bi bi-slash-circle me-1"></i>Revoke Access</button>` : ''}
             ${!isAdmin    ? `<button class="btn btn-outline-primary btn-sm" onclick="makeAdmin('${uid}')"><i class="bi bi-shield-lock me-1"></i>Make Admin</button>` : ''}
             <button class="btn btn-outline-danger btn-sm ms-auto" onclick="deleteAccount('${uid}')"><i class="bi bi-trash me-1"></i>Delete</button>
           </div>
         </div>`;
     });
 
-    if (snapshot.empty) html = '<div class="alert alert-secondary small">No admin accounts found in the system.</div>';
+    updatePendingAdminBadge(pendingCount);
+
+    if (snapshot.empty) {
+      html = '<div class="alert alert-secondary small">No user or admin accounts found in the system.</div>';
+    } else {
+      const summaryHeader = `
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="card p-3 border-0 bg-light shadow-sm text-center">
+              <div class="small text-muted fw-bold text-uppercase">Total Admins</div>
+              <div class="fs-4 fw-bold text-primary">${totalAdmins}</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card p-3 border-0 bg-light shadow-sm text-center">
+              <div class="small text-muted fw-bold text-uppercase">Approved Admins</div>
+              <div class="fs-4 fw-bold text-success">${approvedAdmins}</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card p-3 border-0 ${pendingCount > 0 ? 'bg-warning bg-opacity-25 border border-warning' : 'bg-light'} shadow-sm text-center">
+              <div class="small text-muted fw-bold text-uppercase">Pending Approvals</div>
+              <div class="fs-4 fw-bold ${pendingCount > 0 ? 'text-warning text-dark' : 'text-muted'}">${pendingCount}</div>
+            </div>
+          </div>
+        </div>
+      `;
+      html = summaryHeader + html;
+    }
+
     if (listEl) listEl.innerHTML = html;
   } catch (err) {
     console.error('Load admin accounts error:', err);
@@ -1796,8 +1910,12 @@ async function loadAdminAccounts() {
 
 async function approveAccount(uid) {
   try {
-    await db.collection('profiles').doc(uid).update({ is_approved: true });
-    showAdminToast('Account approved successfully!', 'success');
+    await db.collection('profiles').doc(uid).update({ 
+      is_approved: true, 
+      status: 'approved',
+      approved_at: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showAdminToast('Account approved successfully! The admin can now log in.', 'success');
     loadAdminAccounts();
   } catch (err) {
     showAdminToast('Failed to approve: ' + err.message, 'error');
@@ -1807,8 +1925,11 @@ async function approveAccount(uid) {
 async function revokeAccount(uid) {
   if (!confirm('Revoke this account\'s access? They will not be able to log in until re-approved.')) return;
   try {
-    await db.collection('profiles').doc(uid).update({ is_approved: false });
-    showAdminToast('Account access revoked.', 'success');
+    await db.collection('profiles').doc(uid).update({ 
+      is_approved: false, 
+      status: 'pending' 
+    });
+    showAdminToast('Account access revoked. Status set to Pending.', 'info');
     loadAdminAccounts();
   } catch (err) {
     showAdminToast('Failed to revoke: ' + err.message, 'error');
@@ -1817,7 +1938,11 @@ async function revokeAccount(uid) {
 
 async function makeAdmin(uid) {
   try {
-    await db.collection('profiles').doc(uid).update({ role: 'admin', is_approved: true });
+    await db.collection('profiles').doc(uid).update({ 
+      role: 'admin', 
+      is_approved: true, 
+      status: 'approved' 
+    });
     showAdminToast('User promoted to Admin and approved!', 'success');
     loadAdminAccounts();
   } catch (err) {
@@ -1837,6 +1962,12 @@ async function deleteAccount(uid) {
 }
 
 // Expose dynamic-HTML-called functions globally
+window.approveAccount         = approveAccount;
+window.revokeAccount          = revokeAccount;
+window.makeAdmin              = makeAdmin;
+window.deleteAccount          = deleteAccount;
+window.loadAdminAccounts      = loadAdminAccounts;
+window.updatePendingAdminBadge = updatePendingAdminBadge;
 window.updateStepThumbnail    = updateStepThumbnail;
 window.handleStepImageUpload  = handleStepImageUpload;
 window.saveStep               = saveStep;
