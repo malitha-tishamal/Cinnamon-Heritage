@@ -383,75 +383,106 @@
     async function initCheckout() {
       const urlParams = new URLSearchParams(window.location.search);
       const productId = urlParams.get('product_id');
-      isCartCheckout = urlParams.get('cart') === 'true';
-
-      if (!productId && !isCartCheckout) {
-        window.location.href = 'index.html';
-        return;
+      
+      // If productId is present and not empty, single product checkout; otherwise cart checkout
+      if (productId && productId.trim() !== '') {
+        isCartCheckout = false;
+      } else {
+        isCartCheckout = true;
       }
 
-      await Promise.all([
-        isCartCheckout ? fetchCartData() : fetchProduct(productId),
-        fetchDeliveryRates(),
-        fetchSettings()
-      ]);
-      setupLocationSelectors();
-      await prefillCustomerDetails();
-      updateCalculations();
+      // Show a loading overlay while data is being fetched
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      if (loadingOverlay) loadingOverlay.style.display = 'flex';
+
+      try {
+        await Promise.all([
+          isCartCheckout ? fetchCartData() : fetchProduct(productId),
+          fetchDeliveryRates(),
+          fetchSettings()
+        ]);
+        setupLocationSelectors();
+        await prefillCustomerDetails();
+        updateCalculations();
+      } catch (err) {
+        console.error('Checkout init error:', err);
+        showToast('Failed to load checkout details. Please check your connection.', 'danger');
+      } finally {
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
+      }
     }
 
     async function prefillCustomerDetails() {
-      const status = await authStatus();
-      if (status.isLoggedIn && status.profile) {
-        document.getElementById('name').value = (status.profile.first_name ? `${status.profile.first_name} ${status.profile.last_name}` : status.profile.username) || '';
-        document.getElementById('email').value = status.profile.email || '';
-        document.getElementById('phone').value = status.profile.mobile || '';
-        
-        // Prefill province and district (city)
-        const userCity = status.profile.city || '';
-        if (userCity) {
-          const matchedRate = deliveryRates.find(r => r.district.toLowerCase() === userCity.toLowerCase());
-          if (matchedRate) {
-            const provinceSelect = document.getElementById('province');
-            const districtSelect = document.getElementById('district');
-            
-            provinceSelect.value = matchedRate.province;
-            
-            districtSelect.innerHTML = '<option value="">Select District</option>';
-            districtSelect.disabled = false;
-            deliveryRates.filter(r => r.province === matchedRate.province).forEach(d => {
-              const opt = document.createElement('option');
-              opt.value = d.district;
-              opt.textContent = d.district;
-              if (d.district.toLowerCase() === userCity.toLowerCase()) {
-                opt.selected = true;
+      try {
+        const status = await authStatus();
+        if (status && status.isLoggedIn && status.profile) {
+          const nameInput = document.getElementById('name');
+          const emailInput = document.getElementById('email');
+          const phoneInput = document.getElementById('phone');
+          
+          if (nameInput) nameInput.value = (status.profile.first_name ? `${status.profile.first_name} ${status.profile.last_name}` : status.profile.username) || '';
+          if (emailInput) emailInput.value = status.profile.email || '';
+          if (phoneInput) phoneInput.value = status.profile.mobile || '';
+          
+          // Prefill province and district (city)
+          const userCity = status.profile.city || '';
+          if (userCity && deliveryRates && deliveryRates.length > 0) {
+            const matchedRate = deliveryRates.find(r => r.district && r.district.toLowerCase() === userCity.toLowerCase());
+            if (matchedRate) {
+              const provinceSelect = document.getElementById('province');
+              const districtSelect = document.getElementById('district');
+              
+              if (provinceSelect) provinceSelect.value = matchedRate.province;
+              
+              if (districtSelect) {
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+                districtSelect.disabled = false;
+                deliveryRates.filter(r => r.province === matchedRate.province).forEach(d => {
+                  const opt = document.createElement('option');
+                  opt.value = d.district;
+                  opt.textContent = d.district;
+                  if (d.district.toLowerCase() === userCity.toLowerCase()) {
+                    opt.selected = true;
+                  }
+                  districtSelect.appendChild(opt);
+                });
+                districtSelect.value = matchedRate.district;
               }
-              districtSelect.appendChild(opt);
-            });
-            districtSelect.value = matchedRate.district;
-            selectedDeliveryCharge = parseFloat(matchedRate.rate);
+              selectedDeliveryCharge = parseFloat(matchedRate.rate || 0);
+            }
           }
         }
+      } catch (err) {
+        console.warn("prefillCustomerDetails error:", err);
       }
     }
 
     async function fetchCartData() {
       try {
-        const status = await authStatus();
         let items = [];
-        if (status && status.isLoggedIn && status.userId) {
-          items = await getCartItems(status.userId);
+        
+        // 1. Read from localStorage immediately
+        try {
+          items = JSON.parse(localStorage.getItem('guestCart') || '[]');
+        } catch (e) {
+          items = [];
         }
-        if (!items || items.length === 0) {
-          try {
-            items = JSON.parse(localStorage.getItem('guestCart') || '[]');
-          } catch (e) {
-            items = [];
+
+        // 2. Check if logged-in user has saved items in Firestore
+        try {
+          const status = await authStatus();
+          if (status && status.isLoggedIn && status.userId) {
+            const remoteItems = await getCartItems(status.userId);
+            if (remoteItems && remoteItems.length > 0) {
+              items = remoteItems;
+            }
           }
+        } catch (authErr) {
+          console.warn("Auth check in fetchCartData:", authErr);
         }
 
         if (!items || items.length === 0) {
-          renderEmptyCartNotice("Your cart is empty.");
+          renderEmptyCartNotice("Your cart is currently empty.");
           return;
         }
 
@@ -464,7 +495,7 @@
 
         cartItemsList = [];
         for (const item of items) {
-          let prod = (allProds || []).find(p => p.id === item.product_id);
+          let prod = (allProds || []).find(p => String(p.id) === String(item.product_id));
           if (!prod) {
             try {
               prod = await getProduct(item.product_id);
@@ -473,13 +504,13 @@
           if (prod) {
             cartItemsList.push({
               product: prod,
-              quantity: item.quantity
+              quantity: item.quantity || 1
             });
           }
         }
 
         if (cartItemsList.length === 0) {
-          renderEmptyCartNotice("Cart items could not be loaded.");
+          renderEmptyCartNotice("Cart items could not be loaded. Please re-add them from shop.");
           return;
         }
 
@@ -498,8 +529,15 @@
         <div class="text-center py-4">
           <i class="fas fa-shopping-cart fa-2x mb-3 text-white-50"></i>
           <p class="text-white mb-3">${msg}</p>
-          <a href="index.html" class="btn btn-outline-warning btn-sm rounded-0">Return to Shop</a>
+          <a href="index.html" class="btn btn-outline-warning btn-sm rounded-0"><i class="fas fa-arrow-left me-1"></i> Return to Shop</a>
         </div>`;
+      
+      const submitBtn = document.getElementById('submitBtn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+        submitBtn.style.cursor = 'not-allowed';
+      }
     }
 
     function renderCartSummary() {
@@ -511,7 +549,7 @@
         <div class="cart-items-summary-list mb-4" style="max-height: 250px; overflow-y: auto;">`;
 
       cartItemsList.forEach(item => {
-        const price = parseFloat(item.product.price);
+        const price = parseFloat(item.product.price || 0);
         const discount = parseFloat(item.product.discount || 0);
         
         html += `
@@ -557,11 +595,25 @@
         if (!currentProduct) throw new Error('Not found');
         
         // Product loaded successfully
-
         renderProduct();
       } catch (err) {
-        alert('Product not found. Redirecting...');
-        window.location.href = 'index.html';
+        console.error("fetchProduct error:", err);
+        const summaryCard = document.getElementById('productSummary');
+        if (summaryCard) {
+          summaryCard.innerHTML = `
+            <h3 class="h4 mb-4 border-bottom border-secondary pb-3" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-exclamation-triangle me-2 text-warning"></i>PRODUCT NOTICE</h3>
+            <div class="text-center py-4">
+              <i class="fas fa-box-open fa-2x mb-3 text-white-50"></i>
+              <p class="text-white mb-3">Product details could not be found or are currently unavailable.</p>
+              <a href="index.html" class="btn btn-outline-warning btn-sm rounded-0"><i class="fas fa-arrow-left me-1"></i> Return to Shop</a>
+            </div>`;
+        }
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.5';
+          submitBtn.style.cursor = 'not-allowed';
+        }
       }
     }
 
@@ -618,12 +670,12 @@
 
       if (isCartCheckout) {
         cartItemsList.forEach(item => {
-          subtotal += parseFloat(item.product.price) * item.quantity;
-          discount += parseFloat(item.product.discount || 0) * item.quantity;
+          subtotal += parseFloat(item.product.price || 0) * (item.quantity || 1);
+          discount += parseFloat(item.product.discount || 0) * (item.quantity || 1);
         });
       } else {
         if (!currentProduct) return;
-        subtotal = currentProduct.price * qty;
+        subtotal = (parseFloat(currentProduct.price) || 0) * qty;
         discount = (parseFloat(currentProduct.discount) || 0) * qty;
       }
       
