@@ -1316,6 +1316,9 @@ async function checkAuthStatus() {
       }
     }
     updateCartUI();
+
+    // Subscribe to live order updates for this user
+    setupUserOrdersTracking(currentUser.email);
   } else {
     currentUser = null;
     try {
@@ -1328,12 +1331,205 @@ async function checkAuthStatus() {
     if (authButtonsMobile) authButtonsMobile.classList.remove('d-none');
     if (profileMenuMobile) profileMenuMobile.classList.add('d-none');
     updateCartUI();
+
+    // Check if there's a guest order email stored in localStorage to track
+    const guestEmail = localStorage.getItem('customer_order_email');
+    if (guestEmail) {
+      setupUserOrdersTracking(guestEmail);
+    } else {
+      setupUserOrdersTracking(null);
+    }
   }
+}
+
+// User Orders Real-Time State
+let userOrdersUnsubscribe = null;
+let currentUserOrders = [];
+
+function setupUserOrdersTracking(email) {
+  if (userOrdersUnsubscribe) {
+    userOrdersUnsubscribe();
+    userOrdersUnsubscribe = null;
+  }
+  
+  if (!email) {
+    renderUserOrders([]);
+    return;
+  }
+
+  userOrdersUnsubscribe = subscribeToUserOrders(email, (orders) => {
+    currentUserOrders = orders || [];
+    renderUserOrders(currentUserOrders);
+  });
+}
+
+function renderUserOrders(orders) {
+  const container = document.getElementById('cartDrawerOrders');
+  const activeDot = document.getElementById('cartOrdersDot');
+  const activeDotMobile = document.getElementById('cartOrdersDotMobile');
+  const ordersBadge = document.getElementById('drawerOrdersBadge');
+  const tabDot = document.getElementById('drawerOrdersTabDot');
+  const summaryText = document.getElementById('ordersStatusSummaryText');
+
+  const activeOrders = orders.filter(o => ['Pending', 'In Progress', 'Packed', 'Shipped'].includes(o.status));
+
+  // Active Notification Dots & Badges
+  if (activeOrders.length > 0) {
+    if (activeDot) activeDot.classList.remove('d-none');
+    if (activeDotMobile) activeDotMobile.classList.remove('d-none');
+    if (tabDot) tabDot.classList.remove('d-none');
+    if (ordersBadge) {
+      ordersBadge.textContent = activeOrders.length;
+      ordersBadge.className = 'badge bg-warning text-dark ms-1';
+      ordersBadge.classList.remove('d-none');
+    }
+    if (summaryText) {
+      summaryText.textContent = `${activeOrders.length} Active`;
+      summaryText.className = 'badge bg-warning text-dark';
+    }
+  } else {
+    if (activeDot) activeDot.classList.add('d-none');
+    if (activeDotMobile) activeDotMobile.classList.add('d-none');
+    if (tabDot) tabDot.classList.add('d-none');
+    if (orders.length > 0) {
+      if (ordersBadge) {
+        ordersBadge.textContent = orders.length;
+        ordersBadge.className = 'badge bg-secondary ms-1';
+        ordersBadge.classList.remove('d-none');
+      }
+      if (summaryText) {
+        summaryText.textContent = `${orders.length} Total`;
+        summaryText.className = 'badge bg-secondary';
+      }
+    } else {
+      if (ordersBadge) ordersBadge.classList.add('d-none');
+      if (summaryText) summaryText.textContent = '0 Orders';
+    }
+  }
+
+  if (!container) return;
+
+  if (orders.length === 0) {
+    container.innerHTML = `
+      <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center py-5">
+        <i class="fas fa-box-open fa-3x text-muted mb-3" style="color: rgba(255,255,255,0.2) !important;"></i>
+        <h5 class="text-white">No active orders</h5>
+        <p class="text-white-50 small">When you place an order, live tracking will appear here.</p>
+      </div>`;
+    return;
+  }
+
+  const stepsList = [
+    { key: 'Pending', label: 'Placed', icon: 'fa-file-invoice' },
+    { key: 'In Progress', label: 'In Progress', icon: 'fa-cogs' },
+    { key: 'Packed', label: 'Packed', icon: 'fa-box' },
+    { key: 'Shipped', label: 'Shipped', icon: 'fa-shipping-fast' },
+    { key: 'Completed', label: 'Completed', icon: 'fa-check-circle' }
+  ];
+
+  const getStepIndex = (status) => {
+    if (status === 'Delivered') return 4;
+    return stepsList.findIndex(s => s.key.toLowerCase() === (status || '').toLowerCase());
+  };
+
+  let html = '';
+  orders.forEach(o => {
+    const isCancelled = o.status === 'Cancelled';
+    const currentStepIdx = getStepIndex(o.status);
+    const dateStr = o.created_at ? new Date(o.created_at).toLocaleDateString() : '';
+    const timeStr = o.created_at ? new Date(o.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+    
+    // Status Badge Class
+    let statusBadgeClass = 'status-badge-pending';
+    if (o.status === 'In Progress') statusBadgeClass = 'status-badge-in-progress';
+    else if (o.status === 'Packed') statusBadgeClass = 'status-badge-packed';
+    else if (o.status === 'Shipped') statusBadgeClass = 'status-badge-shipped';
+    else if (o.status === 'Completed' || o.status === 'Delivered') statusBadgeClass = 'status-badge-completed';
+    else if (isCancelled) statusBadgeClass = 'status-badge-cancelled';
+
+    // Items list preview
+    let itemsSummary = '';
+    if (o.order_items && o.order_items.length > 0) {
+      itemsSummary = o.order_items.map(item => `
+        <div class="d-flex justify-content-between text-white-50 small mb-1">
+          <span class="text-truncate" style="max-width: 190px;">${item.product_name}</span>
+          <span class="text-white">x${item.quantity}</span>
+        </div>
+      `).join('');
+    } else if (o.product_name) {
+      itemsSummary = `
+        <div class="d-flex justify-content-between text-white-50 small mb-1">
+          <span class="text-truncate" style="max-width: 190px;">${o.product_name}</span>
+          <span class="text-white">x${o.item_quantity || 1}</span>
+        </div>
+      `;
+    }
+
+    // Stepper HTML
+    let stepperHtml = '';
+    if (isCancelled) {
+      stepperHtml = `
+        <div class="alert alert-danger py-2 px-3 small d-flex align-items-center gap-2 mb-2 rounded-2" style="background: rgba(220,53,69,0.15); border: 1px solid rgba(220,53,69,0.3); color: #ff858d;">
+          <i class="fas fa-times-circle"></i>
+          <span>Order has been cancelled</span>
+        </div>
+      `;
+    } else {
+      stepperHtml = `
+        <div class="order-track-stepper">
+          ${stepsList.map((step, idx) => {
+            let stepState = '';
+            if (currentStepIdx >= 0) {
+              if (idx < currentStepIdx) stepState = 'completed';
+              else if (idx === currentStepIdx) stepState = 'active';
+            }
+            const icon = stepState === 'completed' ? 'fa-check' : step.icon;
+            return `
+              <div class="order-track-step ${stepState}">
+                <div class="order-step-node">
+                  <i class="fas ${icon}"></i>
+                </div>
+                <div class="order-step-label">${step.label}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    html += `
+      <div class="order-track-card" id="order-card-${o.id}">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <div class="fw-bold text-white small" style="font-family:'Oswald',sans-serif; letter-spacing:0.5px;">#${o.id}</div>
+            <div class="text-white-50" style="font-size: 0.72rem;">${dateStr} at ${timeStr}</div>
+          </div>
+          <span class="badge ${statusBadgeClass} px-2 py-1" style="font-size: 0.75rem; border-radius: 4px;">
+            ${o.status === 'In Progress' ? '<span class="spinner-grow spinner-grow-sm me-1" style="width:6px;height:6px;" role="status"></span>' : ''}${o.status}
+          </span>
+        </div>
+
+        ${stepperHtml}
+
+        <div class="p-2 rounded-2 mb-2" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+          ${itemsSummary}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center pt-2 border-top border-secondary small">
+          <span class="text-white-50">Total (${o.payment_method || 'COD'})</span>
+          <span class="fw-bold text-accent">LKR ${(parseFloat(o.total_amount) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
 }
 
 function updateCartUI() {
   const badge = document.getElementById('cartBadge');
   const badgeMobile = document.getElementById('cartBadgeMobile');
+  const drawerCartBadge = document.getElementById('drawerCartBadge');
   const drawerBody = document.getElementById('cartDrawerItems');
   
   const totalQty = currentCart.reduce((sum, item) => sum + item.quantity, 0);
@@ -1346,6 +1542,10 @@ function updateCartUI() {
       el.classList.add('d-none');
     }
   });
+
+  if (drawerCartBadge) {
+    drawerCartBadge.textContent = totalQty;
+  }
   
   if (!drawerBody) return;
   
@@ -1605,6 +1805,58 @@ function initCartAndAuthListeners() {
       cartDrawer.classList.remove('open');
       cartOverlay.classList.remove('open');
     });
+  }
+
+  // Drawer Tab Switching (Cart vs My Orders)
+  const drawerCartTabBtn   = document.getElementById('drawerCartTabBtn');
+  const drawerOrdersTabBtn = document.getElementById('drawerOrdersTabBtn');
+  const drawerCartPane     = document.getElementById('drawerCartPane');
+  const drawerOrdersPane   = document.getElementById('drawerOrdersPane');
+
+  function switchDrawerTab(tab) {
+    if (tab === 'orders') {
+      drawerCartPane?.classList.add('d-none');
+      drawerOrdersPane?.classList.remove('d-none');
+      if (drawerCartTabBtn) {
+        drawerCartTabBtn.style.background = 'transparent';
+        drawerCartTabBtn.classList.add('text-white-50');
+      }
+      if (drawerOrdersTabBtn) {
+        drawerOrdersTabBtn.style.background = 'var(--accent)';
+        drawerOrdersTabBtn.classList.remove('text-white-50');
+        drawerOrdersTabBtn.classList.add('text-white');
+      }
+    } else {
+      drawerOrdersPane?.classList.add('d-none');
+      drawerCartPane?.classList.remove('d-none');
+      if (drawerOrdersTabBtn) {
+        drawerOrdersTabBtn.style.background = 'transparent';
+        drawerOrdersTabBtn.classList.add('text-white-50');
+      }
+      if (drawerCartTabBtn) {
+        drawerCartTabBtn.style.background = 'var(--accent)';
+        drawerCartTabBtn.classList.remove('text-white-50');
+        drawerCartTabBtn.classList.add('text-white');
+      }
+    }
+  }
+
+  drawerCartTabBtn?.addEventListener('click', () => switchDrawerTab('cart'));
+  drawerOrdersTabBtn?.addEventListener('click', () => switchDrawerTab('orders'));
+  window.switchDrawerTab = switchDrawerTab;
+
+  // Check if redirected from order placement (e.g. ?order_placed=CH-...)
+  const urlParams = new URLSearchParams(window.location.search);
+  const placedOrderId = urlParams.get('order_placed');
+  if (placedOrderId) {
+    setTimeout(() => {
+      document.getElementById('cartDrawer')?.classList.add('open');
+      document.getElementById('cartOverlay')?.classList.add('open');
+      switchDrawerTab('orders');
+      showToast('🎉 Order placed successfully! You can track live progress here.', 'success');
+      const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+      window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+    }, 600);
   }
 
   // Auth Tabs Toggle
