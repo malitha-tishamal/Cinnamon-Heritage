@@ -1503,7 +1503,11 @@ async function deleteOrder(id) {
 // ============================================================
 async function loadSettings() {
   try {
-    siteSettings = await getSettings();  // replaces fetch('/api/settings')
+    // Direct Firestore read — always get fresh settings, never use stale cache
+    const snap = await db.collection('site_settings').get();
+    siteSettings = {};
+    snap.forEach(doc => { siteSettings[doc.id] = doc.data().value; });
+    sessionStorage.setItem('cache_settings', JSON.stringify(siteSettings));
 
     document.getElementById('settingLowStock').value         = siteSettings.low_stock_threshold    || 10;
     document.getElementById('settingDefaultDelivery').value  = siteSettings.default_delivery_charge || 350;
