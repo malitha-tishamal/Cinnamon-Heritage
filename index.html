@@ -1439,7 +1439,12 @@
               </div>
               <div class="mb-4">
                 <label class="form-label text-white-50 small">Password</label>
-                <input type="password" class="form-control glass-input" id="clientLoginPassword" placeholder="••••••••" required>
+                <div class="position-relative">
+                  <input type="password" class="form-control glass-input" id="clientLoginPassword" placeholder="••••••••" style="padding-right: 45px !important;" required>
+                  <button type="button" class="btn text-white-50 position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent px-3 py-0" id="toggleClientLoginPassword" tabindex="-1" style="cursor: pointer; z-index: 10; height: 100%; display: flex; align-items: center;">
+                    <i class="fas fa-eye-slash"></i>
+                  </button>
+                </div>
               </div>
               <div id="clientLoginError" class="alert alert-danger py-2 small d-none" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
               <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0 mb-3" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">Sign In</button>
@@ -1523,11 +1528,21 @@
               </div>
               <div class="mb-2">
                 <label class="form-label text-white-50 small">Password</label>
-                <input type="password" class="form-control glass-input" id="signupPassword" placeholder="•••••••• (Min 6 chars)" required minlength="6">
+                <div class="position-relative">
+                  <input type="password" class="form-control glass-input" id="signupPassword" placeholder="•••••••• (Min 6 chars)" style="padding-right: 45px !important;" required minlength="6">
+                  <button type="button" class="btn text-white-50 position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent px-3 py-0" id="toggleSignupPassword" tabindex="-1" style="cursor: pointer; z-index: 10; height: 100%; display: flex; align-items: center;">
+                    <i class="fas fa-eye-slash"></i>
+                  </button>
+                </div>
               </div>
               <div class="mb-4" id="signupConfirmPasswordGroup">
                 <label class="form-label text-white-50 small">Confirm Password</label>
-                <input type="password" class="form-control glass-input" id="signupConfirmPassword" placeholder="••••••••" required>
+                <div class="position-relative">
+                  <input type="password" class="form-control glass-input" id="signupConfirmPassword" placeholder="••••••••" style="padding-right: 45px !important;" required>
+                  <button type="button" class="btn text-white-50 position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent px-3 py-0" id="toggleSignupConfirmPassword" tabindex="-1" style="cursor: pointer; z-index: 10; height: 100%; display: flex; align-items: center;">
+                    <i class="fas fa-eye-slash"></i>
+                  </button>
+                </div>
               </div>
               <div id="clientSignupError" class="alert alert-danger py-2 small d-none" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
               <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">Sign Up</button>
