@@ -509,20 +509,15 @@ async function authLogin(email, password) {
     // Check if profile exists
     let profileDoc = await db.collection('profiles').doc(userId).get();
     
-    // If no profile document exists, check if this is the first user
+    // If no profile document exists, create default customer profile
     if (!profileDoc.exists) {
-      const profilesSnap = await db.collection('profiles').limit(1).get();
-      const isFirstUser = profilesSnap.empty;
-      
-      const defaultRole = isFirstUser ? 'admin' : 'customer';
-      const isApproved = isFirstUser; // auto-approved if first user
-      
       const newProfile = {
         id: userId,
         username: email.split('@')[0],
         email: email,
-        role: defaultRole,
-        is_approved: isApproved,
+        role: 'customer',
+        is_approved: true,
+        status: 'approved',
         created_at: firebase.firestore.FieldValue.serverTimestamp()
       };
       
@@ -531,13 +526,26 @@ async function authLogin(email, password) {
     }
     
     const profile = profileDoc.data();
+
+    // Check if admin account is pending approval
+    const isPendingAdmin = profile.role === 'admin' && (profile.is_approved !== true || profile.status === 'pending');
+    if (isPendingAdmin) {
+      await auth.signOut();
+      return {
+        success: false,
+        isPending: true,
+        role: 'admin',
+        error: 'Your admin account is pending approval. Please wait for an administrator to approve your account before logging in.'
+      };
+    }
     
     return { 
       success: true, 
       userId: userId,
       username: profile.username || (profile.first_name ? `${profile.first_name} ${profile.last_name}` : email.split('@')[0]),
-      role: profile.role,
-      is_approved: profile.is_approved,
+      role: profile.role || 'customer',
+      is_approved: profile.is_approved !== false,
+      status: profile.status || 'approved',
       profile: profile
     };
   } catch (error) {
@@ -552,6 +560,10 @@ async function authSignup(username, email, password, extraData = {}) {
     const userId = userCredential.user.uid;
     
     const role = extraData.role || 'customer';
+
+    // When an admin account is created, it ALWAYS defaults to is_approved: false and status: 'pending'
+    const isApproved = role === 'admin' ? false : true;
+    const status = role === 'admin' ? 'pending' : 'approved';
     
     const profile = {
       id: userId,
@@ -564,25 +576,31 @@ async function authSignup(username, email, password, extraData = {}) {
       nic: extraData.nic || '',
       city: extraData.city || '',
       profile_pic_url: extraData.profile_pic_url || '',
-      is_approved: role === 'admin' ? false : true, // Customers automatically approved, admins need approval
+      is_approved: isApproved,
+      status: status,
       created_at: firebase.firestore.FieldValue.serverTimestamp(),
       cart_items: []
     };
-
-    // If first user, auto-approve and force admin role
-    const profilesSnap = await db.collection('profiles').limit(1).get();
-    if (profilesSnap.empty) {
-      profile.role = 'admin';
-      profile.is_approved = true;
-    }
     
     await db.collection('profiles').doc(userId).set(profile);
+
+    // If the new account is an admin, sign out immediately so they cannot bypass login until approved
+    if (role === 'admin') {
+      await auth.signOut();
+    }
     
-    const msg = profile.role === 'admin' && !profile.is_approved
-      ? 'Admin account created! Please wait for another admin to approve your account before logging in.'
+    const msg = role === 'admin'
+      ? 'Admin account created! Your account status is Pending approval. Please wait for an administrator to approve your account before logging in.'
       : 'Account created successfully!';
       
-    return { success: true, message: msg, role: profile.role, user: profile };
+    return { 
+      success: true, 
+      message: msg, 
+      role: profile.role, 
+      is_approved: isApproved, 
+      status: status, 
+      user: profile 
+    };
   } catch (error) {
     return { success: false, error: error.message };
   }
@@ -597,7 +615,9 @@ async function authLogout() {
 /** Check current auth session */
 async function authStatus() {
   return new Promise((resolve) => {
-    auth.onAuthStateChanged(async (user) => {
+    // Unsubscribe immediately after first call to avoid listener accumulation
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      unsubscribe(); // Remove listener after first fire
       if (!user) {
         resolve({ isLoggedIn: false, username: null });
         return;
@@ -606,12 +626,21 @@ async function authStatus() {
       try {
         const profileDoc = await db.collection('profiles').doc(user.uid).get();
         const profile = profileDoc.exists ? profileDoc.data() : null;
+
+        // If admin account is not approved or is pending, sign out immediately
+        if (profile?.role === 'admin' && (profile?.is_approved !== true || profile?.status === 'pending')) {
+          await auth.signOut();
+          resolve({ isLoggedIn: false, isPending: true, role: 'admin', is_approved: false });
+          return;
+        }
+
         resolve({
           isLoggedIn: true,
           userId: user.uid,
           isAdmin: profile?.role === 'admin' && profile?.is_approved === true,
           username: profile?.username || (profile?.first_name ? `${profile.first_name} ${profile.last_name}` : user.email),
           role: profile?.role ?? 'customer',
+          status: profile?.status ?? 'approved',
           profile: profile
         });
       } catch (e) {
