@@ -1832,9 +1832,23 @@ async function loadAdminAccounts() {
     let totalAdmins = 0;
     let approvedAdmins = 0;
 
+    // Deduplicate profiles by email, keeping the newest document
+    const seenEmails = new Set();
+    const uniqueDocs = [];
+
     snapshot.forEach(doc => {
       const p = doc.data();
-      const uid = doc.id;
+      const emailKey = (p.email || doc.id).toLowerCase().trim();
+      if (seenEmails.has(emailKey)) {
+        // Stale duplicate document found in Firestore: automatically clean it up
+        db.collection('profiles').doc(doc.id).delete().catch(err => console.warn('Clean duplicate profile error:', err));
+      } else {
+        seenEmails.add(emailKey);
+        uniqueDocs.push({ doc, p, uid: doc.id });
+      }
+    });
+
+    uniqueDocs.forEach(({ p, uid }) => {
       const createdAt = p.created_at ? new Date(p.created_at.seconds * 1000).toLocaleString() : 'N/A';
       const isApproved = p.is_approved === true && p.status !== 'pending';
       const isAdmin    = p.role === 'admin';
