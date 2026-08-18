@@ -168,29 +168,36 @@
       <!-- Dashboard -->
       <div id="sec-dashboard" class="content-section">
         <h3 class="section-heading">Dashboard</h3>
-        <div class="row g-4 mb-4">
-          <div class="col-md-3">
+        <div class="row g-3 mb-4 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-5">
+          <div class="col">
             <div class="stat-card bg-gradient-1">
               <i class="bi bi-wallet2"></i>
               <div class="stat-value" id="statEarningsToday">LKR 0</div>
               <div class="stat-label">Earnings (Today)</div>
             </div>
           </div>
-          <div class="col-md-3">
+          <div class="col">
             <div class="stat-card bg-gradient-4">
               <i class="bi bi-graph-up-arrow"></i>
               <div class="stat-value" id="statEarningsMonth">LKR 0</div>
               <div class="stat-label">Earnings (Month)</div>
             </div>
           </div>
-          <div class="col-md-3">
+          <div class="col">
             <div class="stat-card bg-gradient-2">
               <i class="bi bi-cart-check-fill"></i>
               <div class="stat-value" id="statOrders">0</div>
               <div class="stat-label">Total Orders</div>
             </div>
           </div>
-          <div class="col-md-3">
+          <div class="col">
+            <div class="stat-card" style="background: linear-gradient(135deg, #fd7e14 0%, #d4873a 100%);">
+              <i class="bi bi-hourglass-split"></i>
+              <div class="stat-value" id="statInProgress">0</div>
+              <div class="stat-label">In Progress</div>
+            </div>
+          </div>
+          <div class="col">
             <div class="stat-card bg-gradient-3">
               <i class="bi bi-box-seam-fill"></i>
               <div class="stat-value" id="statProducts">0</div>
@@ -1332,7 +1339,109 @@
 
       <!-- Orders -->
       <div id="sec-orders" class="content-section d-none">
-        <h3 class="section-heading">Orders</h3>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="section-heading mb-0">Orders</h3>
+          <button class="btn btn-outline-secondary btn-sm" onclick="loadOrders()"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
+        </div>
+
+        <!-- Orders Summary Count Cards -->
+        <div class="row g-2 mb-3 row-cols-2 row-cols-md-4 row-cols-xl-7" id="ordersSummaryRow">
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card active" onclick="filterBySummaryStatus('all')" id="summaryCard-all" style="cursor: pointer;">
+              <div class="text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Total Orders</div>
+              <div class="fs-4 fw-bold text-dark" id="orderCountTotal">0</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card" onclick="filterBySummaryStatus('Pending')" id="summaryCard-Pending" style="cursor: pointer; border-left: 3px solid #ffc107 !important;">
+              <div class="text-warning fw-bold text-uppercase text-dark" style="font-size: 0.7rem;">Pending</div>
+              <div class="fs-4 fw-bold text-warning text-dark" id="orderCountPending">0</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card" onclick="filterBySummaryStatus('In Progress')" id="summaryCard-InProgress" style="cursor: pointer; border-left: 3px solid #fd7e14 !important;">
+              <div class="fw-bold text-uppercase" style="font-size: 0.7rem; color: #fd7e14;">In Progress</div>
+              <div class="fs-4 fw-bold" style="color: #fd7e14;" id="orderCountInProgress">0</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card" onclick="filterBySummaryStatus('Packed')" id="summaryCard-Packed" style="cursor: pointer; border-left: 3px solid #6f42c1 !important;">
+              <div class="fw-bold text-uppercase" style="font-size: 0.7rem; color: #6f42c1;">Packed</div>
+              <div class="fs-4 fw-bold" style="color: #6f42c1;" id="orderCountPacked">0</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card" onclick="filterBySummaryStatus('Shipped')" id="summaryCard-Shipped" style="cursor: pointer; border-left: 3px solid #0d6efd !important;">
+              <div class="text-primary fw-bold text-uppercase" style="font-size: 0.7rem;">Shipped</div>
+              <div class="fs-4 fw-bold text-primary" id="orderCountShipped">0</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card" onclick="filterBySummaryStatus('Completed')" id="summaryCard-Completed" style="cursor: pointer; border-left: 3px solid #198754 !important;">
+              <div class="text-success fw-bold text-uppercase" style="font-size: 0.7rem;">Completed</div>
+              <div class="fs-4 fw-bold text-success" id="orderCountCompleted">0</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card" onclick="filterBySummaryStatus('Cancelled')" id="summaryCard-Cancelled" style="cursor: pointer; border-left: 3px solid #dc3545 !important;">
+              <div class="text-danger fw-bold text-uppercase" style="font-size: 0.7rem;">Cancelled</div>
+              <div class="fs-4 fw-bold text-danger" id="orderCountCancelled">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders Filters Toolbar -->
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-body p-3">
+            <div class="row g-2 align-items-center">
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-calendar3 me-1"></i>Date / Period</label>
+                <select class="form-select form-select-sm" id="orderPeriodFilter" onchange="onOrderFilterChange()">
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="year">This Year</option>
+                  <option value="custom">Custom Date Range...</option>
+                </select>
+              </div>
+
+              <div class="col-lg-2 col-md-3 d-none" id="orderDateFromCol">
+                <label class="form-label small fw-bold text-muted mb-1">From Date</label>
+                <input type="date" class="form-control form-control-sm" id="orderDateFrom" onchange="onOrderFilterChange()">
+              </div>
+
+              <div class="col-lg-2 col-md-3 d-none" id="orderDateToCol">
+                <label class="form-label small fw-bold text-muted mb-1">To Date</label>
+                <input type="date" class="form-control form-control-sm" id="orderDateTo" onchange="onOrderFilterChange()">
+              </div>
+
+              <div class="col-lg-2 col-md-4">
+                <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-funnel me-1"></i>Status</label>
+                <select class="form-select form-select-sm" id="orderStatusFilter" onchange="onOrderFilterChange()">
+                  <option value="all">All Statuses</option>
+                  <option value="Pending">Pending</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Packed">Packed</option>
+                  <option value="Shipped">Shipped</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              <div class="col-lg-3 col-md-5">
+                <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-search me-1"></i>Search</label>
+                <input type="text" class="form-control form-control-sm" id="orderSearchInput" placeholder="Order ID, customer, phone..." oninput="onOrderFilterChange()">
+              </div>
+
+              <div class="col-lg-2 col-md-3 text-end pt-md-3">
+                <button class="btn btn-outline-secondary btn-sm w-100" onclick="resetOrderFilters()"><i class="bi bi-x-circle me-1"></i>Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders Table -->
         <div class="card border-0 shadow-sm">
           <div class="card-body p-0">
             <div class="table-responsive">
