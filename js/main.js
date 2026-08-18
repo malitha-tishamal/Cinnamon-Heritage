@@ -1656,6 +1656,35 @@ function initCartAndAuthListeners() {
     }
   });
 
+  // Password visibility toggle helper
+  function setupPasswordToggle(toggleBtnId, inputId) {
+    const btn = document.getElementById(toggleBtnId);
+    if (!btn) return;
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const input = document.getElementById(inputId);
+      const icon = this.querySelector('i');
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) {
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      } else {
+        input.type = 'password';
+        if (icon) {
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        }
+      }
+    });
+  }
+
+  setupPasswordToggle('toggleClientLoginPassword', 'clientLoginPassword');
+  setupPasswordToggle('toggleSignupPassword', 'signupPassword');
+  setupPasswordToggle('toggleSignupConfirmPassword', 'signupConfirmPassword');
+
   // Signup Image Upload to Cloudinary
   const signupPicInput = document.getElementById('signupPicInput');
   const signupPicPreview = document.getElementById('signupPicPreview');
