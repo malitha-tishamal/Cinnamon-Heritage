@@ -871,16 +871,38 @@
       try {
         const result = await placeOrder(orderData);
         if (result.success) {
-          // Clear cart if this was a cart checkout
+          // Clear cart items automatically
+          const status = await authStatus();
           if (isCartCheckout) {
-            const status = await authStatus();
             if (status && status.isLoggedIn && status.userId) {
               await saveCartItems(status.userId, []);
             }
             localStorage.removeItem('guestCart');
+          } else if (currentProduct) {
+            // Remove single purchased product from cart if present
+            const prodId = String(currentProduct.id);
+            if (status && status.isLoggedIn && status.userId) {
+              try {
+                const currentCart = await getCartItems(status.userId);
+                const updatedCart = currentCart.filter(item => String(item.product_id || item.product?.id) !== prodId);
+                await saveCartItems(status.userId, updatedCart);
+              } catch (e) { console.warn(e); }
+            }
+            try {
+              let guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+              guestCart = guestCart.filter(item => String(item.product_id || item.product?.id) !== prodId);
+              localStorage.setItem('guestCart', JSON.stringify(guestCart));
+            } catch (e) { console.warn(e); }
           }
-          showToast('Order placed successfully! Redirecting...', 'success');
-          setTimeout(() => window.location.href = 'index.html', 3000);
+
+          // Save latest placed order info for guest / customer tracking
+          localStorage.setItem('latest_order_id', result.order_id);
+          localStorage.setItem('customer_order_email', orderData.customer_email || '');
+
+          showToast('Order placed successfully! Redirecting to order tracking...', 'success');
+          setTimeout(() => {
+            window.location.href = `index.html?order_placed=${encodeURIComponent(result.order_id)}`;
+          }, 1500);
         } else {
           showToast(result.error || 'Failed to place order', 'danger');
         }
