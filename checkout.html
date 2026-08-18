@@ -276,7 +276,7 @@
             <div id="paymentMethods">
               <div class="payment-radio-card d-none" id="codContainer" onclick="selectPayment('COD')">
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="paymentMethod" id="payCod" value="COD" checked>
+                  <input class="form-check-input" type="radio" name="paymentMethod" id="payCod" value="COD">
                   <label class="form-check-label text-white" for="payCod">
                     <i class="fas fa-truck me-2" style="color:#a65d25;"></i> Cash on Delivery
                     <br><small class="text-white-50">Pay when your order arrives</small>
@@ -622,21 +622,56 @@
       catch (e) { console.error('Failed to fetch delivery rates'); }
     }
 
+
     async function fetchSettings() {
       try {
-        siteSettings = await getSettings();
-        if (siteSettings.cod_enabled === '1') document.getElementById('codContainer').classList.remove('d-none');
-        if (siteSettings.online_pay_enabled === '1') document.getElementById('payNowContainer').classList.remove('d-none');
-        if (siteSettings.bank_transfer_enabled === '1') {
-          document.getElementById('bankTransferContainer').classList.remove('d-none');
-        }
-        if (siteSettings.bank_name) document.getElementById('bankName').textContent = siteSettings.bank_name;
-        if (siteSettings.bank_branch) document.getElementById('bankBranch').textContent = siteSettings.bank_branch;
+        // Direct Firestore read — NO cache at all — always gets the latest admin settings
+        const snapshot = await db.collection('site_settings').get();
+        siteSettings = {};
+        snapshot.forEach(doc => { siteSettings[doc.id] = doc.data().value; });
+        // Also update sessionStorage so other functions (delivery rates etc) get fresh data
+        sessionStorage.setItem('cache_settings', JSON.stringify(siteSettings));
+
+        const codContainer          = document.getElementById('codContainer');
+        const bankTransferContainer = document.getElementById('bankTransferContainer');
+        const payNowContainer       = document.getElementById('payNowContainer');
+        const paymentMethods        = document.getElementById('paymentMethods');
+
+        const codEnabled    = siteSettings.cod_enabled          === '1';
+        const bankEnabled   = siteSettings.bank_transfer_enabled === '1';
+        const onlineEnabled = siteSettings.online_pay_enabled    === '1';
+
+        if (codEnabled)    codContainer.classList.remove('d-none');
+        else               codContainer.classList.add('d-none');
+
+        if (bankEnabled)   bankTransferContainer.classList.remove('d-none');
+        else               bankTransferContainer.classList.add('d-none');
+
+        if (onlineEnabled) payNowContainer.classList.remove('d-none');
+        else               payNowContainer.classList.add('d-none');
+
+        // Bank details
+        if (siteSettings.bank_name)     document.getElementById('bankName').textContent    = siteSettings.bank_name;
+        if (siteSettings.bank_branch)   document.getElementById('bankBranch').textContent  = siteSettings.bank_branch;
         if (siteSettings.bank_acc_name) document.getElementById('bankAccName').textContent = siteSettings.bank_acc_name;
-        if (siteSettings.bank_acc_no) document.getElementById('bankAccNo').textContent = siteSettings.bank_acc_no;
+        if (siteSettings.bank_acc_no)   document.getElementById('bankAccNo').textContent   = siteSettings.bank_acc_no;
 
         selectedDeliveryCharge = parseFloat(siteSettings.default_delivery_charge || 350);
-      } catch (e) { console.error('Failed to fetch settings'); }
+
+        // Clear all radio selections first, then auto-select first enabled method
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(r => r.checked = false);
+
+        if (codEnabled)         selectPayment('COD');
+        else if (bankEnabled)   selectPayment('BANK');
+        else if (onlineEnabled) selectPayment('ONLINE');
+        else {
+          if (paymentMethods) {
+            paymentMethods.innerHTML = '<div class="alert alert-warning text-dark"><i class="fas fa-exclamation-triangle me-2"></i>No payment methods are currently available. Please contact us.</div>';
+          }
+          const submitBtn = document.getElementById('submitBtn');
+          if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; }
+        }
+      } catch (e) { console.error('Failed to fetch settings from Firestore:', e); }
     }
 
     function selectPayment(method) {
