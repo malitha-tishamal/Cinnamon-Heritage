@@ -1288,10 +1288,48 @@ async function getOrders() {
 /** UPDATE order status */
 async function updateOrderStatus(id, status) {
   try {
-    await db.collection('orders').doc(String(id)).update({ status });
+    await db.collection('orders').doc(String(id)).update({ 
+      status,
+      updated_at: firebase.firestore.FieldValue.serverTimestamp()
+    });
   } catch (error) {
     console.error("Error updating order status:", error);
     throw error;
+  }
+}
+
+/** Subscribe to user orders by email for real-time tracking */
+function subscribeToUserOrders(email, callback) {
+  if (!email) return () => {};
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    return db.collection('orders')
+      .onSnapshot(snapshot => {
+        const orders = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const orderEmail = (data.customer_email || '').trim().toLowerCase();
+          if (orderEmail === cleanEmail) {
+            let created_at = new Date().toISOString();
+            if (data.created_at) {
+              created_at = data.created_at.toDate ? data.created_at.toDate().toISOString() : data.created_at;
+            }
+            orders.push({
+              id: doc.id,
+              ...data,
+              created_at
+            });
+          }
+        });
+        // Sort descending by created_at date
+        orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        callback(orders);
+      }, err => {
+        console.error("subscribeToUserOrders error:", err);
+      });
+  } catch (err) {
+    console.error("subscribeToUserOrders init error:", err);
+    return () => {};
   }
 }
 
@@ -1516,21 +1554,35 @@ async function getDashboardStats() {
       });
     });
 
+    const inProgressOrders = ordersList.filter(o => o.status === 'In Progress').length;
+    const pendingOrders    = ordersList.filter(o => o.status === 'Pending').length;
+    const packedOrders     = ordersList.filter(o => o.status === 'Packed').length;
+    const shippedOrders    = ordersList.filter(o => o.status === 'Shipped').length;
+    const completedOrders  = ordersList.filter(o => o.status === 'Completed' || o.status === 'Delivered').length;
+    const cancelledOrders  = ordersList.filter(o => o.status === 'Cancelled').length;
+
     return {
-      totalMessages:  messagesList.length,
-      unreadMessages: messagesList.filter(m => !m.is_read).length,
-      totalProducts:  activeProds.size,
-      totalSteps:     stepsList.size,
-      totalOrders:    ordersList.length,
+      totalMessages:    messagesList.length,
+      unreadMessages:   messagesList.filter(m => !m.is_read).length,
+      totalProducts:    activeProds.size,
+      totalSteps:       stepsList.size,
+      totalOrders:      ordersList.length,
+      inProgressOrders,
+      pendingOrders,
+      packedOrders,
+      shippedOrders,
+      completedOrders,
+      cancelledOrders,
       earningsToday,
       earningsMonth,
       totalEarnings,
-      productSales:   activeProductsList
+      productSales:     activeProductsList
     };
   } catch (error) {
     console.error("Error loading dashboard stats:", error);
     return {
       totalMessages: 0, unreadMessages: 0, totalProducts: 0, totalSteps: 0, totalOrders: 0,
+      inProgressOrders: 0, pendingOrders: 0, packedOrders: 0, shippedOrders: 0, completedOrders: 0, cancelledOrders: 0,
       earningsToday: 0, earningsMonth: 0, totalEarnings: 0, productSales: []
     };
   }
