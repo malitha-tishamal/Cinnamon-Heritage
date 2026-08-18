@@ -1508,8 +1508,33 @@ async function loadSettings() {
     document.getElementById('settingLowStock').value         = siteSettings.low_stock_threshold    || 10;
     document.getElementById('settingDefaultDelivery').value  = siteSettings.default_delivery_charge || 350;
     document.getElementById('settingMaxPopups').value        = siteSettings.max_popups             || 5;
-    document.getElementById('settingCodEnabled').checked     = siteSettings.cod_enabled    === '1';
-    document.getElementById('settingOnlineEnabled').checked  = siteSettings.online_pay_enabled === '1';
+    document.getElementById('settingCodEnabled').checked          = siteSettings.cod_enabled            === '1';
+    document.getElementById('settingBankTransferEnabled').checked = siteSettings.bank_transfer_enabled  === '1';
+    document.getElementById('settingOnlineEnabled').checked       = siteSettings.online_pay_enabled      === '1';
+
+    // Bank detail fields
+    const bankDetailsSection = document.getElementById('bankDetailsSection');
+    if (siteSettings.bank_transfer_enabled === '1') {
+      if (bankDetailsSection) bankDetailsSection.style.display = '';
+    } else {
+      if (bankDetailsSection) bankDetailsSection.style.display = 'none';
+    }
+    const settingBankName    = document.getElementById('settingBankName');
+    const settingBankBranch  = document.getElementById('settingBankBranch');
+    const settingBankAccName = document.getElementById('settingBankAccName');
+    const settingBankAccNo   = document.getElementById('settingBankAccNo');
+    if (settingBankName)    settingBankName.value    = siteSettings.bank_name     || '';
+    if (settingBankBranch)  settingBankBranch.value  = siteSettings.bank_branch   || '';
+    if (settingBankAccName) settingBankAccName.value = siteSettings.bank_acc_name || '';
+    if (settingBankAccNo)   settingBankAccNo.value   = siteSettings.bank_acc_no   || '';
+
+    // Toggle bank details panel visibility on checkbox change
+    const bankToggle = document.getElementById('settingBankTransferEnabled');
+    if (bankToggle) {
+      bankToggle.onchange = function() {
+        if (bankDetailsSection) bankDetailsSection.style.display = this.checked ? '' : 'none';
+      };
+    }
 
     // Footer Settings
     document.getElementById('settingFooterAbout').value     = siteSettings.footer_about || '';
@@ -1536,15 +1561,21 @@ async function loadSettings() {
 
 async function saveSettings() {
   try {
+    const bankTransferEnabled = document.getElementById('settingBankTransferEnabled').checked;
     const settings = {
-      low_stock_threshold:    document.getElementById('settingLowStock').value,
+      low_stock_threshold:     document.getElementById('settingLowStock').value,
       default_delivery_charge: document.getElementById('settingDefaultDelivery').value,
-      max_popups:             document.getElementById('settingMaxPopups').value             || '5',
-      cod_enabled:            document.getElementById('settingCodEnabled').checked  ? '1' : '0',
-      online_pay_enabled:     document.getElementById('settingOnlineEnabled').checked ? '1' : '0'
+      max_popups:              document.getElementById('settingMaxPopups').value || '5',
+      cod_enabled:             document.getElementById('settingCodEnabled').checked         ? '1' : '0',
+      bank_transfer_enabled:   bankTransferEnabled                                           ? '1' : '0',
+      online_pay_enabled:      document.getElementById('settingOnlineEnabled').checked      ? '1' : '0',
+      bank_name:               (document.getElementById('settingBankName')    || {value: ''}).value,
+      bank_branch:             (document.getElementById('settingBankBranch')  || {value: ''}).value,
+      bank_acc_name:           (document.getElementById('settingBankAccName') || {value: ''}).value,
+      bank_acc_no:             (document.getElementById('settingBankAccNo')   || {value: ''}).value,
     };
     for (const [key, value] of Object.entries(settings)) {
-      await saveSetting(key, value);  // replaces fetch('/api/admin/settings', PUT)
+      await saveSetting(key, value);
     }
     showAdminToast('Settings saved successfully!', 'success');
     siteSettings = { ...siteSettings, ...settings };
