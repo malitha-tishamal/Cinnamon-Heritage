@@ -1575,7 +1575,7 @@ function renderFilteredOrders() {
         <td class="fw-bold text-accent">LKR ${Number(o.total_amount || 0).toLocaleString()}</td>
         <td><span class="badge ${statusClass}">${o.status}</span></td>
         <td class="text-end pe-4">
-          <button class="btn btn-outline-light btn-sm me-1" title="View & Edit" onclick="viewOrder('${o.id}')"><i class="bi bi-eye"></i></button>
+          <button class="btn btn-sm btn-primary me-1 fw-bold" style="background: #1a1a24; border: 1px solid #d4873a; color: #d4873a; font-size: 0.78rem;" title="Update Order Status & Process" onclick="viewOrder('${o.id}')"><i class="bi bi-arrow-repeat me-1"></i> Update Process</button>
           <button class="btn btn-outline-danger btn-sm" title="Delete" onclick="deleteOrder('${o.id}')"><i class="bi bi-trash"></i></button>
         </td>
       </tr>`;
