@@ -15,9 +15,21 @@ const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
 })();
 
 // ============================================================
-// IMMEDIATE DATA LOADING — fires before DOMContentLoaded
-// Using Supabase helpers from supabase.js
+// FAST PRELOADER DISMISSAL (Max 1s Guarantee)
 // ============================================================
+function hidePreloader() {
+  const preloader = document.getElementById('preloader');
+  if (preloader && !preloader.classList.contains('hidden')) {
+    preloader.classList.add('hidden');
+    setTimeout(() => {
+      if (preloader.parentNode) preloader.remove();
+    }, 350);
+  }
+}
+
+// Safety: Ensure preloader NEVER stays for more than 1 second under any condition
+setTimeout(hidePreloader, 1000);
+
 // Caching wrapper for instant loads
 async function fetchWithCache(key, fetcher, fallback) {
   const cached = sessionStorage.getItem(key);
@@ -959,11 +971,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupSignupLocationSelectors();
   setupProfileLocationSelectors();
 
-  const preloader = document.getElementById('preloader');
-  if (preloader) {
-    preloader.classList.add('hidden');
-    setTimeout(() => preloader.remove(), 600);
-  }
+  // Fast preloader dismissal
+  hidePreloader();
 
   // Check auth session
   await checkAuthStatus();
