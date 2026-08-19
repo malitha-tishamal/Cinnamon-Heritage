@@ -195,13 +195,19 @@ async function loadDashboard() {
   try {
     const stats = await getDashboardStats();  // replaces fetch('/api/admin/stats')
 
-    document.getElementById('statMessages').textContent    = stats.totalMessages;
-    document.getElementById('statUnread').textContent      = stats.unreadMessages;
-    document.getElementById('statProducts').textContent    = stats.totalProducts;
-    document.getElementById('statSteps').textContent       = stats.totalSteps;
-    document.getElementById('statOrders').textContent      = stats.totalOrders;
+    document.getElementById('statMessages').textContent       = stats.totalMessages;
+    document.getElementById('statUnread').textContent         = stats.unreadMessages;
+    document.getElementById('statProducts').textContent       = stats.totalProducts;
+    document.getElementById('statSteps').textContent          = stats.totalSteps;
+    document.getElementById('statOrders').textContent         = stats.totalOrders;
+    if (document.getElementById('statInProgress')) {
+      document.getElementById('statInProgress').textContent   = stats.inProgressOrders ?? 0;
+    }
     document.getElementById('statEarningsToday').textContent  = `LKR ${Number(stats.earningsToday).toLocaleString()}`;
     document.getElementById('statEarningsMonth').textContent  = `LKR ${Number(stats.earningsMonth).toLocaleString()}`;
+    if (document.getElementById('statEarningsYear')) {
+      document.getElementById('statEarningsYear').textContent = `LKR ${Number(stats.earningsYear || 0).toLocaleString()}`;
+    }
     document.getElementById('statTotalEarnings').textContent  = `LKR ${Number(stats.totalEarnings).toLocaleString()}`;
 
     const badge = document.getElementById('unreadBadge');
@@ -1375,76 +1381,270 @@ async function deleteProduct(id) {
 // ============================================================
 // ORDERS
 // ============================================================
+let allLoadedOrders = [];
+let activeOrderSummaryStatus = 'all';
+
 async function loadOrders() {
+  const listEl = document.getElementById('ordersList');
+  if (listEl) listEl.innerHTML = '<tr><td colspan="8" class="text-center p-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading orders...</td></tr>';
+
   try {
-    const orders = await getOrders();  // replaces fetch('/api/admin/orders')
-    let html = '';
-    orders.forEach(o => {
-      const date        = new Date(o.created_at).toLocaleDateString();
-      const statusClass = getStatusClass(o.status);
-      html += `
-        <tr>
-          <td class="ps-4">#${o.id}</td>
-          <td>
-            <div class="fw-bold">${o.customer_name}</div>
-            <div class="small text-muted">${o.customer_phone}</div>
-          </td>
-          <td>
-            <div class="small fw-bold">${o.district || 'N/A'}</div>
-            <div class="small text-muted">${o.province || ''}</div>
-          </td>
-          <td>
-            <div class="small fw-bold">${o.product_name}</div>
-            <div class="small text-muted">Qty: ${o.item_quantity}</div>
-          </td>
-          <td><span class="badge bg-light text-dark border small">${o.payment_method}</span></td>
-          <td>LKR ${Number(o.total_amount).toLocaleString()}</td>
-          <td><span class="badge ${statusClass}">${o.status}</span></td>
-          <td class="text-end pe-4">
-            <button class="btn btn-outline-light btn-sm me-1" onclick="viewOrder('${o.id}')"><i class="bi bi-eye"></i></button>
-            <button class="btn btn-outline-danger btn-sm" onclick="deleteOrder('${o.id}')"><i class="bi bi-trash"></i></button>
-          </td>
-        </tr>`;
-    });
-    if (orders.length === 0) html = '<tr><td colspan="8" class="text-center p-4 text-muted">No orders found.</td></tr>';
-    document.getElementById('ordersList').innerHTML = html;
+    allLoadedOrders = await getOrders();
+    updateOrdersSummaryCounts(allLoadedOrders);
+    renderFilteredOrders();
   } catch (err) {
     console.error('Load orders error:', err);
+    if (listEl) listEl.innerHTML = '<tr><td colspan="8" class="text-center p-4 text-danger">Failed to load orders: ' + err.message + '</td></tr>';
   }
 }
 
+function updateOrdersSummaryCounts(orders) {
+  const total      = orders.length;
+  const pending    = orders.filter(o => o.status === 'Pending').length;
+  const inProgress = orders.filter(o => o.status === 'In Progress').length;
+  const packed     = orders.filter(o => o.status === 'Packed').length;
+  const shipped    = orders.filter(o => o.status === 'Shipped').length;
+  const completed  = orders.filter(o => o.status === 'Completed' || o.status === 'Delivered').length;
+  const cancelled  = orders.filter(o => o.status === 'Cancelled').length;
+
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setVal('orderCountTotal', total);
+  setVal('orderCountPending', pending);
+  setVal('orderCountInProgress', inProgress);
+  setVal('orderCountPacked', packed);
+  setVal('orderCountShipped', shipped);
+  setVal('orderCountCompleted', completed);
+  setVal('orderCountCancelled', cancelled);
+}
+
+function onOrderFilterChange() {
+  const period = document.getElementById('orderPeriodFilter')?.value || 'all';
+  const fromCol = document.getElementById('orderDateFromCol');
+  const toCol = document.getElementById('orderDateToCol');
+
+  if (period === 'custom') {
+    fromCol?.classList.remove('d-none');
+    toCol?.classList.remove('d-none');
+  } else {
+    fromCol?.classList.add('d-none');
+    toCol?.classList.add('d-none');
+  }
+
+  renderFilteredOrders();
+}
+
+function filterBySummaryStatus(status) {
+  activeOrderSummaryStatus = status;
+  const statusSelect = document.getElementById('orderStatusFilter');
+  if (statusSelect) {
+    statusSelect.value = status;
+  }
+
+  // Update active border/highlight on summary cards
+  document.querySelectorAll('.order-filter-card').forEach(card => {
+    card.classList.remove('active', 'border-primary', 'shadow');
+  });
+  const activeCard = document.getElementById(`summaryCard-${status.replace(/\s+/g, '')}`);
+  if (activeCard) {
+    activeCard.classList.add('active', 'border-primary', 'shadow');
+  }
+
+  renderFilteredOrders();
+}
+
+function resetOrderFilters() {
+  activeOrderSummaryStatus = 'all';
+  const periodSelect = document.getElementById('orderPeriodFilter');
+  const statusSelect = document.getElementById('orderStatusFilter');
+  const searchInput  = document.getElementById('orderSearchInput');
+  const dateFrom     = document.getElementById('orderDateFrom');
+  const dateTo       = document.getElementById('orderDateTo');
+
+  if (periodSelect) periodSelect.value = 'all';
+  if (statusSelect) statusSelect.value = 'all';
+  if (searchInput)  searchInput.value = '';
+  if (dateFrom)     dateFrom.value = '';
+  if (dateTo)       dateTo.value = '';
+
+  document.getElementById('orderDateFromCol')?.classList.add('d-none');
+  document.getElementById('orderDateToCol')?.classList.add('d-none');
+
+  document.querySelectorAll('.order-filter-card').forEach(card => {
+    card.classList.remove('active', 'border-primary', 'shadow');
+  });
+  document.getElementById('summaryCard-all')?.classList.add('active');
+
+  renderFilteredOrders();
+}
+
+function renderFilteredOrders() {
+  const listEl = document.getElementById('ordersList');
+  if (!listEl) return;
+
+  const periodSelect = document.getElementById('orderPeriodFilter')?.value || 'all';
+  const statusSelect = document.getElementById('orderStatusFilter')?.value || 'all';
+  const searchQuery  = (document.getElementById('orderSearchInput')?.value || '').toLowerCase().trim();
+  const dateFromVal  = document.getElementById('orderDateFrom')?.value;
+  const dateToVal    = document.getElementById('orderDateTo')?.value;
+
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  
+  // Start of week
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  // Start of month
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // Start of year
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+  let filtered = allLoadedOrders.filter(o => {
+    const oDate = new Date(o.created_at);
+    const oDateStr = oDate.toISOString().split('T')[0];
+
+    // 1. Period filter
+    if (periodSelect === 'today') {
+      if (oDateStr !== todayStr) return false;
+    } else if (periodSelect === 'week') {
+      if (oDate < startOfWeek) return false;
+    } else if (periodSelect === 'month') {
+      if (oDate < startOfMonth) return false;
+    } else if (periodSelect === 'year') {
+      if (oDate < startOfYear) return false;
+    } else if (periodSelect === 'custom') {
+      if (dateFromVal && oDateStr < dateFromVal) return false;
+      if (dateToVal && oDateStr > dateToVal) return false;
+    }
+
+    // 2. Status filter
+    if (statusSelect !== 'all') {
+      const s = o.status || '';
+      if (statusSelect === 'Completed') {
+        if (s !== 'Completed' && s !== 'Delivered') return false;
+      } else {
+        if (s !== statusSelect) return false;
+      }
+    }
+
+    // 3. Search query
+    if (searchQuery) {
+      const matchId       = (o.id || '').toLowerCase().includes(searchQuery);
+      const matchName     = (o.customer_name || '').toLowerCase().includes(searchQuery);
+      const matchEmail    = (o.customer_email || '').toLowerCase().includes(searchQuery);
+      const matchPhone    = (o.customer_phone || '').toLowerCase().includes(searchQuery);
+      const matchDistrict = (o.district || '').toLowerCase().includes(searchQuery);
+      const matchProvince = (o.province || '').toLowerCase().includes(searchQuery);
+      const matchProduct  = (o.product_name || '').toLowerCase().includes(searchQuery);
+      const matchPayment  = (o.payment_method || '').toLowerCase().includes(searchQuery);
+      if (!matchId && !matchName && !matchEmail && !matchPhone && !matchDistrict && !matchProvince && !matchProduct && !matchPayment) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<tr><td colspan="8" class="text-center p-4 text-muted">No orders match your filter criteria.</td></tr>';
+    return;
+  }
+
+  let html = '';
+  filtered.forEach(o => {
+    const date = o.created_at ? new Date(o.created_at).toLocaleDateString() : 'N/A';
+    const statusClass = getStatusClass(o.status);
+    html += `
+      <tr>
+        <td class="ps-4 fw-bold font-monospace small">#${o.id}</td>
+        <td>
+          <div class="fw-bold">${o.customer_name || 'Customer'}</div>
+          <div class="small text-muted">${o.customer_phone || ''}</div>
+        </td>
+        <td>
+          <div class="small fw-bold">${o.district || 'N/A'}</div>
+          <div class="small text-muted">${o.province || ''}</div>
+        </td>
+        <td>
+          <div class="small fw-bold text-truncate" style="max-width: 180px;">${o.product_name || (o.order_items?.[0]?.product_name || 'Items')}</div>
+          <div class="small text-muted">${o.order_items ? `${o.order_items.length} item(s)` : `Qty: ${o.item_quantity || 1}`}</div>
+        </td>
+        <td><span class="badge bg-light text-dark border small">${o.payment_method || 'COD'}</span></td>
+        <td class="fw-bold text-accent">LKR ${Number(o.total_amount || 0).toLocaleString()}</td>
+        <td><span class="badge ${statusClass}">${o.status}</span></td>
+        <td class="text-end pe-4">
+          <button class="btn btn-outline-light btn-sm me-1" title="View & Edit" onclick="viewOrder('${o.id}')"><i class="bi bi-eye"></i></button>
+          <button class="btn btn-outline-danger btn-sm" title="Delete" onclick="deleteOrder('${o.id}')"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>`;
+  });
+
+  listEl.innerHTML = html;
+}
+
 function getStatusClass(status) {
-  const map = { Pending: 'bg-warning text-dark', Processing: 'bg-info text-dark', Shipped: 'bg-primary', Delivered: 'bg-success', Cancelled: 'bg-danger' };
-  return map[status] ?? 'bg-secondary';
+  const s = (status || '').toLowerCase();
+  if (s === 'pending') return 'bg-warning text-dark';
+  if (s === 'in progress') return 'bg-warning bg-opacity-75 text-dark fw-bold';
+  if (s === 'packed') return 'bg-secondary text-white';
+  if (s === 'shipped') return 'bg-primary text-white';
+  if (s === 'completed' || s === 'delivered') return 'bg-success text-white';
+  if (s === 'cancelled') return 'bg-danger text-white';
+  return 'bg-secondary text-white';
 }
 
 async function viewOrder(id) {
   try {
-    const orders = await getOrders();
+    const orders = allLoadedOrders.length > 0 ? allLoadedOrders : await getOrders();
     const o      = orders.find(x => x.id === id);
     if (!o) return;
+
+    const statusOptions = ['Pending', 'In Progress', 'Packed', 'Shipped', 'Completed', 'Cancelled'];
+
+    let itemsRows = '';
+    if (o.order_items && o.order_items.length > 0) {
+      itemsRows = o.order_items.map(item => `
+        <tr>
+          <td>${item.product_name}</td>
+          <td class="text-center">LKR ${Number(item.unit_price || 0).toLocaleString()}</td>
+          <td class="text-center">${item.quantity}</td>
+          <td class="text-end">LKR ${(Number(item.unit_price || 0) * item.quantity).toLocaleString()}</td>
+        </tr>
+      `).join('');
+    } else {
+      itemsRows = `
+        <tr>
+          <td>${o.product_name}</td>
+          <td class="text-center">LKR ${Number(o.unit_price || 0).toLocaleString()}</td>
+          <td class="text-center">${o.item_quantity || 1}</td>
+          <td class="text-end">LKR ${(Number(o.unit_price || 0) * (o.item_quantity || 1)).toLocaleString()}</td>
+        </tr>
+      `;
+    }
 
     document.getElementById('modalOrderId').textContent = o.id;
     document.getElementById('modalOrderBody').innerHTML = `
       <div class="row">
         <div class="col-md-6 mb-4">
           <h6 class="fw-bold text-accent border-bottom pb-2">Customer Details</h6>
-          <p class="mb-1"><strong>Name:</strong> ${o.customer_name}</p>
-          <p class="mb-1"><strong>Email:</strong> ${o.customer_email}</p>
-          <p class="mb-1"><strong>Phone:</strong> ${o.customer_phone}</p>
+          <p class="mb-1"><strong>Name:</strong> ${o.customer_name || 'N/A'}</p>
+          <p class="mb-1"><strong>Email:</strong> ${o.customer_email || 'N/A'}</p>
+          <p class="mb-1"><strong>Phone:</strong> ${o.customer_phone || 'N/A'}</p>
           <p class="mb-1"><strong>District:</strong> ${o.district || 'N/A'} | ${o.province || ''}</p>
-          <p class="mb-1"><strong>Address:</strong> ${o.shipping_address}</p>
+          <p class="mb-1"><strong>Address:</strong> ${o.shipping_address || 'N/A'}</p>
         </div>
         <div class="col-md-6 mb-4">
           <h6 class="fw-bold text-accent border-bottom pb-2">Order Info</h6>
-          <p class="mb-1"><strong>Status:</strong> ${o.status}</p>
-          <p class="mb-1"><strong>Payment:</strong> <span class="badge bg-light text-dark border">${o.payment_method}</span></p>
+          <p class="mb-1"><strong>Status:</strong> <span class="badge ${getStatusClass(o.status)}">${o.status}</span></p>
+          <p class="mb-1"><strong>Payment:</strong> <span class="badge bg-light text-dark border">${o.payment_method || 'COD'}</span></p>
           <p class="mb-1"><strong>Date:</strong> ${new Date(o.created_at).toLocaleString()}</p>
           ${o.bank_reference ? `<p class="mb-1"><strong>Bank Ref:</strong> ${o.bank_reference}</p>` : ''}
           <div class="mt-3">
             <label class="form-label small fw-bold">Update Status</label>
             <select class="form-select form-select-sm" onchange="updateOrderStatusAndRefresh('${o.id}', this.value)">
-              ${['Pending','Processing','Shipped','Delivered','Cancelled'].map(s => `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+              ${statusOptions.map(s => `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s}</option>`).join('')}
             </select>
           </div>
         </div>
@@ -1453,18 +1653,13 @@ async function viewOrder(id) {
           <table class="table table-sm">
             <thead><tr><th>Product</th><th class="text-center">Price</th><th class="text-center">Qty</th><th class="text-end">Subtotal</th></tr></thead>
             <tbody>
-              <tr>
-                <td>${o.product_name}</td>
-                <td class="text-center">LKR ${Number(o.unit_price).toLocaleString()}</td>
-                <td class="text-center">${o.item_quantity}</td>
-                <td class="text-end">LKR ${(Number(o.unit_price) * o.item_quantity).toLocaleString()}</td>
-              </tr>
+              ${itemsRows}
             </tbody>
             <tfoot class="border-top-0">
-              <tr><td colspan="3" class="text-end border-0 small">Subtotal:</td><td class="text-end border-0 small">LKR ${Number(o.subtotal).toLocaleString()}</td></tr>
-              <tr><td colspan="3" class="text-end border-0 small text-success">Discount:</td><td class="text-end border-0 small text-success">- LKR ${Number(o.discount_total).toLocaleString()}</td></tr>
-              <tr><td colspan="3" class="text-end border-0 small">Delivery:</td><td class="text-end border-0 small">LKR ${Number(o.delivery_charge).toLocaleString()}</td></tr>
-              <tr class="fw-bold fs-5"><td colspan="3" class="text-end border-0">Total:</td><td class="text-end border-0 text-accent">LKR ${Number(o.total_amount).toLocaleString()}</td></tr>
+              <tr><td colspan="3" class="text-end border-0 small">Subtotal:</td><td class="text-end border-0 small">LKR ${Number(o.subtotal || 0).toLocaleString()}</td></tr>
+              <tr><td colspan="3" class="text-end border-0 small text-success">Discount:</td><td class="text-end border-0 small text-success">- LKR ${Number(o.discount_total || 0).toLocaleString()}</td></tr>
+              <tr><td colspan="3" class="text-end border-0 small">Delivery:</td><td class="text-end border-0 small">LKR ${Number(o.delivery_charge || 0).toLocaleString()}</td></tr>
+              <tr class="fw-bold fs-5"><td colspan="3" class="text-end border-0">Total:</td><td class="text-end border-0 text-accent">LKR ${Number(o.total_amount || 0).toLocaleString()}</td></tr>
             </tfoot>
           </table>
         </div>
@@ -1497,6 +1692,15 @@ async function deleteOrder(id) {
     showAdminToast('Failed to delete', 'error');
   }
 }
+
+// Global window bindings
+window.onOrderFilterChange = onOrderFilterChange;
+window.filterBySummaryStatus = filterBySummaryStatus;
+window.resetOrderFilters = resetOrderFilters;
+window.loadOrders = loadOrders;
+window.viewOrder = viewOrder;
+window.updateOrderStatusAndRefresh = updateOrderStatusAndRefresh;
+window.deleteOrder = deleteOrder;
 
 // ============================================================
 // SETTINGS
