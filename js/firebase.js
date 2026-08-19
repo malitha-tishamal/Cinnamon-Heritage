@@ -1497,9 +1497,11 @@ async function getDashboardStats() {
 
     const todayStr = new Date().toISOString().split('T')[0];
     const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const firstDayOfYear = new Date(new Date().getFullYear(), 0, 1);
 
     let earningsToday = 0;
     let earningsMonth = 0;
+    let earningsYear = 0;
     let totalEarnings = 0;
 
     ordersList.forEach(o => {
@@ -1515,6 +1517,9 @@ async function getDashboardStats() {
         }
         if (oDate >= firstDayOfMonth) {
           earningsMonth += amt;
+        }
+        if (oDate >= firstDayOfYear) {
+          earningsYear += amt;
         }
       }
     });
@@ -1575,6 +1580,7 @@ async function getDashboardStats() {
       cancelledOrders,
       earningsToday,
       earningsMonth,
+      earningsYear,
       totalEarnings,
       productSales:     activeProductsList
     };
@@ -1583,7 +1589,7 @@ async function getDashboardStats() {
     return {
       totalMessages: 0, unreadMessages: 0, totalProducts: 0, totalSteps: 0, totalOrders: 0,
       inProgressOrders: 0, pendingOrders: 0, packedOrders: 0, shippedOrders: 0, completedOrders: 0, cancelledOrders: 0,
-      earningsToday: 0, earningsMonth: 0, totalEarnings: 0, productSales: []
+      earningsToday: 0, earningsMonth: 0, earningsYear: 0, totalEarnings: 0, productSales: []
     };
   }
 }
