@@ -1,91 +1,159 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- =========================================================
+     Cinnamon Heritage Sitemap
+     Website : https://www.cinnamonheritage.lk/
+     Alt URL : https://www.cinnamonheritage.com/
+     Updated : 2026-09-08
+     Target  : Cinnamon | Sri Lanka Cinnamon | Best Cinnamon
+               Galle | Buy Sri Lanka Cinnamon
+               Cinnamon Heritage | CinnamonHeritage.lk
+========================================================= -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-  
-  <!-- Main Homepage -->
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- ══════════════════════════════════════
+       HOMEPAGE – Highest Priority
+       Keywords: Best Cinnamon, Sri Lanka Cinnamon,
+                 Buy Ceylon Cinnamon, Cinnamon Heritage
+  ═══════════════════════════════════════ -->
   <url>
     <loc>https://www.cinnamonheritage.lk/</loc>
-    <lastmod>2026-08-13</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://www.cinnamonheritage.lk/images/logo.png</image:loc>
-      <image:title>Cinnamon Heritage Pure Ceylon Cinnamon Logo</image:title>
+      <image:title>Cinnamon Heritage – Best Ceylon Cinnamon Brand Logo, Galle Sri Lanka</image:title>
+      <image:caption>Cinnamon Heritage: Buy the Best Sri Lanka Cinnamon – cinnamonheritage.lk</image:caption>
     </image:image>
     <image:image>
       <image:loc>https://www.cinnamonheritage.lk/images/cinnamon_spices.jpg</image:loc>
-      <image:title>Authentic Ceylon Cinnamon Estate and Spices</image:title>
+      <image:title>Best Ceylon Cinnamon Quills from Galle, Sri Lanka – Cinnamon Heritage</image:title>
+      <image:caption>Authentic Pure Ceylon Cinnamon from Cinnamon Heritage estate in Galle, Sri Lanka. Buy Sri Lanka Cinnamon at cinnamonheritage.lk</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.cinnamonheritage.lk/images/cinnamon_plantlings.jpg</image:loc>
+      <image:title>Ceylon Cinnamon Plantation in Galle, Sri Lanka – Cinnamon Heritage Estate</image:title>
+      <image:caption>Sri Lanka Cinnamon growing on the Cinnamon Heritage family estate in Galle since 1982</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.cinnamonheritage.lk/images/factory.png</image:loc>
+      <image:title>Ceylon Cinnamon Processing Factory – ISO Certified, Galle Sri Lanka</image:title>
+      <image:caption>Cinnamon Heritage ISO 22000 &amp; HACCP certified cinnamon processing facility in Galle</image:caption>
     </image:image>
   </url>
 
-  <!-- Key Page Sections -->
+  <!-- ══════════════════════════════════════
+       HERITAGE / ABOUT SECTION
+       Keywords: Cinnamon Heritage, Sri Lanka Cinnamon Estate Galle
+  ═══════════════════════════════════════ -->
   <url>
     <loc>https://www.cinnamonheritage.lk/#heritage</loc>
-    <lastmod>2026-08-13</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
+  <!-- ══════════════════════════════════════
+       PRODUCTS – Buy Sri Lanka Cinnamon
+       Keywords: Best Cinnamon, Buy Ceylon Cinnamon, Galle Cinnamon
+  ═══════════════════════════════════════ -->
   <url>
     <loc>https://www.cinnamonheritage.lk/#products</loc>
-    <lastmod>2026-08-13</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://www.cinnamonheritage.lk/images/cinnamon_spices.jpg</image:loc>
+      <image:title>Buy Best Ceylon Cinnamon Products – Cinnamon Heritage Sri Lanka</image:title>
+      <image:caption>Buy the best Sri Lanka Cinnamon: quills, powder, alba grade – Cinnamon Heritage, Galle</image:caption>
+    </image:image>
   </url>
 
+  <!-- ══════════════════════════════════════
+       ESSENTIAL OILS
+       Keywords: Cinnamon Oil Sri Lanka, Best Cinnamon Oil
+  ═══════════════════════════════════════ -->
   <url>
     <loc>https://www.cinnamonheritage.lk/#essential-oils</loc>
-    <lastmod>2026-08-13</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
+  <!-- ══════════════════════════════════════
+       B2B WHOLESALE
+       Keywords: Buy Sri Lanka Cinnamon Bulk, Cinnamon Wholesale Export
+  ═══════════════════════════════════════ -->
   <url>
     <loc>https://www.cinnamonheritage.lk/#b2b</loc>
-    <lastmod>2026-08-13</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
+  <!-- ══════════════════════════════════════
+       EXPERIENCE / ESTATE TOUR
+       Keywords: Cinnamon Estate Galle, Sri Lanka Cinnamon Tour
+  ═══════════════════════════════════════ -->
   <url>
     <loc>https://www.cinnamonheritage.lk/#experience</loc>
-    <lastmod>2026-08-13</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
+  <!-- ══════════════════════════════════════
+       VILLA STAY
+       Keywords: Cinnamon Heritage Villa Galle, Sri Lanka Cinnamon Estate Stay
+  ═══════════════════════════════════════ -->
   <url>
     <loc>https://www.cinnamonheritage.lk/#villa</loc>
-    <lastmod>2026-08-13</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
+  <!-- ══════════════════════════════════════
+       PROCESS
+       Keywords: Ceylon Cinnamon Processing, How Sri Lanka Cinnamon is Made
+  ═══════════════════════════════════════ -->
   <url>
     <loc>https://www.cinnamonheritage.lk/#process</loc>
-    <lastmod>2026-08-13</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
+  <!-- ══════════════════════════════════════
+       FAQ PAGE
+       Keywords: Best Cinnamon FAQ, Buy Sri Lanka Cinnamon Guide
+  ═══════════════════════════════════════ -->
   <url>
     <loc>https://www.cinnamonheritage.lk/#faq</loc>
-    <lastmod>2026-08-13</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
 
+  <!-- ══════════════════════════════════════
+       CONTACT
+       Keywords: Cinnamon Heritage Contact, Galle Sri Lanka Cinnamon Supplier
+  ═══════════════════════════════════════ -->
   <url>
     <loc>https://www.cinnamonheritage.lk/#contact</loc>
-    <lastmod>2026-08-13</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
-  <!-- Checkout -->
+  <!-- ══════════════════════════════════════
+       CHECKOUT
+  ═══════════════════════════════════════ -->
   <url>
     <loc>https://www.cinnamonheritage.lk/checkout.html</loc>
-    <lastmod>2026-08-13</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
