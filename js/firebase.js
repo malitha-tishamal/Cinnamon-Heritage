@@ -124,9 +124,16 @@ function subscribeToSettings(callback) {
 let isSeeded = false;
 
 async function seedDatabaseIfNeeded() {
-  // Permanently disabled automatic client-side seeding to prevent overwriting Firestore data and Cloudinary image URLs
-  return;
-}
+  if (isSeeded) return;
+  
+  // Only check once per session to reduce calls
+  isSeeded = true;
+  
+  try {
+    const productsSnap = await db.collection('products').limit(1).get();
+    if (!productsSnap.empty) {
+      return; // Already seeded
+    }
     
     console.log("Seeding Firestore database with initial Cinnamon Heritage data...");
     
@@ -1038,8 +1045,9 @@ async function deleteStepById(id) {
 }
 
 async function seedFaqsIfNeeded() {
-  return;
-}
+  try {
+    const snapshot = await db.collection('faqs').limit(1).get();
+    if (!snapshot.empty) return; // Already seeded
     
     console.log("Seeding FAQs collection...");
     const faqs = [
