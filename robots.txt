@@ -1,10 +1,57 @@
-# Robots.txt for Cinnamon Heritage (https://www.cinnamonheritage.lk/)
+# ================================================================
+# Robots.txt – Cinnamon Heritage
+# Website : https://www.cinnamonheritage.lk/
+# Alt URL : https://www.cinnamonheritage.com/
+# Purpose : Allow search engines to crawl all public pages
+#            Block sensitive/admin areas
+# ================================================================
 
+# ── Allow all crawlers (Google, Bing, etc.) ──────────────────
 User-agent: *
 Allow: /
+Allow: /index.html
+Allow: /checkout.html
+Allow: /images/
+Allow: /css/
+Allow: /js/
+
+# ── Block sensitive and non-public files ─────────────────────
 Disallow: /admin.html
 Disallow: /scratch/
-Disallow: /database.sql
-Disallow: /*.sql
+Disallow: /*.sql$
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /package.json
+Disallow: /package-lock.json
 
+# ── Googlebot specific ───────────────────────────────────────
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+# ── Googlebot-Image (for image SEO) ──────────────────────────
+User-agent: Googlebot-Image
+Allow: /images/
+
+# ── Bingbot ──────────────────────────────────────────────────
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+# ── Yandex ───────────────────────────────────────────────────
+User-agent: YandexBot
+Allow: /
+
+# ── Block bad bots ───────────────────────────────────────────
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# ── Sitemap location ─────────────────────────────────────────
 Sitemap: https://www.cinnamonheritage.lk/sitemap.xml
+Sitemap: https://www.cinnamonheritage.com/sitemap.xml
