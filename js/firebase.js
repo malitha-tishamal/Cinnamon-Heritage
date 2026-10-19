@@ -6,17 +6,21 @@
 const appConfig = (typeof window !== 'undefined' && window.__APP_CONFIG__) || {};
 
 const firebaseConfig = {
-  apiKey: appConfig.FIREBASE_API_KEY || "AIzaSyCxwS4oCfB4b2vQniNoSjNOq_G_2GvAkdg",
-  authDomain: appConfig.FIREBASE_AUTH_DOMAIN || "authspark-pq68d.firebaseapp.com",
-  projectId: appConfig.FIREBASE_PROJECT_ID || "authspark-pq68d",
-  storageBucket: appConfig.FIREBASE_STORAGE_BUCKET || "authspark-pq68d.firebasestorage.app",
-  messagingSenderId: appConfig.FIREBASE_MESSAGING_SENDER_ID || "104606816181",
-  appId: appConfig.FIREBASE_APP_ID || "1:104606816181:web:249a1f1f3e9daebd4eabfc"
+  apiKey: appConfig.FIREBASE_API_KEY || "",
+  authDomain: appConfig.FIREBASE_AUTH_DOMAIN || "",
+  projectId: appConfig.FIREBASE_PROJECT_ID || "",
+  storageBucket: appConfig.FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId: appConfig.FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: appConfig.FIREBASE_APP_ID || ""
 };
 
 // Initialize Firebase
 if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+  if (!firebaseConfig.apiKey) {
+    console.error("Firebase config is missing! Please ensure js/config.js is generated with valid environment variables.");
+  } else {
+    firebase.initializeApp(firebaseConfig);
+  }
 }
 
 const auth = firebase.auth();
@@ -907,8 +911,8 @@ async function deleteProductById(id) {
 // IMAGE UPLOAD (CLOUDINARY IMAGE HOSTING)
 // ============================================================
 
-const CLOUDINARY_CLOUD_NAME = appConfig.CLOUDINARY_CLOUD_NAME || "dqeptzlsb";
-const CLOUDINARY_UPLOAD_PRESET = appConfig.CLOUDINARY_UPLOAD_PRESET || "flutter_mediq_upload";
+const CLOUDINARY_CLOUD_NAME = appConfig.CLOUDINARY_CLOUD_NAME || "";
+const CLOUDINARY_UPLOAD_PRESET = appConfig.CLOUDINARY_UPLOAD_PRESET || "";
 
 /** Upload image to Cloudinary with optional progress callback (0–100) */
 function uploadImageWithProgress(file, onProgress) {

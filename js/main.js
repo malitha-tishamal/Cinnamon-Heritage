@@ -3,13 +3,15 @@
 // All fetch('/api/...') calls replaced with Supabase helpers
 // ============================================================
 
-// EmailJS config (optional — keep if you use it)
-const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
-const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
-const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
+const appConfig = (typeof window !== 'undefined' && window.__APP_CONFIG__) || {};
+
+// EmailJS config (optional — configured via environment variables)
+const EMAILJS_PUBLIC_KEY  = appConfig.EMAILJS_PUBLIC_KEY  || 'YOUR_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID  = appConfig.EMAILJS_SERVICE_ID  || 'YOUR_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID = appConfig.EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID';
 
 (function() {
-  if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
+  if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
     emailjs.init(EMAILJS_PUBLIC_KEY);
   }
 })();
