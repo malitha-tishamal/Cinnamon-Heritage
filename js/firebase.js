@@ -3,13 +3,15 @@
 // Replace the config keys with your own Firebase Project details
 // ============================================================
 
+const appConfig = (typeof window !== 'undefined' && window.__APP_CONFIG__) || {};
+
 const firebaseConfig = {
-  apiKey: "AIzaSyCxwS4oCfB4b2vQniNoSjNOq_G_2GvAkdg",
-  authDomain: "authspark-pq68d.firebaseapp.com",
-  projectId: "authspark-pq68d",
-  storageBucket: "authspark-pq68d.firebasestorage.app",
-  messagingSenderId: "104606816181",
-  appId: "1:104606816181:web:249a1f1f3e9daebd4eabfc"
+  apiKey: appConfig.FIREBASE_API_KEY || "AIzaSyCxwS4oCfB4b2vQniNoSjNOq_G_2GvAkdg",
+  authDomain: appConfig.FIREBASE_AUTH_DOMAIN || "authspark-pq68d.firebaseapp.com",
+  projectId: appConfig.FIREBASE_PROJECT_ID || "authspark-pq68d",
+  storageBucket: appConfig.FIREBASE_STORAGE_BUCKET || "authspark-pq68d.firebasestorage.app",
+  messagingSenderId: appConfig.FIREBASE_MESSAGING_SENDER_ID || "104606816181",
+  appId: appConfig.FIREBASE_APP_ID || "1:104606816181:web:249a1f1f3e9daebd4eabfc"
 };
 
 // Initialize Firebase
@@ -905,8 +907,8 @@ async function deleteProductById(id) {
 // IMAGE UPLOAD (CLOUDINARY IMAGE HOSTING)
 // ============================================================
 
-const CLOUDINARY_CLOUD_NAME = "dqeptzlsb";
-const CLOUDINARY_UPLOAD_PRESET = "flutter_mediq_upload";
+const CLOUDINARY_CLOUD_NAME = appConfig.CLOUDINARY_CLOUD_NAME || "dqeptzlsb";
+const CLOUDINARY_UPLOAD_PRESET = appConfig.CLOUDINARY_UPLOAD_PRESET || "flutter_mediq_upload";
 
 /** Upload image to Cloudinary with optional progress callback (0–100) */
 function uploadImageWithProgress(file, onProgress) {
