@@ -30,37 +30,42 @@ db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
 });
 
 // ============================================================
-// CACHE HELPERS
+// CACHE HELPERS (PERSISTENT LOCALSTORAGE)
 // ============================================================
 
 async function serveFromCache(key, fetcher) {
-  const cached = sessionStorage.getItem(key);
+  let cached = null;
+  try {
+    cached = localStorage.getItem(key);
+  } catch (e) {}
+
   if (cached) {
     try {
       const parsed = JSON.parse(cached);
+      // Background revalidation to keep data fresh
       fetcher().then(data => {
         if (data !== undefined && data !== null) {
-          sessionStorage.setItem(key, JSON.stringify(data));
+          try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
         }
       }).catch(() => {});
       return parsed;
     } catch (e) {
-      sessionStorage.removeItem(key);
+      try { localStorage.removeItem(key); } catch (e) {}
     }
   }
   const data = await fetcher();
   if (data !== undefined && data !== null) {
-    sessionStorage.setItem(key, JSON.stringify(data));
+    try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
   }
   return data;
 }
 
 function invalidateCache(key) {
-  sessionStorage.removeItem(key);
+  try { localStorage.removeItem(key); } catch (e) {}
 }
 
 function invalidateAllCaches() {
-  ['cache_content', 'cache_products', 'cache_process_steps', 'cache_settings', 'cache_faqs'].forEach(invalidateCache);
+  ['cache_content', 'cache_products', 'cache_process_steps', 'cache_settings', 'cache_faqs', 'cache_delivery_rates'].forEach(invalidateCache);
 }
 
 // ============================================================
@@ -72,7 +77,7 @@ function subscribeToContent(callback) {
     snapshot => {
       const content = {};
       snapshot.forEach(doc => { content[doc.id] = doc.data(); });
-      sessionStorage.setItem('cache_content', JSON.stringify(content));
+      try { localStorage.setItem('cache_content', JSON.stringify(content)); } catch (e) {}
       callback(content);
     },
     err => console.error('Content listener error:', err)
@@ -110,7 +115,7 @@ function subscribeToSettings(callback) {
     snapshot => {
       const settings = {};
       snapshot.forEach(doc => { settings[doc.id] = doc.data().value; });
-      sessionStorage.setItem('cache_settings', JSON.stringify(settings));
+      try { localStorage.setItem('cache_settings', JSON.stringify(settings)); } catch (e) {}
       callback(settings);
     },
     err => console.error('Settings listener error:', err)
@@ -124,6 +129,9 @@ function subscribeToSettings(callback) {
 let isSeeded = false;
 
 async function seedDatabaseIfNeeded() {
+  // Permanently disabled in production to protect live Firestore data from being overwritten
+  return;
+
   if (isSeeded) return;
   
   // Only check once per session to reduce calls
@@ -1045,6 +1053,9 @@ async function deleteStepById(id) {
 }
 
 async function seedFaqsIfNeeded() {
+  // Permanently disabled in production to protect live Firestore FAQs from being overwritten
+  return;
+
   try {
     const snapshot = await db.collection('faqs').limit(1).get();
     if (!snapshot.empty) return; // Already seeded

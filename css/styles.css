@@ -544,22 +544,28 @@ h1,h2,h3,h4,h5,h6 {
   white-space: nowrap;
 }
 
-/* Desktop Row 1: Logo + Nav links */
-.navbar-row-top {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  justify-content: space-between;
-  padding-bottom: 4px;
+/* Desktop Row 1 & 2: Responsive display */
+@media (min-width: 1200px) {
+  .navbar-row-top {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+    padding-bottom: 4px;
+  }
+  .navbar-row-bottom {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: 4px;
+  }
 }
-
-/* Desktop Row 2: Action buttons */
-.navbar-row-bottom {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  justify-content: flex-end;
-  padding-top: 4px;
+@media (max-width: 1199.98px) {
+  .navbar-row-top,
+  .navbar-row-bottom {
+    display: none !important;
+  }
 }
 
 .navbar-nav-main {
@@ -671,16 +677,32 @@ h1,h2,h3,h4,h5,h6 {
 }
 
 .navbar-dropdown {
-  background: rgba(15, 15, 25, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: rgba(15, 15, 25, 0.98) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(15px);
+  list-style: none !important;
+  padding: 0.5rem 0 !important;
+}
+.navbar-dropdown li {
+  list-style: none !important;
+}
+.navbar-dropdown .dropdown-item {
+  color: rgba(255, 255, 255, 0.88) !important;
+  text-decoration: none !important;
+}
+.navbar-dropdown .dropdown-item:hover {
+  color: var(--accent) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 .navbar-dropdown .dropdown-divider {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
 .navbar .nav-link {
-  position: relative; transition: color 0.3s ease;
+  color: rgba(255, 255, 255, 0.88) !important;
+  text-decoration: none !important;
+  position: relative;
+  transition: color 0.3s ease;
 }
 .navbar .nav-link::after {
   content: ''; position: absolute; bottom: -2px; left: 50%; width: 0; height: 2px;

@@ -30,9 +30,13 @@ function hidePreloader() {
 // Safety: Ensure preloader NEVER stays for more than 1 second under any condition
 setTimeout(hidePreloader, 1000);
 
-// Caching wrapper for instant loads
+// Caching wrapper for instant loads (Persistent localStorage)
 async function fetchWithCache(key, fetcher, fallback) {
-  const cached = sessionStorage.getItem(key);
+  let cached = null;
+  try {
+    cached = localStorage.getItem(key);
+  } catch (e) {}
+
   let initialData = fallback;
   if (cached) {
     try { initialData = JSON.parse(cached); } catch(e){}
@@ -40,9 +44,14 @@ async function fetchWithCache(key, fetcher, fallback) {
   
   // Always fetch fresh data in background to update cache for next time
   const promise = fetcher().then(data => {
-    if (data) sessionStorage.setItem(key, JSON.stringify(data));
+    if (data !== undefined && data !== null) {
+      try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+    }
     return data;
-  }).catch(() => fallback);
+  }).catch((err) => {
+    console.warn(`Fetch failed for ${key}:`, err);
+    return fallback;
+  });
 
   // If we had cached data, return it immediately, otherwise wait for network
   return cached ? initialData : promise;
@@ -938,49 +947,99 @@ function setupProfileLocationSelectors() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  showSkeletons();
-
-  const [content, products, settings, rates, steps, faqs] = await Promise.all([
-    dataPromises.content,
-    dataPromises.products,
-    dataPromises.settings,
-    dataPromises.deliveryRates,
-    dataPromises.processSteps,
-    dataPromises.faqs
-  ]);
-
-  allProducts = products;
-  siteSettings = settings;
-  deliveryRates = rates || [];
-
-  applyHeroContent(content);
-  applyAboutContent(content);
-  applyFactoryContent(content);
-  applyProcessContent(content);
-  applyProductsContent(content);
-  applyB2BContent(content);
-  applyVillaContent(content);
-  applyExperienceContent(content);
-  applyEssentialOilsContent(content);
-  loadFaqBackground();
-  applySettings(settings);
-  renderProducts(products);
-  renderProcessSteps(steps);
-  renderFaqs(faqs);
-  
-  setupSignupLocationSelectors();
-  setupProfileLocationSelectors();
-
-  // Fast preloader dismissal
-  hidePreloader();
-
-  // Check auth session
-  await checkAuthStatus();
-  // Setup drawer and modal UI listeners
-  initCartAndAuthListeners();
-  initNavDrawer();
-
+  // 1. Immediately initialize UI and scroll animations (never wait for network)
   initScrollAnimations();
+  initNavDrawer();
+  initCartAndAuthListeners();
+
+  // 2. Immediate 0ms hydration from localStorage if available (zero flash of defaults)
+  try {
+    const cachedContent = JSON.parse(localStorage.getItem('cache_content') || 'null');
+    const cachedProducts = JSON.parse(localStorage.getItem('cache_products') || 'null');
+    const cachedSettings = JSON.parse(localStorage.getItem('cache_settings') || 'null');
+    const cachedSteps = JSON.parse(localStorage.getItem('cache_process_steps') || 'null');
+    const cachedFaqs = JSON.parse(localStorage.getItem('cache_faqs') || 'null');
+
+    if (cachedContent) {
+      applyHeroContent(cachedContent);
+      applyAboutContent(cachedContent);
+      applyFactoryContent(cachedContent);
+      applyProcessContent(cachedContent);
+      applyProductsContent(cachedContent);
+      applyB2BContent(cachedContent);
+      applyVillaContent(cachedContent);
+      applyExperienceContent(cachedContent);
+      applyEssentialOilsContent(cachedContent);
+      loadFaqBackground();
+    }
+    if (cachedProducts && cachedProducts.length) {
+      allProducts = cachedProducts;
+      renderProducts(cachedProducts);
+    } else {
+      showSkeletons();
+    }
+    if (cachedSettings) {
+      siteSettings = cachedSettings;
+      applySettings(cachedSettings);
+    }
+    if (cachedSteps && cachedSteps.length) {
+      renderProcessSteps(cachedSteps);
+    }
+    if (cachedFaqs && cachedFaqs.length) {
+      renderFaqs(cachedFaqs);
+    }
+  } catch (err) {
+    console.warn("Early hydration error:", err);
+    showSkeletons();
+  }
+
+  // 3. Resolve all network data in parallel safely
+  try {
+    const [content, products, settings, rates, steps, faqs] = await Promise.all([
+      dataPromises.content,
+      dataPromises.products,
+      dataPromises.settings,
+      dataPromises.deliveryRates,
+      dataPromises.processSteps,
+      dataPromises.faqs
+    ]);
+
+    allProducts = products || allProducts;
+    siteSettings = settings || siteSettings;
+    deliveryRates = rates || [];
+
+    if (content) {
+      applyHeroContent(content);
+      applyAboutContent(content);
+      applyFactoryContent(content);
+      applyProcessContent(content);
+      applyProductsContent(content);
+      applyB2BContent(content);
+      applyVillaContent(content);
+      applyExperienceContent(content);
+      applyEssentialOilsContent(content);
+      loadFaqBackground();
+    }
+    if (settings) applySettings(settings);
+    if (products && products.length) renderProducts(products);
+    if (steps && steps.length) renderProcessSteps(steps);
+    if (faqs && faqs.length) renderFaqs(faqs);
+    
+    setupSignupLocationSelectors();
+    setupProfileLocationSelectors();
+  } catch (err) {
+    console.error("Data loading error:", err);
+  } finally {
+    hidePreloader();
+  }
+
+  // 4. Check auth & setup real-time listeners safely
+  try {
+    await checkAuthStatus();
+  } catch (err) {
+    console.error("Auth status error:", err);
+  }
+
   initRealtimeUpdates();
 });
 
@@ -1235,9 +1294,17 @@ document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
 });
 
 // ============================================================
-// Scroll Animations
+// Scroll Animations (with safety fallback)
 // ============================================================
 function initScrollAnimations() {
+  const elements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger-children');
+  if (!elements || !elements.length) return;
+
+  if (!('IntersectionObserver' in window)) {
+    elements.forEach(el => el.classList.add('visible'));
+    return;
+  }
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -1245,10 +1312,18 @@ function initScrollAnimations() {
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+  }, { threshold: 0.05, rootMargin: '0px 0px 50px 0px' });
 
-  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger-children')
-    .forEach(el => observer.observe(el));
+  elements.forEach(el => observer.observe(el));
+
+  // Safety fallback: Ensure any content in viewport or delayed becomes visible within 1.2s
+  setTimeout(() => {
+    elements.forEach(el => {
+      if (!el.classList.contains('visible')) {
+        el.classList.add('visible');
+      }
+    });
+  }, 1200);
 }
 
 // ============================================================
@@ -1305,11 +1380,14 @@ async function checkAuthStatus() {
     if (navNameMobile) navNameMobile.textContent = currentUser.first_name || currentUser.username;
     
     const adminPanelLink = document.getElementById('navAdminPanelLink');
+    const adminPanelDivider = document.getElementById('navAdminPanelDivider');
     if (adminPanelLink) {
       if (currentUser.role === 'admin') {
         adminPanelLink.classList.remove('d-none');
+        if (adminPanelDivider) adminPanelDivider.classList.remove('d-none');
       } else {
         adminPanelLink.classList.add('d-none');
+        if (adminPanelDivider) adminPanelDivider.classList.add('d-none');
       }
     }
     

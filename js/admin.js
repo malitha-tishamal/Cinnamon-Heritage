@@ -297,50 +297,50 @@ async function loadSection(section) {
       document.getElementById('heroTitle').value    = content.hero.title    || '';
       document.getElementById('heroSubtitle').value = content.hero.subtitle || '';
       document.getElementById('heroCta').value      = content.hero.cta_text || '';
-      const bgUrl = content.hero.background_image || 'images/cinnamon_spices.jpg';
+      const bgUrl = content.hero.background_image || '';
       document.getElementById('heroBackgroundImage').value = bgUrl;
-      document.getElementById('heroBgPreviewImg').src = bgUrl;
+      if (bgUrl) document.getElementById('heroBgPreviewImg').src = bgUrl;
     }
     if (section === 'about' && content?.about) {
       document.getElementById('aboutTitle').value = content.about.title || '';
       document.getElementById('aboutText').value  = content.about.text  || '';
-      const bgUrl = content.about.background_image || 'images/estate_bg.png';
+      const bgUrl = content.about.background_image || '';
       document.getElementById('aboutBackgroundImage').value = bgUrl;
-      document.getElementById('aboutBgPreviewImg').src = bgUrl;
-      const imgUrl = content.about.image || 'images/cinnamon_plantlings.jpg';
+      if (bgUrl) document.getElementById('aboutBgPreviewImg').src = bgUrl;
+      const imgUrl = content.about.image || '';
       document.getElementById('aboutImage').value = imgUrl;
-      document.getElementById('aboutImgPreviewImg').src = imgUrl;
+      if (imgUrl) document.getElementById('aboutImgPreviewImg').src = imgUrl;
     }
     if (section === 'villa' && content?.villa) {
       document.getElementById('villaTitle').value = content.villa.title || '';
       document.getElementById('villaSubtitle').value = content.villa.subtitle || '';
       document.getElementById('villaText').value  = content.villa.text  || '';
-      const bgUrl = content.villa.background_image || 'images/estate_bg.png';
+      const bgUrl = content.villa.background_image || '';
       document.getElementById('villaBackgroundImage').value = bgUrl;
-      document.getElementById('villaBgPreviewImg').src = bgUrl;
-      const imgUrl = content.villa.image || 'images/cinnamon_plantlings.jpg';
+      if (bgUrl) document.getElementById('villaBgPreviewImg').src = bgUrl;
+      const imgUrl = content.villa.image || '';
       document.getElementById('villaImage').value = imgUrl;
-      document.getElementById('villaImgPreviewImg').src = imgUrl;
+      if (imgUrl) document.getElementById('villaImgPreviewImg').src = imgUrl;
     }
     if (section === 'factory' && content?.factory) {
       document.getElementById('factoryTitle').value = content.factory.title || '';
       document.getElementById('factoryText').value  = content.factory.text  || '';
-      const bgUrl  = content.factory.background_image || 'images/estate_bg.png';
-      const imgUrl = content.factory.image_url        || 'images/cinnamon_srilanka.jpg';
+      const bgUrl  = content.factory.background_image || '';
+      const imgUrl = content.factory.image_url        || '';
       document.getElementById('factoryBackgroundImage').value = bgUrl;
-      document.getElementById('factoryBgPreviewImg').src      = bgUrl;
+      if (bgUrl) document.getElementById('factoryBgPreviewImg').src = bgUrl;
       document.getElementById('factoryImageUrl').value        = imgUrl;
-      document.getElementById('factoryImgPreview').src        = imgUrl;
+      if (imgUrl) document.getElementById('factoryImgPreview').src = imgUrl;
     }
     if (section === 'process' && content?.process) {
-      const bgUrl = content.process.background_image || 'images/estate_bg.png';
+      const bgUrl = content.process.background_image || '';
       document.getElementById('processBackgroundImage').value = bgUrl;
-      document.getElementById('processBgPreviewImg').src = bgUrl;
+      if (bgUrl) document.getElementById('processBgPreviewImg').src = bgUrl;
     }
     if (section === 'products' && content?.products) {
-      const bgUrl = content.products.background_image || 'images/estate_bg.png';
+      const bgUrl = content.products.background_image || '';
       document.getElementById('productsBackgroundImage').value = bgUrl;
-      document.getElementById('productsBgPreviewImg').src = bgUrl;
+      if (bgUrl) document.getElementById('productsBgPreviewImg').src = bgUrl;
     }
     if (section === 'quality' && content?.quality) {
       document.getElementById('qualityTitle').value = content.quality.title || '';
@@ -384,37 +384,37 @@ async function saveContent(section) {
         title:            document.getElementById('heroTitle').value,
         subtitle:         document.getElementById('heroSubtitle').value,
         cta_text:         document.getElementById('heroCta').value,
-        background_image: document.getElementById('heroBackgroundImage').value || 'images/cinnamon_spices.jpg'
+        background_image: document.getElementById('heroBackgroundImage').value.trim()
       };
     } else if (section === 'about') {
       fields = {
         title:            document.getElementById('aboutTitle').value,
         text:             document.getElementById('aboutText').value,
-        background_image: document.getElementById('aboutBackgroundImage').value || 'images/estate_bg.png',
-        image:            document.getElementById('aboutImage').value || 'images/cinnamon_plantlings.jpg'
+        background_image: document.getElementById('aboutBackgroundImage').value.trim(),
+        image:            document.getElementById('aboutImage').value.trim()
       };
     } else if (section === 'villa') {
       fields = {
         title:            document.getElementById('villaTitle').value,
         subtitle:         document.getElementById('villaSubtitle').value,
         text:             document.getElementById('villaText').value,
-        background_image: document.getElementById('villaBackgroundImage').value || 'images/estate_bg.png',
-        image:            document.getElementById('villaImage').value || 'images/cinnamon_plantlings.jpg'
+        background_image: document.getElementById('villaBackgroundImage').value.trim(),
+        image:            document.getElementById('villaImage').value.trim()
       };
     } else if (section === 'factory') {
       fields = {
         title:            document.getElementById('factoryTitle').value,
         text:             document.getElementById('factoryText').value,
-        background_image: document.getElementById('factoryBackgroundImage').value || 'images/estate_bg.png',
-        image_url:        document.getElementById('factoryImageUrl').value        || 'images/cinnamon_srilanka.jpg'
+        background_image: document.getElementById('factoryBackgroundImage').value.trim(),
+        image_url:        document.getElementById('factoryImageUrl').value.trim()
       };
     } else if (section === 'process') {
       fields = {
-        background_image: document.getElementById('processBackgroundImage').value || 'images/estate_bg.png'
+        background_image: document.getElementById('processBackgroundImage').value.trim()
       };
     } else if (section === 'products') {
       fields = {
-        background_image: document.getElementById('productsBackgroundImage').value || 'images/estate_bg.png'
+        background_image: document.getElementById('productsBackgroundImage').value.trim()
       };
     } else if (section === 'quality') {
       fields = { title: document.getElementById('qualityTitle').value, text: document.getElementById('qualityText').value };
@@ -2529,9 +2529,9 @@ async function loadB2BSection() {
     document.getElementById('b2bSectionTitle').value = b2bData.title || 'B2B Partnerships';
     document.getElementById('b2bSubtitle').value = b2bData.subtitle || 'Partner With Cinnamon Heritage';
     document.getElementById('b2bDescription').value = b2bData.description || 'We provide authentic Ceylon Cinnamon solutions for global businesses, supporting industries with premium products, reliable supply and customized services from our family estate in Galle, Sri Lanka.';
-    const bgUrl = b2bData.background_image || 'images/estate_bg.png';
+    const bgUrl = b2bData.background_image || '';
     document.getElementById('b2bBackgroundImage').value = bgUrl;
-    document.getElementById('b2bBgPreviewImg').src = bgUrl;
+    if (bgUrl) document.getElementById('b2bBgPreviewImg').src = bgUrl;
     document.getElementById('b2bCtaTitle').value = b2bData.cta_title || 'Become a Partner';
     document.getElementById('b2bCtaDescription').value = b2bData.cta_description || 'Partner with Cinnamon Heritage for authentic Ceylon Cinnamon products and tailored business solutions.';
     document.getElementById('b2bButtonText').value = b2bData.button_text || 'Partner With Us';
@@ -2771,7 +2771,7 @@ async function saveB2BContent() {
       title: document.getElementById('b2bSectionTitle').value,
       subtitle: document.getElementById('b2bSubtitle').value,
       description: document.getElementById('b2bDescription').value,
-      background_image: document.getElementById('b2bBackgroundImage').value || 'images/estate_bg.png',
+      background_image: document.getElementById('b2bBackgroundImage').value.trim(),
       cta_title: document.getElementById('b2bCtaTitle').value,
       cta_description: document.getElementById('b2bCtaDescription').value,
       button_text: document.getElementById('b2bButtonText').value,
@@ -3142,9 +3142,9 @@ async function loadEssentialOilsSection() {
     document.getElementById('eoSubtitle').value = eoData.subtitle || 'Pure Ceylon Cinnamon Essential Oils';
     document.getElementById('eoDescription').value = eoData.description || 'Steam Distilled From Authentic Ceylon Cinnamon';
     document.getElementById('eoText').value = eoData.text || 'Experience the natural power of authentic Ceylon Cinnamon through our premium essential oils...';
-    const bgUrl = eoData.background_image || 'images/estate_bg.png';
+    const bgUrl = eoData.background_image || '';
     document.getElementById('eoBackgroundImage').value = bgUrl;
-    document.getElementById('eoBgPreviewImg').src = bgUrl;
+    if (bgUrl) document.getElementById('eoBgPreviewImg').src = bgUrl;
     document.getElementById('eoSampleBtn').value = eoData.sample_button || 'Request B2B Sample';
     document.getElementById('eoTechBtn').value = eoData.tech_button || 'Technical Discussion';
 
@@ -3239,7 +3239,7 @@ async function saveEssentialOilsContent() {
       subtitle: document.getElementById('eoSubtitle').value,
       description: document.getElementById('eoDescription').value,
       text: document.getElementById('eoText').value,
-      background_image: document.getElementById('eoBackgroundImage').value || 'images/estate_bg.png',
+      background_image: document.getElementById('eoBackgroundImage').value.trim(),
       sample_button: document.getElementById('eoSampleBtn').value,
       tech_button: document.getElementById('eoTechBtn').value,
       leaf: {
@@ -3324,9 +3324,9 @@ async function loadExperienceSection() {
     document.getElementById('experienceSectionTitle').value = experienceData.title || 'Cinnamon Experience';
     document.getElementById('experienceSubtitle').value = experienceData.subtitle || 'Discover the Heart of Ceylon Cinnamon';
     document.getElementById('experienceDescription').value = experienceData.description || 'Step into our family estate in Galle and experience the authentic journey of Ceylon Cinnamon—from plantation to finished product.';
-    const bgUrl = experienceData.background_image || 'images/estate_bg.png';
+    const bgUrl = experienceData.background_image || '';
     document.getElementById('experienceBackgroundImage').value = bgUrl;
-    document.getElementById('experienceBgPreviewImg').src = bgUrl;
+    if (bgUrl) document.getElementById('experienceBgPreviewImg').src = bgUrl;
     document.getElementById('experienceCtaTitle').value = experienceData.cta_title || 'Book Your Experience';
     document.getElementById('experienceCtaDescription').value = experienceData.cta_description || 'Discover the heritage, craftsmanship and flavours of authentic Ceylon Cinnamon.';
     document.getElementById('experienceButtonText').value = experienceData.button_text || 'Book a Visit';
@@ -3481,7 +3481,7 @@ async function saveExperienceContent() {
       title: document.getElementById('experienceSectionTitle').value,
       subtitle: document.getElementById('experienceSubtitle').value,
       description: document.getElementById('experienceDescription').value,
-      background_image: document.getElementById('experienceBackgroundImage').value || 'images/estate_bg.png',
+      background_image: document.getElementById('experienceBackgroundImage').value.trim(),
       cta_title: document.getElementById('experienceCtaTitle').value,
       cta_description: document.getElementById('experienceCtaDescription').value,
       button_text: document.getElementById('experienceButtonText').value,

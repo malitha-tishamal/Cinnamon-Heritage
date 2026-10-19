@@ -1,3 +1,6 @@
+console.error("SAFETY GUARD: Reseed is permanently disabled to prevent overwriting production Firestore data.");
+process.exit(1);
+
 const { initializeApp } = require('firebase/app');
 const { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } = require('firebase/firestore');
 
