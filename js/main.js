@@ -3,7 +3,7 @@
 // All fetch('/api/...') calls replaced with Supabase helpers
 // ============================================================
 
-const appConfig = (typeof window !== 'undefined' && window.__APP_CONFIG__) || {};
+var appConfig = (typeof window !== 'undefined' && window.__APP_CONFIG__) || {};
 
 // EmailJS config (optional — configured via environment variables)
 const EMAILJS_PUBLIC_KEY  = appConfig.EMAILJS_PUBLIC_KEY  || 'YOUR_PUBLIC_KEY';
@@ -42,6 +42,10 @@ async function fetchWithCache(key, fetcher, fallback) {
   let initialData = fallback;
   if (cached) {
     try { initialData = JSON.parse(cached); } catch(e){}
+  }
+  
+  if (typeof fetcher !== 'function') {
+    return cached ? initialData : fallback;
   }
   
   // Always fetch fresh data in background to update cache for next time
@@ -948,7 +952,7 @@ function setupProfileLocationSelectors() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function initApp() {
   // 1. Immediately initialize UI and scroll animations (never wait for network)
   initScrollAnimations();
   initNavDrawer();
@@ -1043,7 +1047,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   initRealtimeUpdates();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 // ============================================================
 // Real-time Firestore listeners — site updates instantly

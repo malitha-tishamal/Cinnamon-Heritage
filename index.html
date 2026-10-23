@@ -379,6 +379,19 @@
     <div class="preloader-spinner"></div>
     <div class="preloader-text">Loading...</div>
   </div>
+  <script>
+    (function() {
+      function dismiss() {
+        var p = document.getElementById('preloader');
+        if (p && !p.classList.contains('hidden')) {
+          p.classList.add('hidden');
+          setTimeout(function() { if (p && p.parentNode) p.remove(); }, 350);
+        }
+      }
+      setTimeout(dismiss, 800);
+      window.addEventListener('load', dismiss);
+    })();
+  </script>
   <!-- Header and Navigation -->
   <header>
     <div class="fixed-top" style="z-index: 1040;">
@@ -1532,8 +1545,7 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <!-- EmailJS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <!-- Floating Promo Alert — populated dynamically by JS -->
+    <!-- Floating Promo Alert — populated dynamically by JS -->
   <div id="promoAlert" class="promo-alert-card"></div>
 
   <!-- Cart Drawer -->
