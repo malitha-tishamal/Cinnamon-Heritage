@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // Cinnamon Heritage — Firebase Client
 // Replace the config keys with your own Firebase Project details
 // ============================================================
@@ -992,17 +992,28 @@ async function uploadImage(file, bucket = 'unused') {
 async function getProcessSteps() {
   await seedDatabaseIfNeeded();
   return serveFromCache('cache_process_steps', async () => {
-    const snapshot = await db.collection('process_steps')
-      .orderBy('display_order')
-      .get();
-      
-    const stepsList = [];
-    snapshot.forEach(doc => {
-      stepsList.push({ id: doc.id, ...doc.data() });
-    });
-    
-    // Filter active steps client-side to avoid composite index requirements
-    return stepsList.filter(s => s.is_active !== false);
+    if (!db) return (typeof FALLBACK_PROCESS_STEPS !== 'undefined' ? FALLBACK_PROCESS_STEPS : []);
+    try {
+      let snapshot;
+      try {
+        snapshot = await db.collection('process_steps').orderBy('display_order').get();
+      } catch (orderErr) {
+        // Fallback: fetch without orderBy if index missing
+        snapshot = await db.collection('process_steps').get();
+      }
+      const stepsList = [];
+      snapshot.forEach(doc => {
+        stepsList.push({ id: doc.id, ...doc.data() });
+      });
+      const active = stepsList
+        .filter(s => s.is_active !== false)
+        .sort((a, b) => (Number(a.display_order) || 0) - (Number(b.display_order) || 0));
+      if (active.length > 0) return active;
+      return (typeof FALLBACK_PROCESS_STEPS !== 'undefined' ? FALLBACK_PROCESS_STEPS : []);
+    } catch (err) {
+      console.warn('Firestore process_steps fetch error:', err);
+      return (typeof FALLBACK_PROCESS_STEPS !== 'undefined' ? FALLBACK_PROCESS_STEPS : []);
+    }
   });
 }
 
@@ -1122,19 +1133,21 @@ async function getFaqs() {
   await seedDatabaseIfNeeded();
   await seedFaqsIfNeeded();
   return serveFromCache('cache_faqs', async () => {
-    if (!db) return [];
+    if (!db) return (typeof FALLBACK_FAQS !== 'undefined' ? FALLBACK_FAQS : []);
     try {
       const snapshot = await db.collection('faqs').get();
       const faqs = [];
       snapshot.forEach(doc => {
         faqs.push({ id: doc.id, ...doc.data() });
       });
-      return faqs
+      const active = faqs
         .filter(f => f.is_active !== false)
         .sort((a, b) => (Number(a.display_order) || 0) - (Number(b.display_order) || 0));
+      if (active.length > 0) return active;
+      return (typeof FALLBACK_FAQS !== 'undefined' ? FALLBACK_FAQS : []);
     } catch (err) {
-      console.error("Error fetching FAQs:", err);
-      return [];
+      console.warn('Error fetching FAQs:', err);
+      return (typeof FALLBACK_FAQS !== 'undefined' ? FALLBACK_FAQS : []);
     }
   });
 }
