@@ -1001,7 +1001,7 @@ async function initApp() {
 
   // 3. Resolve all network data in parallel safely
   try {
-    const [content, products, settings, rates, steps, faqs] = await Promise.all([
+    const results = await Promise.allSettled([
       dataPromises.content,
       dataPromises.products,
       dataPromises.settings,
@@ -1009,6 +1009,13 @@ async function initApp() {
       dataPromises.processSteps,
       dataPromises.faqs
     ]);
+
+    const content  = results[0].status === 'fulfilled' ? results[0].value : null;
+    const products = results[1].status === 'fulfilled' ? results[1].value : [];
+    const settings = results[2].status === 'fulfilled' ? results[2].value : {};
+    const rates    = results[3].status === 'fulfilled' ? results[3].value : [];
+    const steps    = results[4].status === 'fulfilled' ? results[4].value : [];
+    const faqs     = results[5].status === 'fulfilled' ? results[5].value : [];
 
     allProducts = products || allProducts;
     siteSettings = settings || siteSettings;

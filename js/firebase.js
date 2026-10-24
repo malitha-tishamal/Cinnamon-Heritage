@@ -1104,11 +1104,20 @@ async function getFaqs() {
   await seedDatabaseIfNeeded();
   await seedFaqsIfNeeded();
   return serveFromCache('cache_faqs', async () => {
-    const snapshot = await db.collection('faqs')
-      .where('is_active', '==', true)
-      .orderBy('display_order')
-      .get();
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    if (!db) return [];
+    try {
+      const snapshot = await db.collection('faqs').get();
+      const faqs = [];
+      snapshot.forEach(doc => {
+        faqs.push({ id: doc.id, ...doc.data() });
+      });
+      return faqs
+        .filter(f => f.is_active !== false)
+        .sort((a, b) => (Number(a.display_order) || 0) - (Number(b.display_order) || 0));
+    } catch (err) {
+      console.error("Error fetching FAQs:", err);
+      return [];
+    }
   });
 }
 
@@ -1177,17 +1186,21 @@ async function deleteFaqById(id) {
 
 /** Subscribe to FAQ changes in real-time */
 function subscribeToFaqs(callback) {
-  return db.collection('faqs')
-    .where('is_active', '==', true)
-    .orderBy('display_order')
-    .onSnapshot(
-      snapshot => {
-        invalidateCache('cache_faqs');
-        const faqs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        callback(faqs);
-      },
-      err => console.error('FAQ listener error:', err)
-    );
+  if (!db) return () => {};
+  return db.collection('faqs').onSnapshot(
+    snapshot => {
+      invalidateCache('cache_faqs');
+      const faqs = [];
+      snapshot.forEach(doc => {
+        faqs.push({ id: doc.id, ...doc.data() });
+      });
+      const activeFaqs = faqs
+        .filter(f => f.is_active !== false)
+        .sort((a, b) => (Number(a.display_order) || 0) - (Number(b.display_order) || 0));
+      callback(activeFaqs);
+    },
+    err => console.error('FAQ listener error:', err)
+  );
 }
 
 // ============================================================
