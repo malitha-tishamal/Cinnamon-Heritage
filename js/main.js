@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // main.js — Supabase Edition
 // All fetch('/api/...') calls replaced with Supabase helpers
 // ============================================================
@@ -225,23 +225,152 @@ const FALLBACK_PRODUCTS = [
   }
 ];
 
-// Fallback content if Supabase is slow or unavailable
+// ============================================================
+// FALLBACK CONTENT — shown instantly if Firestore is slow/unavailable
+// ============================================================
+
+const FALLBACK_CONTENT = {
+  hero: {
+    title: 'PURE CEYLON CINNAMON',
+    subtitle: 'From our Family Estates in Galle Unanwitiya to the World. Hand Crafted, Sustainably Grown and Certified Authentic Ceylon Cinnamon Since 1982.',
+    cta_text: 'Discover Our Heritage',
+    background_image: 'images/cinnamon_spices.jpg'
+  },
+  about: {
+    title: 'From Our Own Estate',
+    text: 'Nestled in the lush hillsides of Galle Unanwitiya, our family-owned estate spans over 15 acres of prime cinnamon-growing land. The southern coast of Sri Lanka – known globally as "Cinnamon Country" – provides the perfect tropical climate, rich laterite soils and monsoon rains that give Ceylon cinnamon its world-renowned delicate flavour and aroma.\n\nThree generations of our family have nurtured these lands using sustainable, organic farming methods passed down through the decades.'
+  },
+  factory: {
+    title: 'Our Facility',
+    text: 'Our state-of-the-art processing facility combines centuries-old Sri Lankan craftsmanship with modern food-grade technology. Every workstation features hygienic stainless steel surfaces, and our advanced mechanical dryers are calibrated to preserve the delicate essential oils that make Ceylon cinnamon exceptional.\n\nOver 50 skilled local artisans work alongside quality-control specialists to ensure every batch meets international export standards including ISO 22000 and HACCP certification.'
+  },
+  b2b: {
+    title: 'B2B SUPPLY SOLUTIONS',
+    subtitle: 'Partnering with Global Businesses',
+    description: 'We supply premium Ceylon Cinnamon to wholesalers, retailers, food manufacturers and hospitality brands worldwide.',
+    background_image: 'images/estate_bg.png',
+    partner_types: [
+      { icon: 'industry', title: 'Food Manufacturers', description: 'Bulk cinnamon supply for food processing and manufacturing industries worldwide.' },
+      { icon: 'store', title: 'Retailers & Distributors', description: 'Premium packaged cinnamon products for retail shelves globally.' },
+      { icon: 'hotel', title: 'Hospitality & F&B', description: 'High-quality cinnamon for hotels, restaurants and cafes.' },
+      { icon: 'flask', title: 'Wellness & Pharma', description: 'Certified pure cinnamon for health and wellness product lines.' },
+      { icon: 'leaf', title: 'Organic Brands', description: 'Sustainably farmed organic Ceylon cinnamon for premium brands.' },
+      { icon: 'globe', title: 'Export Partners', description: 'Reliable supply chain for international export markets.' }
+    ],
+    solutions: [
+      { icon: 'boxes', title: 'Bulk Supply', description: 'All grades: quills, powder, chips, oils in bulk.' },
+      { icon: 'tag', title: 'Private Label', description: 'Your brand identity on our premium cinnamon.' },
+      { icon: 'cogs', title: 'Custom Development', description: 'Tailored cinnamon products for your market.' },
+      { icon: 'certificate', title: 'Certified Quality', description: 'ISO 22000, HACCP certified with full COA.' }
+    ],
+    cta_title: 'Ready to Partner With Us?',
+    cta_description: 'Contact our B2B team today to discuss your requirements and get a custom quote.',
+    button_text: 'Get a Quote'
+  },
+  villa: {
+    title: 'Cinnamon Heritage Villa',
+    subtitle: 'Experience Sri Lanka from Our Estate',
+    text: 'Stay at our beautifully appointed villa nestled within our working cinnamon estate in Galle. Wake up to the aroma of fresh cinnamon and immerse yourself in the authentic Sri Lankan plantation lifestyle.\n\nOur villa offers exclusive accommodation with guided estate tours, cinnamon processing demonstrations and traditional Sri Lankan dining experiences.',
+    background_image: 'images/estate_bg.png'
+  },
+  experience: {
+    title: 'ESTATE EXPERIENCES',
+    subtitle: 'Immersive Cinnamon Journeys',
+    description: 'Discover the complete journey of Ceylon Cinnamon through our curated estate experiences.',
+    background_image: 'images/estate_bg.png',
+    items: [
+      { icon: 'tree', title: 'Estate Walk', description: 'Guided walk through our 15-acre cinnamon estate with expert commentary on cultivation.' },
+      { icon: 'cut', title: 'Peeling Workshop', description: 'Hands-on cinnamon peeling and quill-making with our master artisans.' },
+      { icon: 'flask', title: 'Oil Distillation', description: 'Watch the traditional steam distillation of cinnamon leaf and bark essential oils.' },
+      { icon: 'utensils', title: 'Spice Tasting', description: 'Curated tasting of premium cinnamon grades and our full product range.' },
+      { icon: 'camera', title: 'Photography Tour', description: 'Capture stunning visuals of the plantation and artisan processing facility.' },
+      { icon: 'graduation-cap', title: 'Cinnamon Masterclass', description: 'In-depth workshop on Ceylon cinnamon varieties, grading and culinary uses.' }
+    ],
+    cta_title: 'Book Your Estate Visit',
+    cta_description: 'Reserve your experience and discover the story behind every quill.',
+    button_text: 'Book Now'
+  },
+  essential_oils: {
+    title: 'CEYLON CINNAMON OILS',
+    subtitle: 'Pure Steam-Distilled Essential Oils',
+    description: 'Two distinct oils. One legendary spice.',
+    background_image: 'images/estate_bg.png',
+    leaf: {
+      title: 'Cinnamon Leaf Oil',
+      subtitle: 'High Eugenol Content',
+      description: 'Steam-distilled from fresh Ceylon Cinnamon leaves. Rich in eugenol (70-85%), ideal for aromatherapy, skincare and wellness.',
+      features: 'Therapeutic-grade purity\nHigh eugenol content (70-85%)\nNatural antiseptic properties\nIdeal for aromatherapy & skincare',
+      constituents: 'Eugenol 70-85%, Cinnamaldehyde 3-5%, Linalool 1-3%',
+      applications: 'Aromatherapy, natural skincare, massage blends, wellness products'
+    },
+    bark: {
+      title: 'Cinnamon Bark Oil',
+      subtitle: 'Premium Cinnamaldehyde Content',
+      description: 'Rare and precious oil from the inner bark. Contains 60-75% cinnamaldehyde — the gold standard in essential oils.',
+      features: 'Rare and highly concentrated\nCinnamaldehyde 60-75%\nPremium perfumery grade\nPharmaceutical applications',
+      constituents: 'Cinnamaldehyde 60-75%, Eugenol 5-10%, Linalool 1-2%',
+      applications: 'Premium perfumery, pharmaceutical formulations, luxury wellness products'
+    },
+    aroma: {
+      leaf_title: 'Leaf Oil Aroma Profile',
+      leaf_description: 'Warm, spicy-clove aroma with subtle green herbal undertones.',
+      leaf_notes: 'Clove-like warmth, Herbal green, Spicy undertones, Sweet finish',
+      bark_title: 'Bark Oil Aroma Profile',
+      bark_description: 'Intensely warm, sweet cinnamon aroma — the true, unmistakable scent of Ceylon.',
+      bark_notes: 'Intense cinnamon warmth, Sweet spice, Woody base, Exotic depth'
+    },
+    footer: 'All our essential oils are 100% pure, steam-distilled and GC/MS tested. Available in 10ml, 50ml, 100ml and bulk quantities.'
+  },
+  quality: {
+    title: 'QUALITY ASSURANCE',
+    text: 'Every batch of Cinnamon Heritage products undergoes rigorous laboratory testing for purity, moisture content and coumarin levels. We hold ISO 22000, HACCP and Sri Lanka Standards Institution certifications.'
+  },
+  contact: {
+    title: 'Contact Us',
+    subtitle: 'Whether you are a wholesaler, retailer or artisan brand looking for authentic Ceylon cinnamon, we would love to hear from you.',
+    address: 'Galle Unanwitiya, Sri Lanka',
+    phone: '+94 77 123 4567',
+    email: 'info@cinnamonheritage.com',
+    whatsapp: '94771234567'
+  },
+  process: { background_image: 'images/estate_bg.png' },
+  products: { background_image: 'images/estate_bg.png' },
+  faq: { background_image: '' }
+};
+
+const FALLBACK_PROCESS_STEPS = [
+  { step_number: '01', title: 'Harvesting', short_desc: 'Mature stems are carefully harvested at dawn to ensure the highest concentration of bark essential oils.', full_desc: 'At our estates, skilled harvesters select mature branches (typically 2-3 years old) with optimal bark thickness. Harvesting takes place in the early morning when moisture content is highest, making the bark easier to peel.', image_url: 'images/step1_harvest.png', display_order: 1 },
+  { step_number: '02', title: 'Cleaning and Preparation', short_desc: 'Harvested stems are washed in pure filtered water and outer bark is scraped to expose the clean inner bark.', full_desc: 'Once harvested, the stems are immediately brought to our facility, washed thoroughly with clean water on stainless steel tables, and trimmed. The rough outer cork and green layers are scraped away to expose the golden-bronze inner bark underneath.', image_url: 'images/step2_wash.png', display_order: 2 },
+  { step_number: '03', title: 'Scraping and Rubbing', short_desc: 'The inner bark is rubbed with a brass rod to loosen it, vital for clean, unbroken peeling.', full_desc: 'Artisans vigorously rub the prepared stems with a smooth brass rod. This traditional friction technique loosens the thin inner bark layer from the wood core, allowing it to be peeled in large, clean, unbroken sheets.', image_url: 'images/step3_scrape.png', display_order: 3 },
+  { step_number: '04', title: 'Peeling', short_desc: 'Expert peelers make precise longitudinal cuts to slide the delicate inner bark off the wood.', full_desc: 'Highly trained artisans use custom curved stainless steel knives to make precise incisions. With immense dexterity, they slide the micro-thin sheets of inner bark off the wood core, taking care to minimize splitting.', image_url: 'images/step3_peel.png', display_order: 4 },
+  { step_number: '05', title: 'Quill Making', short_desc: 'The thin inner bark is layered and rolled by hand into multi-layered cylindrical quills.', full_desc: 'The peeled bark sheets are immediately packed together, layered, and rolled into continuous cylindrical pipes called quills. The hollow center is filled with smaller fragments of high-grade cinnamon bark to create a solid, uniform cylinder.', image_url: 'images/step5_quill.png', display_order: 5 },
+  { step_number: '06', title: 'Drying', short_desc: 'Quills are shade-dried on coir racks, then finished in state-of-the-art mechanical dryers.', full_desc: 'The wet quills are initially hung and dried in shade-drying rooms on coconut coir racks to protect the sensitive cinnamaldehyde oils. Once cured, they undergo low-temperature mechanical drying to achieve export-ready moisture content below 12%.', image_url: 'images/step4_dry.png', display_order: 6 },
+  { step_number: '07', title: 'Grading, Cutting and Milling', short_desc: 'Quills are sorted into international export grades, then cut or milled into ultra-fine powder.', full_desc: 'Cinnamon quills are inspected and sorted into strict export grades (Alba, C5 Special, C5, C4, M5, H1) based on diameter, color, and density. Premium quills are cut to standard lengths, while select pieces are stone-milled into pure, micro-ground powder.', image_url: 'images/step7_grade.png', display_order: 7 },
+  { step_number: '08', title: 'Essential-Oil Distillation', short_desc: 'Unused leaves and bark chips are steam-distilled into pure leaf and bark essential oils.', full_desc: 'To support zero-waste production, cinnamon leaves and bark chips are loaded into our steam distillation chambers. Steam passes through the organic matter, vaporizing the essential oils, which are then cooled, condensed, and separated to yield pure therapeutic-grade oils.', image_url: 'images/step8_distill.png', display_order: 8 },
+  { step_number: '09', title: 'Packing and Storage', short_desc: 'Finished products are vacuum-packed and stored in climate-controlled warehouses ready for export.', full_desc: 'To protect against humidity and maintain absolute freshness, our cinnamon products are vacuum-sealed in hygienic food-grade packaging. They are stored in our climate-controlled warehouse, ready for shipping to international markets.', image_url: 'images/step5_pack.png', display_order: 9 }
+];
+
+const FALLBACK_FAQS = [
+  { id: 'f1', question: 'What is Ceylon Cinnamon?', answer: 'Ceylon Cinnamon (Cinnamomum verum) is the "true cinnamon" native to Sri Lanka. It is distinguished by its delicate, multi-layered quills, light tan colour, subtle sweet flavour, and ultra-low coumarin content — making it the safest and most premium variety for daily culinary and wellness use.', display_order: 1, is_active: true },
+  { id: 'f2', question: 'What is the difference between Ceylon Cinnamon and Cassia?', answer: 'Ceylon Cinnamon has thin, multi-layered bark, a mild sweet taste, and contains only trace amounts of coumarin (0.004%). Cassia has a single thick bark layer, a stronger spicy taste, and significantly higher coumarin levels (up to 1%), which can be harmful in large doses. Ceylon is considered the premium, health-safe choice.', display_order: 2, is_active: true },
+  { id: 'f3', question: 'Do you supply cinnamon in bulk?', answer: 'Yes. We offer comprehensive bulk supply for wholesalers, distributors, food manufacturers and hospitality businesses. Our minimum order quantities are flexible, and we provide competitive pricing for large volumes across all product lines — quills, powder, chips, tea cut, and essential oils.', display_order: 3, is_active: true },
+  { id: 'f4', question: 'What is Ceylon Cinnamon Leaf Oil?', answer: 'Cinnamon Leaf Oil is steam-distilled from fresh Ceylon Cinnamon leaves. It is rich in eugenol (70-85%) and is widely used in aromatherapy, natural skincare, massage therapy, and as a natural antiseptic. It has a warm, spicy-clove aroma.', display_order: 4, is_active: true },
+  { id: 'f5', question: 'What is Ceylon Cinnamon Bark Oil?', answer: 'Cinnamon Bark Oil is steam-distilled from the inner bark of the Ceylon Cinnamon tree. It contains 60-75% cinnamaldehyde, making it one of the most potent essential oils available. Used in premium perfumery, pharmaceutical applications, and high-end wellness products.', display_order: 5, is_active: true },
+  { id: 'f6', question: 'Do you offer Private Label / White Label services?', answer: 'Yes. We provide full private label and white label packaging services. You supply your branding and we handle everything from sourcing and processing to packaging and labelling, delivering shelf-ready products under your brand name.', display_order: 6, is_active: true },
+  { id: 'f7', question: 'Can you provide a Certificate of Analysis (COA)?', answer: 'Absolutely. Every batch we produce is accompanied by a Certificate of Analysis from accredited laboratories. Our COAs include moisture content, volatile oil content, ash levels, coumarin levels, and microbiological test results.', display_order: 7, is_active: true },
+  { id: 'f8', question: 'What certifications do you hold?', answer: 'Cinnamon Heritage holds ISO 22000 (Food Safety Management), HACCP (Hazard Analysis Critical Control Points), and Sri Lanka Standards Institution (SLSI) certifications. Our products are 100% natural with no additives or preservatives.', display_order: 8, is_active: true },
+  { id: 'f9', question: 'Can we visit your estate or processing facility?', answer: 'Yes! We welcome visits to our cinnamon estate and processing facility in Galle, Sri Lanka. Experience the entire cinnamon journey from plantation to product. Please contact us in advance to arrange a guided tour and tasting session.', display_order: 9, is_active: true },
+  { id: 'f10', question: 'Do you ship internationally?', answer: 'Yes, we export to markets worldwide including Europe, North America, the Middle East, and East Asia. All shipments are professionally packed in food-grade, humidity-controlled containers. We handle customs documentation and provide CIF/FOB pricing.', display_order: 10, is_active: true }
+];
+
+// Kick off all data fetches in parallel immediately
 const dataPromises = {
   content:       fetchWithCache('cache_content', getContent, null),
   products:      fetchWithCache('cache_products', getProducts, FALLBACK_PRODUCTS),
   settings:      fetchWithCache('cache_settings', getSettings, {}),
   deliveryRates: fetchWithCache('cache_delivery_rates', getDeliveryRates, []),
-  processSteps:  fetchWithCache('cache_process_steps', getProcessSteps, []),
-  faqs:          fetchWithCache('cache_faqs', getFaqs, [])
-};
-
-const FALLBACK = {
-  hero: {
-    title: 'Pure Ceylon Cinnamon',
-    subtitle: 'From our family estate in Galle to your table — authentic, sustainable, exceptional.',
-    cta_text: 'Discover Our Story',
-    background_image: 'images/cinnamon_spices.jpg'
-  }
+  processSteps:  fetchWithCache('cache_process_steps', getProcessSteps, FALLBACK_PROCESS_STEPS),
+  faqs:          fetchWithCache('cache_faqs', getFaqs, FALLBACK_FAQS)
 };
 
 const DEFAULT_HERO_BG = 'images/cinnamon_spices.jpg';
@@ -253,7 +382,7 @@ function applyHeroBackground(content) {
   const heroSection = document.getElementById('hero-section');
   if (!heroSection) return;
 
-  const hero = (content && content.hero) ? content.hero : FALLBACK.hero;
+  const hero = (content && content.hero) ? content.hero : FALLBACK_CONTENT.hero;
   const bgUrl = hero.background_image || DEFAULT_HERO_BG;
   heroSection.style.background = `linear-gradient(rgba(10,10,15,0.55), rgba(10,10,15,0.7)), url('${bgUrl}')`;
   heroSection.style.backgroundSize = 'cover';
@@ -265,7 +394,7 @@ function applyHeroContent(content) {
   const heroTitle    = document.getElementById('hero-title');
   const heroSubtitle = document.getElementById('hero-subtitle');
   const heroCta      = document.getElementById('hero-cta');
-  const hero = (content && content.hero) ? content.hero : FALLBACK.hero;
+  const hero = (content && content.hero) ? content.hero : FALLBACK_CONTENT.hero;
 
   if (heroTitle) {
     heroTitle.textContent = hero.title || FALLBACK.hero.title;
@@ -285,13 +414,11 @@ function applyHeroContent(content) {
 }
 
 function applyAboutContent(content) {
+  const about = (content && content.about && content.about.title) ? content.about : FALLBACK_CONTENT.about;
+  if (!about) return;
   const aboutTitle = document.getElementById('about-title');
   const aboutTextContainer = document.getElementById('about-text-container');
   const aboutSection = document.getElementById('heritage');
-
-  if (!content || !content.about) return;
-
-  const about = content.about;
   if (aboutTitle && about.title) {
     aboutTitle.textContent = about.title;
   }
@@ -319,8 +446,8 @@ function applyAboutContent(content) {
 }
 
 function applyFactoryContent(content) {
-  if (!content || !content.factory) return;
-  const factory = content.factory;
+  const factory = (content && content.factory && content.factory.title) ? content.factory : FALLBACK_CONTENT.factory;
+  if (!factory) return;
 
   const factoryTitle = document.getElementById('factory-title');
   const factoryTextContainer = document.getElementById('factory-text-container');
@@ -375,8 +502,8 @@ function applyProductsContent(content) {
 }
 
 function applyB2BContent(content) {
-  if (!content || !content.b2b) return;
-  const b2b = content.b2b;
+  const b2b = (content && content.b2b && content.b2b.title) ? content.b2b : FALLBACK_CONTENT.b2b;
+  if (!b2b) return;
   const b2bSection = document.getElementById('b2b');
   
   if (b2bSection) {
@@ -461,8 +588,8 @@ function applyB2BContent(content) {
 }
 
 function applyVillaContent(content) {
-  if (!content || !content.villa) return;
-  const villa = content.villa;
+  const villa = (content && content.villa && (content.villa.title || content.villa.background_image)) ? content.villa : FALLBACK_CONTENT.villa;
+  if (!villa) return;
   
   const villaSection = document.getElementById('villa');
   if (villaSection && villa.background_image) {
@@ -491,8 +618,8 @@ function applyVillaContent(content) {
 }
 
 function applyExperienceContent(content) {
-  if (!content || !content.experience) return;
-  const experience = content.experience;
+  const experience = (content && content.experience && content.experience.title) ? content.experience : FALLBACK_CONTENT.experience;
+  if (!experience) return;
   const experienceSection = document.getElementById('experience');
 
   if (experienceSection) {
@@ -556,8 +683,8 @@ function applyExperienceContent(content) {
 }
 
 function applyEssentialOilsContent(content) {
-  if (!content || !content.essential_oils) return;
-  const eo = content.essential_oils;
+  const eo = (content && content.essential_oils && content.essential_oils.title) ? content.essential_oils : FALLBACK_CONTENT.essential_oils;
+  if (!eo) return;
   const essentialOilsSection = document.getElementById('essential-oils');
 
   if (essentialOilsSection) {
@@ -1127,18 +1254,17 @@ async function initApp() {
     const cachedSteps = JSON.parse(localStorage.getItem('cache_process_steps') || 'null');
     const cachedFaqs = JSON.parse(localStorage.getItem('cache_faqs') || 'null');
 
-    if (cachedContent) {
-      applyHeroContent(cachedContent);
-      applyAboutContent(cachedContent);
-      applyFactoryContent(cachedContent);
-      applyProcessContent(cachedContent);
-      applyProductsContent(cachedContent);
-      applyB2BContent(cachedContent);
-      applyVillaContent(cachedContent);
-      applyExperienceContent(cachedContent);
-      applyEssentialOilsContent(cachedContent);
-      loadFaqBackground();
-    }
+    // Always apply content — functions use FALLBACK_CONTENT when data is missing
+    applyHeroContent(cachedContent);
+    applyAboutContent(cachedContent);
+    applyFactoryContent(cachedContent);
+    applyProcessContent(cachedContent);
+    applyProductsContent(cachedContent);
+    applyB2BContent(cachedContent);
+    applyVillaContent(cachedContent);
+    applyExperienceContent(cachedContent);
+    applyEssentialOilsContent(cachedContent);
+    loadFaqBackground();
     if (cachedProducts && cachedProducts.length) {
       allProducts = cachedProducts;
       renderProducts(cachedProducts);
@@ -1150,12 +1276,8 @@ async function initApp() {
       siteSettings = cachedSettings;
       applySettings(cachedSettings);
     }
-    if (cachedSteps && cachedSteps.length) {
-      renderProcessSteps(cachedSteps);
-    }
-    if (cachedFaqs && cachedFaqs.length) {
-      renderFaqs(cachedFaqs);
-    }
+    renderProcessSteps((cachedSteps && cachedSteps.length) ? cachedSteps : FALLBACK_PROCESS_STEPS);
+    renderFaqs((cachedFaqs && cachedFaqs.length) ? cachedFaqs : FALLBACK_FAQS);
   } catch (err) {
     console.warn("Early hydration error:", err);
     showSkeletons();
@@ -1184,22 +1306,21 @@ async function initApp() {
     siteSettings = settings || siteSettings;
     deliveryRates = rates || [];
 
-    if (content) {
-      applyHeroContent(content);
-      applyAboutContent(content);
-      applyFactoryContent(content);
-      applyProcessContent(content);
-      applyProductsContent(content);
-      applyB2BContent(content);
-      applyVillaContent(content);
-      applyExperienceContent(content);
-      applyEssentialOilsContent(content);
-      loadFaqBackground();
-    }
+    // Apply content to all sections (functions use FALLBACK_CONTENT when data missing)
+    applyHeroContent(content);
+    applyAboutContent(content);
+    applyFactoryContent(content);
+    applyProcessContent(content);
+    applyProductsContent(content);
+    applyB2BContent(content);
+    applyVillaContent(content);
+    applyExperienceContent(content);
+    applyEssentialOilsContent(content);
+    loadFaqBackground();
     if (settings) applySettings(settings);
     if (products && products.length) renderProducts(products);
-    if (steps && steps.length) renderProcessSteps(steps);
-    if (faqs && faqs.length) renderFaqs(faqs);
+    renderProcessSteps((steps && steps.length) ? steps : FALLBACK_PROCESS_STEPS);
+    renderFaqs((faqs && faqs.length) ? faqs : FALLBACK_FAQS);
     
     setupSignupLocationSelectors();
     setupProfileLocationSelectors();
