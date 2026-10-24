@@ -1374,13 +1374,13 @@ function initRealtimeUpdates() {
 
   if (typeof subscribeToProcessSteps === 'function') {
     subscribeToProcessSteps(steps => {
-      renderProcessSteps(steps);
+      renderProcessSteps((steps && steps.length) ? steps : FALLBACK_PROCESS_STEPS);
     });
   }
 
   if (typeof subscribeToFaqs === 'function') {
     subscribeToFaqs(faqs => {
-      renderFaqs(faqs);
+      renderFaqs((faqs && faqs.length) ? faqs : FALLBACK_FAQS);
     });
   }
 
