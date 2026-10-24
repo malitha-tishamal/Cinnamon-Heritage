@@ -16,6 +16,13 @@ const EMAILJS_TEMPLATE_ID = appConfig.EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID';
   }
 })();
 
+// Global Application State
+var allProducts = [];
+var siteSettings = {};
+var deliveryRates = [];
+var currentUser = null;
+var currentCart = [];
+
 // ============================================================
 // FAST PRELOADER DISMISSAL (Max 1s Guarantee)
 // ============================================================
@@ -39,40 +46,195 @@ async function fetchWithCache(key, fetcher, fallback) {
     cached = localStorage.getItem(key);
   } catch (e) {}
 
-  let initialData = fallback;
+  let initialData = null;
   if (cached) {
-    try { initialData = JSON.parse(cached); } catch(e){}
+    try {
+      const parsed = JSON.parse(cached);
+      const isValid = Array.isArray(parsed) ? parsed.length > 0 : (parsed && Object.keys(parsed).length > 0);
+      if (isValid) {
+        initialData = parsed;
+      } else {
+        try { localStorage.removeItem(key); } catch (e) {}
+      }
+    } catch(e) {
+      try { localStorage.removeItem(key); } catch (e) {}
+    }
   }
   
   if (typeof fetcher !== 'function') {
-    return cached ? initialData : fallback;
+    return initialData || fallback;
   }
   
   // Always fetch fresh data in background to update cache for next time
   const promise = fetcher().then(data => {
-    if (data !== undefined && data !== null) {
+    const isValid = Array.isArray(data) ? data.length > 0 : (data && Object.keys(data).length > 0);
+    if (isValid) {
       try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+      return data;
     }
-    return data;
+    return initialData || fallback;
   }).catch((err) => {
     console.warn(`Fetch failed for ${key}:`, err);
-    return fallback;
+    return initialData || fallback;
   });
 
-  // If we had cached data, return it immediately, otherwise wait for network
-  return cached ? initialData : promise;
+  // If we had valid cached data, return it immediately, otherwise wait for network
+  return initialData ? initialData : promise;
 }
 
+const FALLBACK_PRODUCTS = [
+  {
+    "id": "1",
+    "title": "Premium Ceylon Cinnamon Quills C5 Grade",
+    "price": 3500,
+    "discount": 200,
+    "stock_quantity": 50,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217120/zjmcjz0cgfiiw4ah0qnp.png",
+    "card_type": "product",
+    "short_desc": "Finest hand-rolled Ceylon Cinnamon Quills. Delicate layers, smooth texture, sweet aroma.",
+    "full_desc": "Our signature premium quills are hand-harvested and expertly rolled by skilled artisans. These Grade C5 Special quills showcase the finest layering and sweetest aroma of true Ceylon Cinnamon. Perfect for gourmet kitchens, specialty retail and premium export.",
+    "total_sales": 1,
+    "display_order": 1,
+    "is_active": true
+  },
+  {
+    "id": "2",
+    "title": "Cut Quills and Cinnamon Sticks",
+    "price": 2500,
+    "discount": 100,
+    "stock_quantity": 80,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217126/g7oo02khvh8ky4alauda.png",
+    "card_type": "product",
+    "short_desc": "Precision-cut quills and sticks in various grades. Ideal for retail and food service.",
+    "full_desc": "Available in C4, C5 and C5 Special grades. Our cut quills are uniformly sized and sorted for consistency. Perfect for retail packaging, food manufacturing and hospitality use. Available in 50g, 100g and bulk packaging.",
+    "total_sales": 2,
+    "display_order": 2,
+    "is_active": true
+  },
+  {
+    "id": "3",
+    "title": "Ceylon Cinnamon Powder",
+    "price": 1800,
+    "discount": 0,
+    "stock_quantity": 200,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217137/e4x8xvfqvpws7q5mvqxt.png",
+    "card_type": "product",
+    "short_desc": "100% Pure micro-ground Ceylon Cinnamon Powder. Rich aroma, smooth texture.",
+    "full_desc": "Stone-ground from premium Ceylon Cinnamon bark, our powder retains maximum essential oil content and natural sweetness. Ultra-low coumarin content. Perfect for baking, beverages, supplements and health products.",
+    "total_sales": 0,
+    "display_order": 3,
+    "is_active": true
+  },
+  {
+    "id": "4",
+    "title": "Cinnamon Chips, Quillings & Featherings",
+    "price": 950,
+    "discount": 50,
+    "stock_quantity": 300,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217147/nz8ebvxskq3xcvz9sgas.png",
+    "card_type": "product",
+    "short_desc": "Premium cinnamon by-products. Excellent for oil extraction, tea blends and cooking.",
+    "full_desc": "Our chips, quillings and featherings are carefully sorted from the cinnamon processing line. Rich in essential oils, these are ideal for oil distillation, herbal tea blends, potpourri and industrial food processing applications.",
+    "total_sales": 0,
+    "display_order": 4,
+    "is_active": true
+  },
+  {
+    "id": "5",
+    "title": "Ceylon Cinnamon Tea Cut",
+    "price": 1200,
+    "discount": 0,
+    "stock_quantity": 150,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217152/qsrfhw1obmmc4oeexza4.png",
+    "card_type": "product",
+    "short_desc": "Finely cut cinnamon pieces designed for perfect brewing. Pure and aromatic.",
+    "full_desc": "Specifically cut to optimal size for tea brewing and herbal infusions. Our tea cut releases flavor and aroma evenly during steeping. 100% natural with no additives. Perfect for loose-leaf tea blends and sachets.",
+    "total_sales": 0,
+    "display_order": 5,
+    "is_active": true
+  },
+  {
+    "id": "6",
+    "title": "Ceylon Cinnamon Leaf Oil",
+    "price": 2800,
+    "discount": 150,
+    "stock_quantity": 40,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217164/onsikq9ucwa5el32q3bq.png",
+    "card_type": "product",
+    "short_desc": "Steam-distilled pure leaf oil. High eugenol content for aromatherapy and wellness.",
+    "full_desc": "Extracted through traditional steam distillation from fresh Ceylon Cinnamon leaves. Rich in eugenol (70-85%), this therapeutic-grade oil is perfect for aromatherapy, natural skincare formulations, massage blends and wellness products.",
+    "total_sales": 0,
+    "display_order": 6,
+    "is_active": true
+  },
+  {
+    "id": "7",
+    "title": "Premium Ceylon Cinnamon Bark Oil",
+    "price": 8500,
+    "discount": 500,
+    "stock_quantity": 15,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217181/kfdbkdpdktkxormwupa6.png",
+    "card_type": "product",
+    "short_desc": "Rare bark oil with high cinnamaldehyde content. The gold standard in essential oils.",
+    "full_desc": "Our premium bark oil contains 60-75% cinnamaldehyde, making it one of the most potent and sought-after essential oils. Steam-distilled from the finest Ceylon Cinnamon bark. Used in premium perfumery, pharmaceutical applications and luxury wellness products.",
+    "total_sales": 0,
+    "display_order": 7,
+    "is_active": true
+  },
+  {
+    "id": "8",
+    "title": "Cinnamon Herbal Infusions & Beverage Concepts",
+    "price": 1500,
+    "discount": 0,
+    "stock_quantity": 100,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217192/qnnu0zmipctlnedlxa2r.png",
+    "card_type": "product",
+    "short_desc": "Curated cinnamon-based herbal tea blends and innovative beverage solutions.",
+    "full_desc": "Explore our range of cinnamon herbal infusions combining Ceylon Cinnamon with complementary herbs and spices. From classic cinnamon tea to innovative beverage concepts for the hospitality and wellness industry. Available as loose blends and tea bags.",
+    "total_sales": 0,
+    "display_order": 8,
+    "is_active": true
+  },
+  {
+    "id": "9",
+    "title": "Cinnamon Heritage Gift Collection",
+    "price": 12000,
+    "discount": 1000,
+    "stock_quantity": 20,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217204/fhcwmwgx4k2pcbealgl9.png",
+    "card_type": "product",
+    "short_desc": "Luxury curated gift box featuring premium cinnamon products. Perfect for gifting.",
+    "full_desc": "An elegantly packaged collection featuring our finest products: Premium Quills, Pure Powder, Leaf Oil and Herbal Infusions. Presented in a handcrafted wooden gift box with heritage branding. Ideal for corporate gifts, special occasions and discerning cinnamon enthusiasts.",
+    "total_sales": 0,
+    "display_order": 9,
+    "is_active": true
+  },
+  {
+    "id": "10",
+    "title": "Bulk Supply, Private Label & Custom Development",
+    "price": 0,
+    "discount": 0,
+    "stock_quantity": 999,
+    "image_url": "images/estate_bg.png",
+    "card_type": "contact",
+    "short_desc": "Partner with us for bulk orders, private labelling and bespoke product development.",
+    "full_desc": "We offer comprehensive B2B solutions including bulk supply of all cinnamon grades, private label packaging with your branding, and custom product development. From concept to shelf-ready products, our team works with you to create tailored cinnamon solutions for your market.",
+    "total_sales": 0,
+    "display_order": 10,
+    "is_active": true
+  }
+];
+
+// Fallback content if Supabase is slow or unavailable
 const dataPromises = {
   content:       fetchWithCache('cache_content', getContent, null),
-  products:      fetchWithCache('cache_products', getProducts, []),
+  products:      fetchWithCache('cache_products', getProducts, FALLBACK_PRODUCTS),
   settings:      fetchWithCache('cache_settings', getSettings, {}),
   deliveryRates: fetchWithCache('cache_delivery_rates', getDeliveryRates, []),
   processSteps:  fetchWithCache('cache_process_steps', getProcessSteps, []),
   faqs:          fetchWithCache('cache_faqs', getFaqs, [])
 };
 
-// Fallback content if Supabase is slow or unavailable
 const FALLBACK = {
   hero: {
     title: 'Pure Ceylon Cinnamon',
@@ -867,7 +1029,6 @@ function applySettings(settings) {
 // ============================================================
 // DOM Ready
 // ============================================================
-let deliveryRates = [];
 
 function setupSignupLocationSelectors() {
   const provinceSelect = document.getElementById('signupProvince');
@@ -982,7 +1143,8 @@ async function initApp() {
       allProducts = cachedProducts;
       renderProducts(cachedProducts);
     } else {
-      showSkeletons();
+      allProducts = FALLBACK_PRODUCTS;
+      renderProducts(FALLBACK_PRODUCTS);
     }
     if (cachedSettings) {
       siteSettings = cachedSettings;
@@ -1017,7 +1179,8 @@ async function initApp() {
     const steps    = results[4].status === 'fulfilled' ? results[4].value : [];
     const faqs     = results[5].status === 'fulfilled' ? results[5].value : [];
 
-    allProducts = products || allProducts;
+    allProducts = (products && products.length) ? products : (allProducts.length ? allProducts : FALLBACK_PRODUCTS);
+    renderProducts(allProducts);
     siteSettings = settings || siteSettings;
     deliveryRates = rates || [];
 
@@ -1364,10 +1527,7 @@ window.addEventListener('scroll', function() {
 // ============================================================
 // SHOPPING CART & CLIENT AUTH SYSTEM
 // ============================================================
-let currentUser = null;
-let currentCart = [];
-let allProducts = [];
-let siteSettings = {};
+// (globals initialized at top)
 
 const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
 

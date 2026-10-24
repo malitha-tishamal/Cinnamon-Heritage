@@ -50,19 +50,26 @@ async function serveFromCache(key, fetcher) {
   if (cached) {
     try {
       const parsed = JSON.parse(cached);
-      // Background revalidation to keep data fresh
-      fetcher().then(data => {
-        if (data !== undefined && data !== null) {
-          try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
-        }
-      }).catch(() => {});
-      return parsed;
+      const isValid = Array.isArray(parsed) ? parsed.length > 0 : (parsed && Object.keys(parsed).length > 0);
+      if (isValid) {
+        // Background revalidation to keep data fresh
+        fetcher().then(data => {
+          const isFreshValid = Array.isArray(data) ? data.length > 0 : (data && Object.keys(data).length > 0);
+          if (isFreshValid) {
+            try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+          }
+        }).catch(() => {});
+        return parsed;
+      } else {
+        try { localStorage.removeItem(key); } catch (e) {}
+      }
     } catch (e) {
       try { localStorage.removeItem(key); } catch (e) {}
     }
   }
   const data = await fetcher();
-  if (data !== undefined && data !== null) {
+  const isValid = Array.isArray(data) ? data.length > 0 : (data && Object.keys(data).length > 0);
+  if (isValid) {
     try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
   }
   return data;
@@ -799,23 +806,34 @@ async function updateFaqBackground(imageUrl) {
 async function getProducts() {
   await seedDatabaseIfNeeded();
   return serveFromCache('cache_products', async () => {
-    // Get all products ordered by display_order
-    const snapshot = await db.collection('products')
-      .orderBy('display_order')
-      .get();
+    if (!db) return (typeof FALLBACK_PRODUCTS !== 'undefined' ? FALLBACK_PRODUCTS : []);
+    try {
+      let snapshot;
+      try {
+        snapshot = await db.collection('products').orderBy('display_order').get();
+      } catch (orderErr) {
+        snapshot = await db.collection('products').get();
+      }
       
-    const productsList = [];
-    snapshot.forEach(doc => {
-      productsList.push({ id: doc.id, ...doc.data() });
-    });
-    
-    // Filter active products client-side to avoid composite index requirements
-    return productsList
-      .filter(p => p.is_active !== false)
-      .map(p => ({
-        ...p,
-        total_sales: p.total_sales || 0
-      }));
+      const productsList = [];
+      snapshot.forEach(doc => {
+        productsList.push({ id: doc.id, ...doc.data() });
+      });
+      
+      const active = productsList
+        .filter(p => p.is_active !== false)
+        .sort((a, b) => (Number(a.display_order) || 0) - (Number(b.display_order) || 0))
+        .map(p => ({
+          ...p,
+          total_sales: p.total_sales || 0
+        }));
+
+      if (active.length > 0) return active;
+      return (typeof FALLBACK_PRODUCTS !== 'undefined' ? FALLBACK_PRODUCTS : []);
+    } catch (err) {
+      console.warn("Firestore products fetch error:", err);
+      return (typeof FALLBACK_PRODUCTS !== 'undefined' ? FALLBACK_PRODUCTS : []);
+    }
   });
 }
 
