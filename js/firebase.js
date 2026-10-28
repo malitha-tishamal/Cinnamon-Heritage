@@ -1,17 +1,25 @@
 ﻿// ============================================================
-// Cinnamon Heritage — Firebase Client
+// Cinnamon Heritage â€” Firebase Client
 // Replace the config keys with your own Firebase Project details
 // ============================================================
 
-var appConfig = (typeof window !== 'undefined' && window.__APP_CONFIG__) || {};
+// Sanitize appConfig values â€” strip any accidental leading/trailing whitespace
+// (Vercel env vars can sometimes inject \t tab characters)
+var _raw = (typeof window !== 'undefined' && window.__APP_CONFIG__) || {};
+var appConfig = {};
+for (var _k in _raw) {
+  if (Object.prototype.hasOwnProperty.call(_raw, _k)) {
+    appConfig[_k] = typeof _raw[_k] === 'string' ? _raw[_k].trim() : _raw[_k];
+  }
+}
 
 const firebaseConfig = {
-  apiKey: appConfig.FIREBASE_API_KEY || "AIzaSyCxwS4oCfB4b2vQniNoSjNOq_G_2GvAkdg",
-  authDomain: appConfig.FIREBASE_AUTH_DOMAIN || "authspark-pq68d.firebaseapp.com",
-  projectId: appConfig.FIREBASE_PROJECT_ID || "authspark-pq68d",
-  storageBucket: appConfig.FIREBASE_STORAGE_BUCKET || "authspark-pq68d.firebasestorage.app",
-  messagingSenderId: appConfig.FIREBASE_MESSAGING_SENDER_ID || "104606816181",
-  appId: appConfig.FIREBASE_APP_ID || "1:104606816181:web:249a1f1f3e9daebd4eabfc"
+  apiKey:            (appConfig.FIREBASE_API_KEY            || "AIzaSyCxwS4oCfB4b2vQniNoSjNOq_G_2GvAkdg").trim(),
+  authDomain:        (appConfig.FIREBASE_AUTH_DOMAIN        || "authspark-pq68d.firebaseapp.com").trim(),
+  projectId:         (appConfig.FIREBASE_PROJECT_ID         || "authspark-pq68d").trim(),
+  storageBucket:     (appConfig.FIREBASE_STORAGE_BUCKET     || "authspark-pq68d.firebasestorage.app").trim(),
+  messagingSenderId: (appConfig.FIREBASE_MESSAGING_SENDER_ID|| "104606816181").trim(),
+  appId:             (appConfig.FIREBASE_APP_ID             || "1:104606816181:web:249a1f1f3e9daebd4eabfc").trim()
 };
 
 // Initialize Firebase safely
@@ -26,7 +34,7 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 var auth = (typeof firebase !== 'undefined' && firebase.apps.length) ? firebase.auth() : null;
 var db = (typeof firebase !== 'undefined' && firebase.apps.length) ? firebase.firestore() : null;
 
-// Firestore persistence disabled intentionally — localStorage caching is used instead.
+// Firestore persistence disabled intentionally â€” localStorage caching is used instead.
 // enablePersistence({ synchronizeTabs: true }) causes "Failed to get document because the client is offline"
 // errors across browser tabs and iframes.
 
@@ -156,9 +164,9 @@ async function seedDatabaseIfNeeded() {
     // Seed Site Content
     const content = [
       { id: 'hero', title: 'PURE CEYLON CINNAMON', subtitle: 'From our Family Estates in Galle Unanwitiya to the World. Hand Crafted, Sustainably Grown and Certified Authentic Ceylon Cinnamon Since 1982.', cta_text: 'Discover Our Heritage', background_image: 'images/cinnamon_spices.jpg' },
-      { id: 'about', title: 'From Our Own Estate', text: 'Nestled in the lush hillsides of Galle Unanwitiya, our family-owned estate spans over 15 acres of prime cinnamon-growing land. The southern coast of Sri Lanka – known globally as "Cinnamon Country" – provides the perfect tropical climate, rich laterite soils and monsoon rains that give Ceylon cinnamon its world-renowned delicate flavour and aroma. Three generations of our family have nurtured these lands using sustainable, organic farming methods passed down through the decades.' },
+      { id: 'about', title: 'From Our Own Estate', text: 'Nestled in the lush hillsides of Galle Unanwitiya, our family-owned estate spans over 15 acres of prime cinnamon-growing land. The southern coast of Sri Lanka â€“ known globally as "Cinnamon Country" â€“ provides the perfect tropical climate, rich laterite soils and monsoon rains that give Ceylon cinnamon its world-renowned delicate flavour and aroma. Three generations of our family have nurtured these lands using sustainable, organic farming methods passed down through the decades.' },
       { id: 'factory', title: 'Our Facility', text: 'Our state-of-the-art processing facility combines centuries-old Sri Lankan craftsmanship with modern food-grade technology. Every workstation features hygienic stainless steel surfaces, and our advanced mechanical dryers are calibrated to preserve the delicate essential oils that make Ceylon cinnamon exceptional. Over 50 skilled local artisans work alongside quality-control specialists to ensure every batch meets international export standards including ISO 22000 and HACCP certification.' },
-      { id: 'quality', title: 'QUALITY ASSURANCE', text: 'Every batch of Cinnamon Heritage products undergoes rigorous laboratory testing for purity, moisture content and coumarin levels. We hold ISO 22000, HACCP and Sri Lanka Standards Institution certifications. Our sustainable farming practices protect the environment, empower our local community and guarantee that our cinnamon reaches you 100% natural – free of additives, preservatives and artificial colouring.' },
+      { id: 'quality', title: 'QUALITY ASSURANCE', text: 'Every batch of Cinnamon Heritage products undergoes rigorous laboratory testing for purity, moisture content and coumarin levels. We hold ISO 22000, HACCP and Sri Lanka Standards Institution certifications. Our sustainable farming practices protect the environment, empower our local community and guarantee that our cinnamon reaches you 100% natural â€“ free of additives, preservatives and artificial colouring.' },
       { id: 'contact', title: 'Contact Us', subtitle: 'Whether you are a wholesaler, retailer or artisan brand looking for authentic Ceylon cinnamon, we would love to hear from you. Reach out to discuss bulk orders, private labelling or any enquiries about our products.', address: 'Galle Unanwitiya, Sri Lanka', phone: '+94 77 123 4567', email: 'info@cinnamonheritage.com', whatsapp: '94771234567' },
       { id: 'products', background_image: 'images/estate_bg.png' },
       { id: 'process', background_image: 'images/estate_bg.png' },
@@ -1149,7 +1157,7 @@ async function deleteProductById(id) {
 const CLOUDINARY_CLOUD_NAME = appConfig.CLOUDINARY_CLOUD_NAME || "dqeptzlsb";
 const CLOUDINARY_UPLOAD_PRESET = appConfig.CLOUDINARY_UPLOAD_PRESET || "flutter_mediq_upload";
 
-/** Upload image to Cloudinary with optional progress callback (0–100) */
+/** Upload image to Cloudinary with optional progress callback (0â€“100) */
 function uploadImageWithProgress(file, onProgress) {
   return new Promise((resolve, reject) => {
     const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
@@ -1314,11 +1322,11 @@ async function seedFaqsIfNeeded() {
     
     console.log("Seeding FAQs collection...");
     const faqs = [
-      { question: 'What is Ceylon Cinnamon?', answer: 'Ceylon Cinnamon (Cinnamomum verum) is the "true cinnamon" native to Sri Lanka. It is distinguished by its delicate, multi-layered quills, light tan colour, subtle sweet flavour, and ultra-low coumarin content — making it the safest and most premium variety for daily culinary and wellness use.', display_order: 1, is_active: true },
+      { question: 'What is Ceylon Cinnamon?', answer: 'Ceylon Cinnamon (Cinnamomum verum) is the "true cinnamon" native to Sri Lanka. It is distinguished by its delicate, multi-layered quills, light tan colour, subtle sweet flavour, and ultra-low coumarin content â€” making it the safest and most premium variety for daily culinary and wellness use.', display_order: 1, is_active: true },
       { question: 'What is the difference between Ceylon Cinnamon and Cassia?', answer: 'Ceylon Cinnamon has thin, multi-layered bark, a mild sweet taste, and contains only trace amounts of coumarin (0.004%). Cassia (Cinnamomum cassia) has a single thick bark layer, a stronger spicy taste, and significantly higher coumarin levels (up to 1%), which can be harmful in large doses. Ceylon is considered the premium, health-safe choice.', display_order: 2, is_active: true },
-      { question: 'Do you supply cinnamon in bulk?', answer: 'Yes. We offer comprehensive bulk supply for wholesalers, distributors, food manufacturers and hospitality businesses. Our minimum order quantities are flexible, and we provide competitive pricing for large volumes across all product lines — quills, powder, chips, tea cut, and essential oils.', display_order: 3, is_active: true },
-      { question: 'What is Ceylon Cinnamon Leaf Oil?', answer: 'Cinnamon Leaf Oil is steam-distilled from fresh Ceylon Cinnamon leaves. It is rich in eugenol (70–85%) and is widely used in aromatherapy, natural skincare, massage therapy, and as a natural antiseptic. It has a warm, spicy-clove aroma.', display_order: 4, is_active: true },
-      { question: 'What is Ceylon Cinnamon Bark Oil?', answer: 'Cinnamon Bark Oil is steam-distilled from the inner bark of the Ceylon Cinnamon tree. It contains 60–75% cinnamaldehyde, making it one of the most potent essential oils available. It is used in premium perfumery, pharmaceutical applications, and high-end wellness products.', display_order: 5, is_active: true },
+      { question: 'Do you supply cinnamon in bulk?', answer: 'Yes. We offer comprehensive bulk supply for wholesalers, distributors, food manufacturers and hospitality businesses. Our minimum order quantities are flexible, and we provide competitive pricing for large volumes across all product lines â€” quills, powder, chips, tea cut, and essential oils.', display_order: 3, is_active: true },
+      { question: 'What is Ceylon Cinnamon Leaf Oil?', answer: 'Cinnamon Leaf Oil is steam-distilled from fresh Ceylon Cinnamon leaves. It is rich in eugenol (70â€“85%) and is widely used in aromatherapy, natural skincare, massage therapy, and as a natural antiseptic. It has a warm, spicy-clove aroma.', display_order: 4, is_active: true },
+      { question: 'What is Ceylon Cinnamon Bark Oil?', answer: 'Cinnamon Bark Oil is steam-distilled from the inner bark of the Ceylon Cinnamon tree. It contains 60â€“75% cinnamaldehyde, making it one of the most potent essential oils available. It is used in premium perfumery, pharmaceutical applications, and high-end wellness products.', display_order: 5, is_active: true },
       { question: 'What is the difference between Leaf Oil and Bark Oil?', answer: 'Leaf Oil is rich in eugenol (clove-like aroma) and is more affordable, making it popular for aromatherapy and skincare. Bark Oil is rich in cinnamaldehyde (warm cinnamon aroma), is rarer and more expensive, and is prized in perfumery and pharmaceutical use. Both are 100% pure and steam-distilled.', display_order: 6, is_active: true },
       { question: 'Are your essential oils safe for direct use?', answer: 'Our essential oils are 100% pure and therapeutic-grade. However, they are highly concentrated and must be diluted with a carrier oil before topical application. They are not intended for internal consumption. Always perform a patch test and consult a healthcare professional if you have sensitivities.', display_order: 7, is_active: true },
       { question: 'Do you offer Private Label / White Label services?', answer: 'Yes. We provide full private label and white label packaging services. You supply your branding and we handle everything from sourcing and processing to packaging and labelling, delivering shelf-ready products under your brand name.', display_order: 8, is_active: true },
