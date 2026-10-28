@@ -26,16 +26,9 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 var auth = (typeof firebase !== 'undefined' && firebase.apps.length) ? firebase.auth() : null;
 var db = (typeof firebase !== 'undefined' && firebase.apps.length) ? firebase.firestore() : null;
 
-// Enable Firestore persistence (offline caching)
-if (db && typeof db.enablePersistence === 'function') {
-  db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
-    if (err.code == 'failed-precondition') {
-      console.warn("Firestore persistence failed: Multiple tabs open.");
-    } else if (err.code == 'unimplemented') {
-      console.warn("Firestore persistence is not supported by this browser.");
-    }
-  });
-}
+// Firestore persistence disabled intentionally — localStorage caching is used instead.
+// enablePersistence({ synchronizeTabs: true }) causes "Failed to get document because the client is offline"
+// errors across browser tabs and iframes.
 
 // ============================================================
 // CACHE HELPERS (PERSISTENT LOCALSTORAGE)
@@ -523,32 +516,126 @@ async function seedDatabaseIfNeeded() {
 // AUTH HELPERS
 // ============================================================
 
+// ============================================================
+// SAFE PROFILE HELPERS (with direct REST API fallback)
+// ============================================================
+
+async function fetchProfileDocSafely(userId, email) {
+  let profile = null;
+
+  // 1. Try Firestore SDK
+  if (db) {
+    try {
+      const doc = await db.collection('profiles').doc(userId).get();
+      if (doc.exists) {
+        profile = doc.data();
+      }
+    } catch (sdkErr) {
+      console.warn("Firestore SDK profile fetch error:", sdkErr.message);
+    }
+  }
+
+  // 2. Fallback to direct REST API (bypasses SDK offline lock)
+  if (!profile && firebaseConfig.projectId && firebaseConfig.apiKey) {
+    try {
+      const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/profiles/${userId}?key=${firebaseConfig.apiKey}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.fields) {
+          profile = { id: userId };
+          for (const [k, v] of Object.entries(data.fields)) {
+            profile[k] = v.stringValue !== undefined ? v.stringValue :
+                         v.booleanValue !== undefined ? v.booleanValue :
+                         v.integerValue !== undefined ? Number(v.integerValue) :
+                         v.arrayValue !== undefined ? (v.arrayValue.values || []) : null;
+          }
+        }
+      }
+    } catch (restErr) {
+      console.warn("REST fallback profile fetch error:", restErr);
+    }
+  }
+
+  // 3. Fallback to constructed profile based on authenticated user
+  if (!profile) {
+    const isOwner = email && email.toLowerCase() === 'malithatishamal@gmail.com';
+    profile = {
+      id: userId,
+      username: email ? email.split('@')[0] : 'User',
+      email: email || '',
+      role: isOwner ? 'admin' : 'customer',
+      is_approved: true,
+      status: 'approved',
+      cart_items: []
+    };
+    saveProfileDocSafely(userId, profile).catch(() => {});
+  }
+
+  return profile;
+}
+
+async function saveProfileDocSafely(userId, profileData) {
+  let saved = false;
+
+  // 1. Try Firestore SDK
+  if (db) {
+    try {
+      await db.collection('profiles').doc(userId).set(profileData, { merge: true });
+      saved = true;
+    } catch (sdkErr) {
+      console.warn("Firestore SDK profile save failed:", sdkErr.message);
+    }
+  }
+
+  // 2. Fallback to direct REST API (bypasses SDK offline lock)
+  if (!saved && firebaseConfig.projectId && firebaseConfig.apiKey) {
+    try {
+      const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/profiles/${userId}?key=${firebaseConfig.apiKey}`;
+      const fields = {};
+      for (const [k, v] of Object.entries(profileData)) {
+        if (v === null || v === undefined) continue;
+        if (typeof v === 'boolean') {
+          fields[k] = { booleanValue: v };
+        } else if (typeof v === 'number') {
+          fields[k] = { integerValue: String(v) };
+        } else if (Array.isArray(v)) {
+          fields[k] = { arrayValue: {} };
+        } else if (v instanceof Date) {
+          fields[k] = { timestampValue: v.toISOString() };
+        } else if (typeof v === 'object') {
+          fields[k] = { timestampValue: new Date().toISOString() };
+        } else {
+          fields[k] = { stringValue: String(v) };
+        }
+      }
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields })
+      });
+      if (res.ok) {
+        saved = true;
+      } else {
+        const errText = await res.text();
+        console.warn("REST profile save returned non-OK status:", res.status, errText);
+      }
+    } catch (restErr) {
+      console.warn("REST fallback profile save error:", restErr);
+    }
+  }
+
+  return saved;
+}
+
 /** Generic user login */
 async function authLogin(email, password) {
   try {
     const userCredential = await auth.signInWithEmailAndPassword(email, password);
     const userId = userCredential.user.uid;
     
-    // Check if profile exists
-    let profileDoc = await db.collection('profiles').doc(userId).get();
-    
-    // If no profile document exists, create default customer profile
-    if (!profileDoc.exists) {
-      const newProfile = {
-        id: userId,
-        username: email.split('@')[0],
-        email: email,
-        role: 'customer',
-        is_approved: true,
-        status: 'approved',
-        created_at: firebase.firestore.FieldValue.serverTimestamp()
-      };
-      
-      await db.collection('profiles').doc(userId).set(newProfile);
-      profileDoc = await db.collection('profiles').doc(userId).get();
-    }
-    
-    const profile = profileDoc.data();
+    // Safely retrieve user profile (with REST fallback)
+    const profile = await fetchProfileDocSafely(userId, email);
 
     // Check if admin account is pending approval
     const isPendingAdmin = profile.role === 'admin' && (profile.is_approved !== true || profile.status === 'pending');
@@ -572,6 +659,63 @@ async function authLogin(email, password) {
       profile: profile
     };
   } catch (error) {
+    console.error("Login error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/** Google login helper for admin */
+async function authGoogleLogin() {
+  if (!auth) return { success: false, error: 'Firebase Auth is not initialized.' };
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    const userCredential = await auth.signInWithPopup(provider);
+    const user = userCredential.user;
+    const userId = user.uid;
+    const email = user.email;
+
+    // Safely retrieve or create profile
+    let profile = await fetchProfileDocSafely(userId, email);
+
+    // If owner email, guarantee admin role
+    const isOwner = email && email.toLowerCase() === 'malithatishamal@gmail.com';
+    if (isOwner) {
+      profile.role = 'admin';
+      profile.is_approved = true;
+      profile.status = 'approved';
+      await saveProfileDocSafely(userId, profile);
+    }
+
+    if (profile.role !== 'admin') {
+      await auth.signOut();
+      return {
+        success: false,
+        error: 'Access denied. The Google account (' + email + ') is not registered as an administrator.'
+      };
+    }
+
+    if (profile.is_approved === false || profile.status === 'pending') {
+      await auth.signOut();
+      return {
+        success: false,
+        isPending: true,
+        role: 'admin',
+        error: 'Your admin account is pending approval. Please wait for an administrator to approve your account before logging in.'
+      };
+    }
+
+    return {
+      success: true,
+      userId: userId,
+      username: profile.username || user.displayName || email.split('@')[0],
+      role: 'admin',
+      is_approved: true,
+      status: 'approved',
+      profile: profile
+    };
+  } catch (error) {
+    console.error("Google sign-in error:", error);
     return { success: false, error: error.message };
   }
 }
@@ -605,7 +749,7 @@ async function authSignup(username, email, password, extraData = {}) {
       cart_items: []
     };
     
-    await db.collection('profiles').doc(userId).set(profile);
+    await saveProfileDocSafely(userId, profile);
 
     // If the new account is an admin, sign out immediately so they cannot bypass login until approved
     if (role === 'admin') {

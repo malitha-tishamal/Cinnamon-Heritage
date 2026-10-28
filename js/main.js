@@ -1576,14 +1576,32 @@ if (contactForm) {
 // ============================================================
 // Toast
 // ============================================================
-function showToast(message, type) {
+function showToast(message, type = 'success') {
   const toastEl  = document.getElementById('contactToast');
   const toastMsg = document.getElementById('toastMessage');
+  if (!toastEl || !toastMsg) return;
+
   toastMsg.textContent = message;
-  toastEl.classList.remove('bg-success', 'bg-danger', 'text-white');
-  toastEl.classList.add(type === 'success' ? 'bg-success' : 'bg-danger', 'text-white');
-  new bootstrap.Toast(toastEl, { delay: 5000 }).show();
+  toastEl.classList.remove('bg-success', 'bg-danger', 'bg-info', 'bg-warning', 'text-white', 'text-dark');
+  if (type === 'success') {
+    toastEl.classList.add('bg-success', 'text-white');
+  } else if (type === 'info') {
+    toastEl.classList.add('bg-info', 'text-dark');
+  } else if (type === 'warning') {
+    toastEl.classList.add('bg-warning', 'text-dark');
+  } else {
+    toastEl.classList.add('bg-danger', 'text-white');
+  }
+
+  try {
+    let bsToast = bootstrap.Toast.getInstance(toastEl);
+    if (!bsToast) bsToast = new bootstrap.Toast(toastEl, { delay: 6000 });
+    bsToast.show();
+  } catch (e) {
+    console.warn('Toast display error:', e);
+  }
 }
+window.showToast = showToast;
 
 // ============================================================
 // Smooth Scroll
@@ -2363,21 +2381,42 @@ function initCartAndAuthListeners() {
       e.preventDefault();
       if (clientLoginError) clientLoginError.classList.add('d-none');
 
+      const submitBtn = clientLoginForm.querySelector('button[type="submit"]');
+      const origBtnText = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing In...';
+      }
+
       const email = document.getElementById('clientLoginEmail').value.trim();
       const password = document.getElementById('clientLoginPassword').value;
 
-      const res = await authLogin(email, password);
-      if (res.success) {
-        showToast("Logged in successfully!", "success");
-        // Hide modal
-        bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
-        clientLoginForm.reset();
-        await checkAuthStatus();
-      } else {
+      try {
+        const res = await authLogin(email, password);
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = origBtnText; }
+
+        if (res.success) {
+          showToast("Welcome back, " + (res.username || "User") + "!", "success");
+          const modalInstance = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+          if (modalInstance) modalInstance.hide();
+          clientLoginForm.reset();
+          await checkAuthStatus();
+        } else {
+          const errorMsg = res.error || "Login failed. Please check your credentials.";
+          if (clientLoginError) {
+            clientLoginError.textContent = errorMsg;
+            clientLoginError.classList.remove('d-none');
+          }
+          showToast(errorMsg, "error");
+        }
+      } catch (err) {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = origBtnText; }
+        const errText = err.message || "An unexpected error occurred during sign-in.";
         if (clientLoginError) {
-          clientLoginError.textContent = res.error || "Login failed";
+          clientLoginError.textContent = errText;
           clientLoginError.classList.remove('d-none');
         }
+        showToast(errText, "error");
       }
     });
   }
@@ -2438,18 +2477,26 @@ function initCartAndAuthListeners() {
       const confirmPassword = document.getElementById('signupConfirmPassword').value;
 
       if (password !== confirmPassword) {
+        const mismatchMsg = "Passwords do not match!";
         if (clientSignupError) {
-          clientSignupError.textContent = "Passwords do not match!";
+          clientSignupError.textContent = mismatchMsg;
           clientSignupError.classList.remove('d-none');
         }
+        showToast(mismatchMsg, "error");
         return;
+      }
+
+      const signupSubmitBtn = clientSignupForm.querySelector('button[type="submit"]');
+      const origSignupText = signupSubmitBtn ? signupSubmitBtn.innerHTML : '';
+      if (signupSubmitBtn) {
+        signupSubmitBtn.disabled = true;
+        signupSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating Account...';
       }
 
       const email = document.getElementById('signupEmail').value.trim();
       const role = document.querySelector('input[name="signupRole"]:checked')?.value || 'customer';
       const firstName = document.getElementById('signupFirstName').value.trim();
       const lastName  = document.getElementById('signupLastName').value.trim();
-      // Auto-generate username from first + last name if not provided
       const usernameEl = document.getElementById('signupUsername');
       const username = usernameEl && usernameEl.value.trim()
         ? usernameEl.value.trim()
@@ -2465,30 +2512,51 @@ function initCartAndAuthListeners() {
         profile_pic_url: role === 'customer' ? (document.getElementById('signupPicUrl').value || '') : ''
       };
 
-      const res = await authSignup(username, email, password, extraData);
-      if (res.success) {
-        if (role === 'admin') {
-          // Admin needs approval, don't auto login
-          showToast(res.message, res.is_approved ? "success" : "info");
-          bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
-          clientSignupForm.reset();
-        } else {
-          // Auto login customer
-          showToast(res.message || "Account created successfully!", "success");
-          const loginRes = await authLogin(email, password);
-          if (loginRes.success) {
-            bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
+      try {
+        const res = await authSignup(username, email, password, extraData);
+        if (signupSubmitBtn) { signupSubmitBtn.disabled = false; signupSubmitBtn.innerHTML = origSignupText; }
+
+        if (res.success) {
+          if (role === 'admin') {
+            showToast(res.message || "Admin account registered! Pending approval.", "info");
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+            if (modalInstance) modalInstance.hide();
             clientSignupForm.reset();
-            if (signupPicPreview) signupPicPreview.src = DEFAULT_AVATAR;
-            if (signupPicUrl) signupPicUrl.value = '';
-            await checkAuthStatus();
+          } else {
+            showToast("Account created successfully! Signing you in...", "success");
+            const loginRes = await authLogin(email, password);
+            if (loginRes.success) {
+              showToast("Welcome to Cinnamon Heritage, " + (loginRes.username || username) + "!", "success");
+              const modalInstance = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+              if (modalInstance) modalInstance.hide();
+              clientSignupForm.reset();
+              if (signupPicPreview) signupPicPreview.src = DEFAULT_AVATAR;
+              if (signupPicUrl) signupPicUrl.value = '';
+              await checkAuthStatus();
+            } else {
+              if (clientSignupError) {
+                clientSignupError.textContent = "Account created! Auto sign-in encountered an issue. Please sign in via the Sign In tab.";
+                clientSignupError.classList.remove('d-none');
+              }
+              showToast("Account created! Please sign in using the Sign In tab.", "info");
+            }
           }
+        } else {
+          const errorMsg = res.error || "Signup failed. Please try again.";
+          if (clientSignupError) {
+            clientSignupError.textContent = errorMsg;
+            clientSignupError.classList.remove('d-none');
+          }
+          showToast(errorMsg, "error");
         }
-      } else {
+      } catch (err) {
+        if (signupSubmitBtn) { signupSubmitBtn.disabled = false; signupSubmitBtn.innerHTML = origSignupText; }
+        const errText = err.message || "An unexpected error occurred during signup.";
         if (clientSignupError) {
-          clientSignupError.textContent = res.error || "Signup failed";
+          clientSignupError.textContent = errText;
           clientSignupError.classList.remove('d-none');
         }
+        showToast(errText, "error");
       }
     });
   }

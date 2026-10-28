@@ -6,6 +6,40 @@
 // ============================================================
 // AUTH
 // ============================================================
+
+// Google Sign-In for Admin
+const googleLoginBtn = document.getElementById('adminGoogleLoginBtn');
+if (googleLoginBtn) {
+  googleLoginBtn.addEventListener('click', async function() {
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.classList.add('d-none');
+    const originalHtml = googleLoginBtn.innerHTML;
+    googleLoginBtn.disabled = true;
+    googleLoginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connecting to Google...';
+
+    try {
+      const result = await authGoogleLogin();
+      googleLoginBtn.disabled = false;
+      googleLoginBtn.innerHTML = originalHtml;
+
+      if (result.success) {
+        document.getElementById('adminUsername').textContent = result.username;
+        document.getElementById('loginScreen').classList.add('d-none');
+        document.getElementById('dashboardScreen').classList.remove('d-none');
+        loadDashboard();
+      } else {
+        errorDiv.textContent = result.error || 'Google login failed';
+        errorDiv.classList.remove('d-none');
+      }
+    } catch (err) {
+      googleLoginBtn.disabled = false;
+      googleLoginBtn.innerHTML = originalHtml;
+      errorDiv.textContent = err.message || 'Google login error';
+      errorDiv.classList.remove('d-none');
+    }
+  });
+}
+
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const email    = document.getElementById('loginEmail').value.trim();
