@@ -2571,6 +2571,42 @@ function initCartAndAuthListeners() {
 
   // Logout Click
   
+  
+  // Ensure Google buttons exist in DOM (safeguard against stale cached HTML)
+  const loginForm = document.getElementById('clientLoginForm');
+  if (loginForm && !document.getElementById('clientGoogleLoginBtn')) {
+    const divider = document.createElement('div');
+    divider.className = 'd-flex align-items-center my-3';
+    divider.innerHTML = '<hr class="flex-grow-1 border-secondary m-0" style="opacity: 0.3;"><span class="px-3 small text-white-50 fw-bold">OR</span><hr class="flex-grow-1 border-secondary m-0" style="opacity: 0.3;">';
+    
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-0 shadow-sm mb-2';
+    btn.id = 'clientGoogleLoginBtn';
+    btn.style.cssText = "background: #ffffff; color: #3c4043; border: 1px solid #dadce0; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; font-size: 0.95rem; text-transform: uppercase;";
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg><span>Sign In with Google</span>';
+
+    loginForm.appendChild(divider);
+    loginForm.appendChild(btn);
+  }
+
+  const signupForm = document.getElementById('clientSignupForm');
+  if (signupForm && !document.getElementById('clientGoogleSignupBtn')) {
+    const divider = document.createElement('div');
+    divider.className = 'd-flex align-items-center my-3';
+    divider.innerHTML = '<hr class="flex-grow-1 border-secondary m-0" style="opacity: 0.3;"><span class="px-3 small text-white-50 fw-bold">OR</span><hr class="flex-grow-1 border-secondary m-0" style="opacity: 0.3;">';
+    
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-0 shadow-sm mb-2';
+    btn.id = 'clientGoogleSignupBtn';
+    btn.style.cssText = "background: #ffffff; color: #3c4043; border: 1px solid #dadce0; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; font-size: 0.95rem; text-transform: uppercase;";
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg><span>Sign Up with Google</span>';
+
+    signupForm.appendChild(divider);
+    signupForm.appendChild(btn);
+  }
+
   // Google Sign-In on Client Auth Modal (Login Tab)
   const clientGoogleLoginBtn = document.getElementById('clientGoogleLoginBtn');
   if (clientGoogleLoginBtn) {
