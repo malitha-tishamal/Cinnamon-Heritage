@@ -2570,6 +2570,105 @@ function initCartAndAuthListeners() {
   }
 
   // Logout Click
+  
+  // Google Sign-In on Client Auth Modal (Login Tab)
+  const clientGoogleLoginBtn = document.getElementById('clientGoogleLoginBtn');
+  if (clientGoogleLoginBtn) {
+    clientGoogleLoginBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (clientLoginError) clientLoginError.classList.add('d-none');
+      const origHtml = clientGoogleLoginBtn.innerHTML;
+      clientGoogleLoginBtn.disabled = true;
+      clientGoogleLoginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connecting to Google...';
+
+      try {
+        const res = await authGoogleSignIn(null);
+        clientGoogleLoginBtn.disabled = false;
+        clientGoogleLoginBtn.innerHTML = origHtml;
+
+        if (res.success) {
+          showToast("Welcome, " + (res.username || "User") + "!", "success");
+          const modalInstance = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+          if (modalInstance) modalInstance.hide();
+          if (clientLoginForm) clientLoginForm.reset();
+          await checkAuthStatus();
+        } else if (res.isPending) {
+          if (clientLoginError) {
+            clientLoginError.textContent = res.error;
+            clientLoginError.classList.remove('d-none');
+          }
+          showToast(res.error, "info");
+        } else {
+          const errMsg = res.error || "Google sign-in failed.";
+          if (clientLoginError) {
+            clientLoginError.textContent = errMsg;
+            clientLoginError.classList.remove('d-none');
+          }
+          showToast(errMsg, "error");
+        }
+      } catch (err) {
+        clientGoogleLoginBtn.disabled = false;
+        clientGoogleLoginBtn.innerHTML = origHtml;
+        const errMsg = err.message || "An unexpected error occurred during Google sign-in.";
+        if (clientLoginError) {
+          clientLoginError.textContent = errMsg;
+          clientLoginError.classList.remove('d-none');
+        }
+        showToast(errMsg, "error");
+      }
+    });
+  }
+
+  // Google Sign-Up on Client Auth Modal (Sign Up Tab)
+  const clientGoogleSignupBtn = document.getElementById('clientGoogleSignupBtn');
+  if (clientGoogleSignupBtn) {
+    clientGoogleSignupBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (clientSignupError) clientSignupError.classList.add('d-none');
+
+      const role = document.querySelector('input[name="signupRole"]:checked')?.value || 'customer';
+      const origHtml = clientGoogleSignupBtn.innerHTML;
+      clientGoogleSignupBtn.disabled = true;
+      clientGoogleSignupBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connecting to Google...';
+
+      try {
+        const res = await authGoogleSignIn(role);
+        clientGoogleSignupBtn.disabled = false;
+        clientGoogleSignupBtn.innerHTML = origHtml;
+
+        if (res.success) {
+          showToast("Welcome, " + (res.username || "User") + "!", "success");
+          const modalInstance = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+          if (modalInstance) modalInstance.hide();
+          if (clientSignupForm) clientSignupForm.reset();
+          await checkAuthStatus();
+        } else if (res.isPending) {
+          if (clientSignupError) {
+            clientSignupError.textContent = res.error;
+            clientSignupError.classList.remove('d-none');
+          }
+          showToast(res.error, "info");
+        } else {
+          const errMsg = res.error || "Google sign-up failed.";
+          if (clientSignupError) {
+            clientSignupError.textContent = errMsg;
+            clientSignupError.classList.remove('d-none');
+          }
+          showToast(errMsg, "error");
+        }
+      } catch (err) {
+        clientGoogleSignupBtn.disabled = false;
+        clientGoogleSignupBtn.innerHTML = origHtml;
+        const errMsg = err.message || "An unexpected error occurred during Google sign-up.";
+        if (clientSignupError) {
+          clientSignupError.textContent = errMsg;
+          clientSignupError.classList.remove('d-none');
+        }
+        showToast(errMsg, "error");
+      }
+    });
+  }
+
   ['clientLogoutBtn', 'clientLogoutBtnMobile'].forEach(id => {
     const btn = document.getElementById(id);
     if (btn) {

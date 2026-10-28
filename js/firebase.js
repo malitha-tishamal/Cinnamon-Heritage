@@ -665,7 +665,11 @@ async function authLogin(email, password) {
 }
 
 /** Google login helper for admin */
-async function authGoogleLogin() {
+/**
+ * Universal Google Sign-In & Sign-Up helper for Customer and Admin
+ * @param {string|null} intendedRole - 'customer', 'admin', or null (if logging in)
+ */
+async function authGoogleSignIn(intendedRole = null) {
   if (!auth) return { success: false, error: 'Firebase Auth is not initialized.' };
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -673,51 +677,118 @@ async function authGoogleLogin() {
     const userCredential = await auth.signInWithPopup(provider);
     const user = userCredential.user;
     const userId = user.uid;
-    const email = user.email;
+    const email = user.email || '';
+    const isOwner = email.toLowerCase() === 'malithatishamal@gmail.com';
 
-    // Safely retrieve or create profile
-    let profile = await fetchProfileDocSafely(userId, email);
+    // 1. Check if profile exists in Firestore (with SDK + REST fallback)
+    let profile = null;
+    if (db) {
+      try {
+        const doc = await db.collection('profiles').doc(userId).get();
+        if (doc.exists) profile = doc.data();
+      } catch (e) {}
+    }
+    if (!profile && firebaseConfig.projectId && firebaseConfig.apiKey) {
+      try {
+        const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/profiles/${userId}?key=${firebaseConfig.apiKey}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const d = await res.json();
+          if (d && d.fields) {
+            profile = { id: userId };
+            for (const [k, v] of Object.entries(d.fields)) {
+              profile[k] = v.stringValue !== undefined ? v.stringValue :
+                           v.booleanValue !== undefined ? v.booleanValue :
+                           v.integerValue !== undefined ? Number(v.integerValue) : null;
+            }
+          }
+        }
+      } catch (e) {}
+    }
 
-    // If owner email, guarantee admin role
-    const isOwner = email && email.toLowerCase() === 'malithatishamal@gmail.com';
-    if (isOwner) {
-      profile.role = 'admin';
-      profile.is_approved = true;
-      profile.status = 'approved';
+    // 2. If new user, create profile according to intendedRole
+    if (!profile) {
+      const role = isOwner ? 'admin' : (intendedRole || 'customer');
+      const isApproved = isOwner ? true : (role === 'admin' ? false : true);
+
+      profile = {
+        id: userId,
+        username: user.displayName ? user.displayName.toLowerCase().replace(/\s+/g, '') : email.split('@')[0],
+        email: email,
+        first_name: user.displayName ? user.displayName.split(' ')[0] : '',
+        last_name: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '',
+        mobile: '',
+        nic: '',
+        city: '',
+        profile_pic_url: user.photoURL || '',
+        role: role,
+        is_approved: isApproved,
+        status: isApproved ? 'approved' : 'pending',
+        cart_items: [],
+        created_at: new Date().toISOString()
+      };
+
       await saveProfileDocSafely(userId, profile);
-    }
 
-    if (profile.role !== 'admin') {
-      await auth.signOut();
-      return {
-        success: false,
-        error: 'Access denied. The Google account (' + email + ') is not registered as an administrator.'
-      };
-    }
+      // If registered as admin and not owner, default to pending approval
+      if (role === 'admin' && !isOwner) {
+        await auth.signOut();
+        return {
+          success: false,
+          isPending: true,
+          role: 'admin',
+          error: 'Admin account registered with Google! Your account is currently pending approval by another administrator before you can sign in.'
+        };
+      }
+    } else {
+      // Profile already exists
+      if (isOwner && profile.role !== 'admin') {
+        profile.role = 'admin';
+        profile.is_approved = true;
+        profile.status = 'approved';
+        await saveProfileDocSafely(userId, profile);
+      }
 
-    if (profile.is_approved === false || profile.status === 'pending') {
-      await auth.signOut();
-      return {
-        success: false,
-        isPending: true,
-        role: 'admin',
-        error: 'Your admin account is pending approval. Please wait for an administrator to approve your account before logging in.'
-      };
+      // If existing user is admin, verify approval
+      if (profile.role === 'admin' && !isOwner) {
+        if (profile.is_approved === false || profile.status === 'pending') {
+          await auth.signOut();
+          return {
+            success: false,
+            isPending: true,
+            role: 'admin',
+            error: 'Your admin account is pending approval by another administrator before you can sign in.'
+          };
+        }
+      }
     }
 
     return {
       success: true,
       userId: userId,
       username: profile.username || user.displayName || email.split('@')[0],
-      role: 'admin',
-      is_approved: true,
-      status: 'approved',
+      role: profile.role || 'customer',
+      is_approved: profile.is_approved !== false,
+      status: profile.status || 'approved',
       profile: profile
     };
   } catch (error) {
     console.error("Google sign-in error:", error);
     return { success: false, error: error.message };
   }
+}
+
+/** Admin Google login wrapper */
+async function authGoogleLogin() {
+  const res = await authGoogleSignIn('admin');
+  if (res.success && res.role !== 'admin') {
+    await auth.signOut();
+    return {
+      success: false,
+      error: 'Access denied. The Google account is not registered as an administrator.'
+    };
+  }
+  return res;
 }
 
 /** Generic user signup with support for custom fields */
