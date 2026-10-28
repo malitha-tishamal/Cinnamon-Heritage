@@ -340,7 +340,7 @@ const FALLBACK_CONTENT = {
 const FALLBACK = FALLBACK_CONTENT;
 
 const FALLBACK_PROCESS_STEPS = [
-  { step_number: '01', title: 'Harvesting', short_desc: 'Mature stems are carefully harvested at dawn to ensure the highest concentration of bark essential oils.', full_desc: 'At our estates, skilled harvesters select mature branches (typically 2-3 years old) with optimal bark thickness. Harvesting takes place in the early morning when moisture content is highest, making the bark easier to peel.', image_url: 'images/step1_harvest.png', display_order: 1 },
+  { step_number: '01', title: 'Harvesting', short_desc: 'Mature stems are carefully harvested at dawn to ensure the highest concentration of bark essential oils.', full_desc: 'At our estates, skilled harvesters select mature branches (typically 2-3 years old) with optimal bark thickness. Harvesting takes place in the early morning when moisture content is highest, making the bark easier to peel.', image_url: 'images/step1.png', display_order: 1 },
   { step_number: '02', title: 'Cleaning and Preparation', short_desc: 'Harvested stems are washed in pure filtered water and outer bark is scraped to expose the clean inner bark.', full_desc: 'Once harvested, the stems are immediately brought to our facility, washed thoroughly with clean water on stainless steel tables, and trimmed. The rough outer cork and green layers are scraped away to expose the golden-bronze inner bark underneath.', image_url: 'images/step2.png', display_order: 2 },
   { step_number: '03', title: 'Scraping and Rubbing', short_desc: 'The inner bark is rubbed with a brass rod to loosen it, vital for clean, unbroken peeling.', full_desc: 'Artisans vigorously rub the prepared stems with a smooth brass rod. This traditional friction technique loosens the thin inner bark layer from the wood core, allowing it to be peeled in large, clean, unbroken sheets.', image_url: 'images/step3.png', display_order: 3 },
   { step_number: '04', title: 'Peeling', short_desc: 'Expert peelers make precise longitudinal cuts to slide the delicate inner bark off the wood.', full_desc: 'Highly trained artisans use custom curved stainless steel knives to make precise incisions. With immense dexterity, they slide the micro-thin sheets of inner bark off the wood core, taking care to minimize splitting.', image_url: 'images/step4.png', display_order: 4 },
@@ -350,7 +350,6 @@ const FALLBACK_PROCESS_STEPS = [
   { step_number: '08', title: 'Essential-Oil Distillation', short_desc: 'Unused leaves and bark chips are steam-distilled into pure leaf and bark essential oils.', full_desc: 'To support zero-waste production, cinnamon leaves and bark chips are loaded into our steam distillation chambers. Steam passes through the organic matter, vaporizing the essential oils, which are then cooled, condensed, and separated to yield pure therapeutic-grade oils.', image_url: 'images/step8.png', display_order: 8 },
   { step_number: '09', title: 'Packing and Storage', short_desc: 'Finished products are vacuum-packed and stored in climate-controlled warehouses ready for export.', full_desc: 'To protect against humidity and maintain absolute freshness, our cinnamon products are vacuum-sealed in hygienic food-grade packaging. They are stored in our climate-controlled warehouse, ready for shipping to international markets.', image_url: 'images/step9.png', display_order: 9 }
 ];
-
 const FALLBACK_FAQS = [
   { id: 'f1', question: 'What is Ceylon Cinnamon?', answer: 'Ceylon Cinnamon (Cinnamomum verum) is the "true cinnamon" native to Sri Lanka. It is distinguished by its delicate, multi-layered quills, light tan colour, subtle sweet flavour, and ultra-low coumarin content — making it the safest and most premium variety for daily culinary and wellness use.', display_order: 1, is_active: true },
   { id: 'f2', question: 'What is the difference between Ceylon Cinnamon and Cassia?', answer: 'Ceylon Cinnamon has thin, multi-layered bark, a mild sweet taste, and contains only trace amounts of coumarin (0.004%). Cassia has a single thick bark layer, a stronger spicy taste, and significantly higher coumarin levels (up to 1%), which can be harmful in large doses. Ceylon is considered the premium, health-safe choice.', display_order: 2, is_active: true },
@@ -1001,15 +1000,24 @@ function renderProcessSteps(steps) {
 
   processRow.innerHTML = '';
   steps.forEach((step, i) => {
+    const stepNum = parseInt(step.step_number, 10) || (i + 1);
+    const localStepImg = `images/step${stepNum}.png`;
+
+    // If step image is missing, empty, or the dummy Cloudinary placeholder, use authentic local image
+    let finalImg = step.image_url;
+    if (!finalImg || finalImg.includes('exdcterg55wpdxwrfhke') || finalImg.includes('placeholder') || finalImg.includes('coming_soon')) {
+      finalImg = localStepImg;
+    }
+
     const col = document.createElement('div');
     col.className = 'col-xl-4 col-lg-4 col-md-6';
     col.style.cssText = `opacity:0;transform:translateY(30px);transition:opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1) ${i * 0.1}s,transform 0.5s cubic-bezier(0.23, 1, 0.32, 1) ${i * 0.1}s`;
 
     col.innerHTML = `
       <div class="card h-100 rounded-0 border shadow-sm process-card" 
-           data-num="${step.step_number}" data-title="${step.title}" data-img="${step.image_url}" data-desc="${step.full_desc || step.short_desc}">
-        <div class="overflow-hidden" style="height: 180px;">
-          <div class="card-img-top h-100 w-100 process-img" style="background-image: url('${step.image_url}'); background-size: cover; background-position: center; transition: transform 0.5s ease;"></div>
+           data-num="${step.step_number}" data-title="${step.title}" data-img="${finalImg}" data-desc="${step.full_desc || step.short_desc}">
+        <div class="overflow-hidden" style="height: 180px; background-color: #f5f5f5;">
+          <div class="card-img-top h-100 w-100 process-img" style="background-image: url('${finalImg}'), url('${localStepImg}'); background-size: cover; background-position: center; transition: transform 0.5s ease;"></div>
         </div>
         <div class="card-body d-flex flex-column p-4 border-top">
           <h3 class="card-title d-flex align-items-center gap-3 fs-4 mb-3" style="font-family: 'Oswald', sans-serif;">
