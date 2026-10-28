@@ -1757,10 +1757,117 @@
               <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0 mb-3" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">Sign In</button>
               <div class="d-flex align-items-center my-3">
                 <hr class="flex-grow-1 border-secondary m-0" style="opacity: 0.3;">
-                <span class="px-3 small text-white-50 fw-bold">OR</span>
+                <span class="px-3 small text-white-50">OR</span>
                 <hr class="flex-grow-1 border-secondary m-0" style="opacity: 0.3;">
               </div>
-              <button type="button" class="btn w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-0 shadow-sm mb-2" id="clientGoogleSignupBtn" style="background: #ffffff; color: #3c4043; border: 1px solid #dadce0; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; font-size: 0.95rem; text-transform: uppercase;">
+              <button type="button" class="btn btn-outline-light w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-0 mb-2" id="clientGoogleLoginBtn" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.25); font-family: 'Oswald', sans-serif; letter-spacing: 1px; text-transform: uppercase;">
+                <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
+                <span>Sign In with Google</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Signup Tab -->
+          <div id="authSignupTab" class="d-none">
+            <h3 class="text-center mb-4 text-white" style="font-family: 'Oswald', sans-serif; letter-spacing: 1.5px;">CREATE ACCOUNT</h3>
+            <form id="clientSignupForm">
+              
+              <!-- Role Selector -->
+              <div class="mb-4 text-center">
+                <label class="form-label text-white-50 small d-block mb-2">Register As</label>
+                <div class="btn-group w-100" role="group">
+                  <input type="radio" class="btn-check" name="signupRole" id="signupRoleUser" value="customer" checked autocomplete="off">
+                  <label class="btn btn-outline-light rounded-0" for="signupRoleUser" style="font-size:0.85rem; letter-spacing:0.5px;">Customer / User</label>
+
+                  <input type="radio" class="btn-check" name="signupRole" id="signupRoleAdmin" value="admin" autocomplete="off">
+                  <label class="btn btn-outline-light rounded-0" for="signupRoleAdmin" style="font-size:0.85rem; letter-spacing:0.5px;">Admin / Agent</label>
+                </div>
+              </div>
+
+              <!-- Profile Pic Upload Section -->
+              <div class="text-center mb-3" id="signupPicUploadSection">
+                <div class="position-relative d-inline-block">
+                  <img id="signupPicPreview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Profile Picture" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid var(--accent); background: rgba(255,255,255,0.05);">
+                  <label for="signupPicInput" class="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center cursor-pointer" style="width: 28px; height: 28px; border: 1.5px solid var(--accent); cursor: pointer;">
+                    <i class="fas fa-camera" style="font-size: 0.75rem;"></i>
+                  </label>
+                  <input type="file" id="signupPicInput" accept="image/*" class="d-none">
+                  <input type="hidden" id="signupPicUrl" value="">
+                </div>
+                <div id="picUploadSpinner" class="spinner-border spinner-border-sm text-accent d-none mt-1" role="status"></div>
+                <div class="text-white-50 small mt-1" style="font-size: 0.75rem;">Upload Profile Photo (Optional)</div>
+              </div>
+
+              <div class="row g-2" id="signupNameRow">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">First Name</label>
+                  <input type="text" class="form-control glass-input" id="signupFirstName" placeholder="John" required>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">Last Name</label>
+                  <input type="text" class="form-control glass-input" id="signupLastName" placeholder="Doe" required>
+                </div>
+              </div>
+              <div class="row g-2">
+                <div class="col-md-12 mb-2 d-none" id="signupUsernameRow">
+                  <label class="form-label text-white-50 small">Username <span class="text-white-25" style="font-size:0.7rem;">(auto-generated)</span></label>
+                  <input type="text" class="form-control glass-input" id="signupUsername" placeholder="johndoe">
+                </div>
+                <div class="col-md-12 mb-2">
+                  <label class="form-label text-white-50 small">NIC Number</label>
+                  <input type="text" class="form-control glass-input" id="signupNic" placeholder="1999XXXXXXXX" required>
+                </div>
+              </div>
+              <div class="row g-2" id="signupMobileRow">
+                <div class="col-md-12 mb-2">
+                  <label class="form-label text-white-50 small">Mobile Number</label>
+                  <input type="tel" class="form-control glass-input" id="signupMobile" placeholder="07XXXXXXXX" required>
+                </div>
+              </div>
+              <div class="row g-2" id="signupLocationRow">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">Province</label>
+                  <select class="form-control glass-input" id="signupProvince" required>
+                    <option value="">Select Province</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">District (City)</label>
+                  <select class="form-control glass-input" id="signupCity" required disabled>
+                    <option value="">Select District</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label text-white-50 small">Email Address</label>
+                <input type="email" class="form-control glass-input" id="signupEmail" placeholder="john@example.com" required>
+              </div>
+              <div class="mb-2">
+                <label class="form-label text-white-50 small">Password</label>
+                <div class="position-relative">
+                  <input type="password" class="form-control glass-input" id="signupPassword" placeholder="•••••••• (Min 6 chars)" style="padding-right: 45px !important;" required minlength="6">
+                  <button type="button" class="btn text-white-50 position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent px-3 py-0" id="toggleSignupPassword" tabindex="-1" style="cursor: pointer; z-index: 10; height: 100%; display: flex; align-items: center;">
+                    <i class="fas fa-eye-slash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="mb-4" id="signupConfirmPasswordGroup">
+                <label class="form-label text-white-50 small">Confirm Password</label>
+                <div class="position-relative">
+                  <input type="password" class="form-control glass-input" id="signupConfirmPassword" placeholder="••••••••" style="padding-right: 45px !important;" required>
+                  <button type="button" class="btn text-white-50 position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent px-3 py-0" id="toggleSignupConfirmPassword" tabindex="-1" style="cursor: pointer; z-index: 10; height: 100%; display: flex; align-items: center;">
+                    <i class="fas fa-eye-slash"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="clientSignupError" class="alert alert-danger py-2 small d-none" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+              <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0 mb-3" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">Sign Up</button>
+              <div class="d-flex align-items-center my-3">
+                <hr class="flex-grow-1 border-secondary m-0" style="opacity: 0.3;">
+                <span class="px-3 small text-white-50">OR</span>
+                <hr class="flex-grow-1 border-secondary m-0" style="opacity: 0.3;">
+              </div>
+              <button type="button" class="btn btn-outline-light w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-0 mb-2" id="clientGoogleSignupBtn" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.25); font-family: 'Oswald', sans-serif; letter-spacing: 1px; text-transform: uppercase;">
                 <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
                 <span>Sign Up with Google</span>
               </button>
@@ -2339,9 +2446,9 @@
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <!-- Environment Configuration -->
-  <script src="js/config.js?v=2.9"></script>
-  <script src="js/firebase.js?v=2.9"></script>
-  <script src="js/main.js?v=2.9"></script>
-  <script src="js/footer.js?v=2.9"></script>
+  <script src="js/config.js?v=3.0"></script>
+  <script src="js/firebase.js?v=3.0"></script>
+  <script src="js/main.js?v=3.0"></script>
+  <script src="js/footer.js?v=3.0"></script>
 </body>
 </html>
