@@ -1723,28 +1723,28 @@ async function checkAuthStatus() {
       }
     }
     
+    // Each user has their own Firestore cart — never share via guestCart
     currentCart = await getCartItems(status.userId);
-    if (!currentCart || currentCart.length === 0) {
-      try {
-        currentCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-        if (currentCart.length > 0) {
-          await saveCartItems(status.userId, currentCart);
-        }
-      } catch (e) {
-        currentCart = [];
-      }
-    }
-    updateCartUI();
+    if (!Array.isArray(currentCart)) currentCart = [];
+    // Wipe shared guestCart so it never bleeds to another user
+    try { localStorage.removeItem('guestCart'); } catch (e) {}
+    // (removed guest cart merge — was causing cart bleeding between users)
+    // end fix
+
+
+
+
+
 
     // Subscribe to live order updates for this user
     setupUserOrdersTracking(currentUser.email);
+
   } else {
     currentUser = null;
-    try {
-      currentCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-    } catch (e) {
-      currentCart = [];
-    }
+    // Clear cart on logout — cart is per-user, not shared
+    currentCart = [];
+    try { localStorage.removeItem('guestCart'); } catch (e) {}
+
     if (authButtons) authButtons.classList.remove('d-none');
     if (profileMenu) profileMenu.classList.add('d-none');
     if (authButtonsMobile) authButtonsMobile.classList.remove('d-none');
@@ -2059,9 +2059,9 @@ async function persistCart() {
     const uid = currentUser.id || currentUser.userId;
     await saveCartItems(uid, currentCart);
   }
-  try {
-    localStorage.setItem('guestCart', JSON.stringify(currentCart));
-  } catch (e) {}
+  // Logged-in: save to Firestore only (user-isolated cart)
+  // Guest/logged-out: no cart persistence needed (cart is empty anyway)
+
 }
 
 async function removeFromCart(productId) {
@@ -2072,6 +2072,12 @@ async function removeFromCart(productId) {
 }
 
 async function addToCart(productId) {
+  // Require login - cart is per-user, not shared
+  if (!currentUser) {
+    openAuthModal('login');
+    showToast('Please log in to add items to your cart.', 'error');
+    return;
+  }
   const product = allProducts.find(p => p.id === productId);
   if (!product) return;
   
@@ -2871,10 +2877,10 @@ function initCartAndAuthListeners() {
         showToast("Your cart is empty!", "error");
         return;
       }
-      // Always sync cart to localStorage before navigating so checkout.html can read it
-      try {
-        localStorage.setItem('guestCart', JSON.stringify(currentCart));
-      } catch (err) {}
+      // Cart is in Firestore per-user; checkout.html reads it via getCartItems(uid)
+
+
+
       window.location.href = "checkout.html?cart=true";
     });
   }
