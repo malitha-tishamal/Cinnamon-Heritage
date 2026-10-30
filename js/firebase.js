@@ -14,12 +14,12 @@ for (var _k in _raw) {
 }
 
 const firebaseConfig = {
-  apiKey:            (appConfig.FIREBASE_API_KEY            || "AIzaSyCxwS4oCfB4b2vQniNoSjNOq_G_2GvAkdg").trim(),
-  authDomain:        (appConfig.FIREBASE_AUTH_DOMAIN        || "authspark-pq68d.firebaseapp.com").trim(),
-  projectId:         (appConfig.FIREBASE_PROJECT_ID         || "authspark-pq68d").trim(),
-  storageBucket:     (appConfig.FIREBASE_STORAGE_BUCKET     || "authspark-pq68d.firebasestorage.app").trim(),
-  messagingSenderId: (appConfig.FIREBASE_MESSAGING_SENDER_ID|| "104606816181").trim(),
-  appId:             (appConfig.FIREBASE_APP_ID             || "1:104606816181:web:249a1f1f3e9daebd4eabfc").trim()
+  apiKey:            (appConfig.FIREBASE_API_KEY            || "").trim(),
+  authDomain:        (appConfig.FIREBASE_AUTH_DOMAIN        || "").trim(),
+  projectId:         (appConfig.FIREBASE_PROJECT_ID         || "").trim(),
+  storageBucket:     (appConfig.FIREBASE_STORAGE_BUCKET     || "").trim(),
+  messagingSenderId: (appConfig.FIREBASE_MESSAGING_SENDER_ID|| "").trim(),
+  appId:             (appConfig.FIREBASE_APP_ID             || "").trim()
 };
 
 // Initialize Firebase safely
