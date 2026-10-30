@@ -1,0 +1,11 @@
+{
+  "name": "cinnamon-heritage-frontend",
+  "version": "2.0.0",
+  "description": "Cinnamon Heritage Digital Business Platform",
+  "scripts": {
+    "build": "node scripts/generate-config.js",
+    "dev": "node scripts/generate-config.js && npx serve .",
+    "start": "node scripts/generate-config.js && npx serve ."
+  },
+  "dependencies": {}
+}

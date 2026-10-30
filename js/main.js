@@ -1,0 +1,3166 @@
+﻿// ============================================================
+// main.js — Supabase Edition
+// All fetch('/api/...') calls replaced with Supabase helpers
+// ============================================================
+
+var appConfig = (typeof window !== 'undefined' && window.__APP_CONFIG__) || {};
+
+// EmailJS config (optional — configured via environment variables)
+const EMAILJS_PUBLIC_KEY  = appConfig.EMAILJS_PUBLIC_KEY  || 'YOUR_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID  = appConfig.EMAILJS_SERVICE_ID  || 'YOUR_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID = appConfig.EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID';
+
+(function() {
+  if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }
+})();
+
+// Global Application State
+var allProducts = [];
+var siteSettings = {};
+var deliveryRates = [];
+var currentUser = null;
+var currentCart = [];
+
+// ============================================================
+// FAST PRELOADER DISMISSAL (Max 1s Guarantee)
+// ============================================================
+function hidePreloader() {
+  const preloader = document.getElementById('preloader');
+  if (preloader && !preloader.classList.contains('hidden')) {
+    preloader.classList.add('hidden');
+    setTimeout(() => {
+      if (preloader.parentNode) preloader.remove();
+    }, 350);
+  }
+}
+
+// Safety: Ensure preloader NEVER stays for more than 1 second under any condition
+setTimeout(hidePreloader, 1000);
+
+// Caching wrapper for instant loads (Persistent localStorage)
+async function fetchWithCache(key, fetcher, fallback) {
+  let cached = null;
+  try {
+    cached = localStorage.getItem(key);
+  } catch (e) {}
+
+  let initialData = null;
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      const isValid = Array.isArray(parsed) ? parsed.length > 0 : (parsed && Object.keys(parsed).length > 0);
+      if (isValid) {
+        initialData = parsed;
+      } else {
+        try { localStorage.removeItem(key); } catch (e) {}
+      }
+    } catch(e) {
+      try { localStorage.removeItem(key); } catch (e) {}
+    }
+  }
+  
+  if (typeof fetcher !== 'function') {
+    return initialData || fallback;
+  }
+  
+  // Always fetch fresh data in background to update cache for next time
+  const promise = fetcher().then(data => {
+    const isValid = Array.isArray(data) ? data.length > 0 : (data && Object.keys(data).length > 0);
+    if (isValid) {
+      try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+      return data;
+    }
+    return initialData || fallback;
+  }).catch((err) => {
+    console.warn(`Fetch failed for ${key}:`, err);
+    return initialData || fallback;
+  });
+
+  // If we had valid cached data, return it immediately, otherwise wait for network
+  return initialData ? initialData : promise;
+}
+
+const FALLBACK_PRODUCTS = [
+  {
+    "id": "1",
+    "title": "Premium Ceylon Cinnamon Quills C5 Grade",
+    "price": 3500,
+    "discount": 200,
+    "stock_quantity": 50,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217120/zjmcjz0cgfiiw4ah0qnp.png",
+    "card_type": "product",
+    "short_desc": "Finest hand-rolled Ceylon Cinnamon Quills. Delicate layers, smooth texture, sweet aroma.",
+    "full_desc": "Our signature premium quills are hand-harvested and expertly rolled by skilled artisans. These Grade C5 Special quills showcase the finest layering and sweetest aroma of true Ceylon Cinnamon. Perfect for gourmet kitchens, specialty retail and premium export.",
+    "total_sales": 1,
+    "display_order": 1,
+    "is_active": true
+  },
+  {
+    "id": "2",
+    "title": "Cut Quills and Cinnamon Sticks",
+    "price": 2500,
+    "discount": 100,
+    "stock_quantity": 80,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217126/g7oo02khvh8ky4alauda.png",
+    "card_type": "product",
+    "short_desc": "Precision-cut quills and sticks in various grades. Ideal for retail and food service.",
+    "full_desc": "Available in C4, C5 and C5 Special grades. Our cut quills are uniformly sized and sorted for consistency. Perfect for retail packaging, food manufacturing and hospitality use. Available in 50g, 100g and bulk packaging.",
+    "total_sales": 2,
+    "display_order": 2,
+    "is_active": true
+  },
+  {
+    "id": "3",
+    "title": "Ceylon Cinnamon Powder",
+    "price": 1800,
+    "discount": 0,
+    "stock_quantity": 200,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217137/e4x8xvfqvpws7q5mvqxt.png",
+    "card_type": "product",
+    "short_desc": "100% Pure micro-ground Ceylon Cinnamon Powder. Rich aroma, smooth texture.",
+    "full_desc": "Stone-ground from premium Ceylon Cinnamon bark, our powder retains maximum essential oil content and natural sweetness. Ultra-low coumarin content. Perfect for baking, beverages, supplements and health products.",
+    "total_sales": 0,
+    "display_order": 3,
+    "is_active": true
+  },
+  {
+    "id": "4",
+    "title": "Cinnamon Chips, Quillings & Featherings",
+    "price": 950,
+    "discount": 50,
+    "stock_quantity": 300,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217147/nz8ebvxskq3xcvz9sgas.png",
+    "card_type": "product",
+    "short_desc": "Premium cinnamon by-products. Excellent for oil extraction, tea blends and cooking.",
+    "full_desc": "Our chips, quillings and featherings are carefully sorted from the cinnamon processing line. Rich in essential oils, these are ideal for oil distillation, herbal tea blends, potpourri and industrial food processing applications.",
+    "total_sales": 0,
+    "display_order": 4,
+    "is_active": true
+  },
+  {
+    "id": "5",
+    "title": "Ceylon Cinnamon Tea Cut",
+    "price": 1200,
+    "discount": 0,
+    "stock_quantity": 150,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217152/qsrfhw1obmmc4oeexza4.png",
+    "card_type": "product",
+    "short_desc": "Finely cut cinnamon pieces designed for perfect brewing. Pure and aromatic.",
+    "full_desc": "Specifically cut to optimal size for tea brewing and herbal infusions. Our tea cut releases flavor and aroma evenly during steeping. 100% natural with no additives. Perfect for loose-leaf tea blends and sachets.",
+    "total_sales": 0,
+    "display_order": 5,
+    "is_active": true
+  },
+  {
+    "id": "6",
+    "title": "Ceylon Cinnamon Leaf Oil",
+    "price": 2800,
+    "discount": 150,
+    "stock_quantity": 40,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217164/onsikq9ucwa5el32q3bq.png",
+    "card_type": "product",
+    "short_desc": "Steam-distilled pure leaf oil. High eugenol content for aromatherapy and wellness.",
+    "full_desc": "Extracted through traditional steam distillation from fresh Ceylon Cinnamon leaves. Rich in eugenol (70-85%), this therapeutic-grade oil is perfect for aromatherapy, natural skincare formulations, massage blends and wellness products.",
+    "total_sales": 0,
+    "display_order": 6,
+    "is_active": true
+  },
+  {
+    "id": "7",
+    "title": "Premium Ceylon Cinnamon Bark Oil",
+    "price": 8500,
+    "discount": 500,
+    "stock_quantity": 15,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217181/kfdbkdpdktkxormwupa6.png",
+    "card_type": "product",
+    "short_desc": "Rare bark oil with high cinnamaldehyde content. The gold standard in essential oils.",
+    "full_desc": "Our premium bark oil contains 60-75% cinnamaldehyde, making it one of the most potent and sought-after essential oils. Steam-distilled from the finest Ceylon Cinnamon bark. Used in premium perfumery, pharmaceutical applications and luxury wellness products.",
+    "total_sales": 0,
+    "display_order": 7,
+    "is_active": true
+  },
+  {
+    "id": "8",
+    "title": "Cinnamon Herbal Infusions & Beverage Concepts",
+    "price": 1500,
+    "discount": 0,
+    "stock_quantity": 100,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217192/qnnu0zmipctlnedlxa2r.png",
+    "card_type": "product",
+    "short_desc": "Curated cinnamon-based herbal tea blends and innovative beverage solutions.",
+    "full_desc": "Explore our range of cinnamon herbal infusions combining Ceylon Cinnamon with complementary herbs and spices. From classic cinnamon tea to innovative beverage concepts for the hospitality and wellness industry. Available as loose blends and tea bags.",
+    "total_sales": 0,
+    "display_order": 8,
+    "is_active": true
+  },
+  {
+    "id": "9",
+    "title": "Cinnamon Heritage Gift Collection",
+    "price": 12000,
+    "discount": 1000,
+    "stock_quantity": 20,
+    "image_url": "https://res.cloudinary.com/dqeptzlsb/image/upload/v1789217204/fhcwmwgx4k2pcbealgl9.png",
+    "card_type": "product",
+    "short_desc": "Luxury curated gift box featuring premium cinnamon products. Perfect for gifting.",
+    "full_desc": "An elegantly packaged collection featuring our finest products: Premium Quills, Pure Powder, Leaf Oil and Herbal Infusions. Presented in a handcrafted wooden gift box with heritage branding. Ideal for corporate gifts, special occasions and discerning cinnamon enthusiasts.",
+    "total_sales": 0,
+    "display_order": 9,
+    "is_active": true
+  },
+  {
+    "id": "10",
+    "title": "Bulk Supply, Private Label & Custom Development",
+    "price": 0,
+    "discount": 0,
+    "stock_quantity": 999,
+    "image_url": "images/estate_bg.png",
+    "card_type": "contact",
+    "short_desc": "Partner with us for bulk orders, private labelling and bespoke product development.",
+    "full_desc": "We offer comprehensive B2B solutions including bulk supply of all cinnamon grades, private label packaging with your branding, and custom product development. From concept to shelf-ready products, our team works with you to create tailored cinnamon solutions for your market.",
+    "total_sales": 0,
+    "display_order": 10,
+    "is_active": true
+  }
+];
+
+// ============================================================
+// FALLBACK CONTENT — shown instantly if Firestore is slow/unavailable
+// ============================================================
+
+const FALLBACK_CONTENT = {
+  hero: {
+    title: 'PURE CEYLON CINNAMON',
+    subtitle: 'From our Family Estates in Galle Unanwitiya to the World. Hand Crafted, Sustainably Grown and Certified Authentic Ceylon Cinnamon Since 1982.',
+    cta_text: 'Discover Our Heritage',
+    background_image: 'images/cinnamon_spices.jpg'
+  },
+  about: {
+    title: 'From Our Own Estate',
+    text: 'Nestled in the lush hillsides of Galle Unanwitiya, our family-owned estate spans over 15 acres of prime cinnamon-growing land. The southern coast of Sri Lanka – known globally as "Cinnamon Country" – provides the perfect tropical climate, rich laterite soils and monsoon rains that give Ceylon cinnamon its world-renowned delicate flavour and aroma.\n\nThree generations of our family have nurtured these lands using sustainable, organic farming methods passed down through the decades.'
+  },
+  factory: {
+    title: 'Our Facility',
+    text: 'Our state-of-the-art processing facility combines centuries-old Sri Lankan craftsmanship with modern food-grade technology. Every workstation features hygienic stainless steel surfaces, and our advanced mechanical dryers are calibrated to preserve the delicate essential oils that make Ceylon cinnamon exceptional.\n\nOver 50 skilled local artisans work alongside quality-control specialists to ensure every batch meets international export standards including ISO 22000 and HACCP certification.'
+  },
+  b2b: {
+    title: 'B2B SUPPLY SOLUTIONS',
+    subtitle: 'Partnering with Global Businesses',
+    description: 'We supply premium Ceylon Cinnamon to wholesalers, retailers, food manufacturers and hospitality brands worldwide.',
+    background_image: 'images/estate_bg.png',
+    partner_types: [
+      { icon: 'industry', title: 'Food Manufacturers', description: 'Bulk cinnamon supply for food processing and manufacturing industries worldwide.' },
+      { icon: 'store', title: 'Retailers & Distributors', description: 'Premium packaged cinnamon products for retail shelves globally.' },
+      { icon: 'hotel', title: 'Hospitality & F&B', description: 'High-quality cinnamon for hotels, restaurants and cafes.' },
+      { icon: 'flask', title: 'Wellness & Pharma', description: 'Certified pure cinnamon for health and wellness product lines.' },
+      { icon: 'leaf', title: 'Organic Brands', description: 'Sustainably farmed organic Ceylon cinnamon for premium brands.' },
+      { icon: 'globe', title: 'Export Partners', description: 'Reliable supply chain for international export markets.' }
+    ],
+    solutions: [
+      { icon: 'boxes', title: 'Bulk Supply', description: 'All grades: quills, powder, chips, oils in bulk.' },
+      { icon: 'tag', title: 'Private Label', description: 'Your brand identity on our premium cinnamon.' },
+      { icon: 'cogs', title: 'Custom Development', description: 'Tailored cinnamon products for your market.' },
+      { icon: 'certificate', title: 'Certified Quality', description: 'ISO 22000, HACCP certified with full COA.' }
+    ],
+    cta_title: 'Ready to Partner With Us?',
+    cta_description: 'Contact our B2B team today to discuss your requirements and get a custom quote.',
+    button_text: 'Get a Quote'
+  },
+  villa: {
+    title: 'Cinnamon Heritage Villa',
+    subtitle: 'Experience Sri Lanka from Our Estate',
+    text: 'Stay at our beautifully appointed villa nestled within our working cinnamon estate in Galle. Wake up to the aroma of fresh cinnamon and immerse yourself in the authentic Sri Lankan plantation lifestyle.\n\nOur villa offers exclusive accommodation with guided estate tours, cinnamon processing demonstrations and traditional Sri Lankan dining experiences.',
+    background_image: 'images/estate_bg.png'
+  },
+  experience: {
+    title: 'ESTATE EXPERIENCES',
+    subtitle: 'Immersive Cinnamon Journeys',
+    description: 'Discover the complete journey of Ceylon Cinnamon through our curated estate experiences.',
+    background_image: 'images/estate_bg.png',
+    items: [
+      { icon: 'tree', title: 'Estate Walk', description: 'Guided walk through our 15-acre cinnamon estate with expert commentary on cultivation.' },
+      { icon: 'cut', title: 'Peeling Workshop', description: 'Hands-on cinnamon peeling and quill-making with our master artisans.' },
+      { icon: 'flask', title: 'Oil Distillation', description: 'Watch the traditional steam distillation of cinnamon leaf and bark essential oils.' },
+      { icon: 'utensils', title: 'Spice Tasting', description: 'Curated tasting of premium cinnamon grades and our full product range.' },
+      { icon: 'camera', title: 'Photography Tour', description: 'Capture stunning visuals of the plantation and artisan processing facility.' },
+      { icon: 'graduation-cap', title: 'Cinnamon Masterclass', description: 'In-depth workshop on Ceylon cinnamon varieties, grading and culinary uses.' }
+    ],
+    cta_title: 'Book Your Estate Visit',
+    cta_description: 'Reserve your experience and discover the story behind every quill.',
+    button_text: 'Book Now'
+  },
+  essential_oils: {
+    title: 'CEYLON CINNAMON OILS',
+    subtitle: 'Pure Steam-Distilled Essential Oils',
+    description: 'Two distinct oils. One legendary spice.',
+    background_image: 'images/estate_bg.png',
+    leaf: {
+      title: 'Cinnamon Leaf Oil',
+      subtitle: 'High Eugenol Content',
+      description: 'Steam-distilled from fresh Ceylon Cinnamon leaves. Rich in eugenol (70-85%), ideal for aromatherapy, skincare and wellness.',
+      features: 'Therapeutic-grade purity\nHigh eugenol content (70-85%)\nNatural antiseptic properties\nIdeal for aromatherapy & skincare',
+      constituents: 'Eugenol 70-85%, Cinnamaldehyde 3-5%, Linalool 1-3%',
+      applications: 'Aromatherapy, natural skincare, massage blends, wellness products'
+    },
+    bark: {
+      title: 'Cinnamon Bark Oil',
+      subtitle: 'Premium Cinnamaldehyde Content',
+      description: 'Rare and precious oil from the inner bark. Contains 60-75% cinnamaldehyde — the gold standard in essential oils.',
+      features: 'Rare and highly concentrated\nCinnamaldehyde 60-75%\nPremium perfumery grade\nPharmaceutical applications',
+      constituents: 'Cinnamaldehyde 60-75%, Eugenol 5-10%, Linalool 1-2%',
+      applications: 'Premium perfumery, pharmaceutical formulations, luxury wellness products'
+    },
+    aroma: {
+      leaf_title: 'Leaf Oil Aroma Profile',
+      leaf_description: 'Warm, spicy-clove aroma with subtle green herbal undertones.',
+      leaf_notes: 'Clove-like warmth, Herbal green, Spicy undertones, Sweet finish',
+      bark_title: 'Bark Oil Aroma Profile',
+      bark_description: 'Intensely warm, sweet cinnamon aroma — the true, unmistakable scent of Ceylon.',
+      bark_notes: 'Intense cinnamon warmth, Sweet spice, Woody base, Exotic depth'
+    },
+    footer: 'All our essential oils are 100% pure, steam-distilled and GC/MS tested. Available in 10ml, 50ml, 100ml and bulk quantities.'
+  },
+  quality: {
+    title: 'QUALITY ASSURANCE',
+    text: 'Every batch of Cinnamon Heritage products undergoes rigorous laboratory testing for purity, moisture content and coumarin levels. We hold ISO 22000, HACCP and Sri Lanka Standards Institution certifications.'
+  },
+  contact: {
+    title: 'Contact Us',
+    subtitle: 'Whether you are a wholesaler, retailer or artisan brand looking for authentic Ceylon cinnamon, we would love to hear from you.',
+    address: 'Galle Unanwitiya, Sri Lanka',
+    phone: '+94 77 123 4567',
+    email: 'info@cinnamonheritage.com',
+    whatsapp: '94771234567'
+  },
+  process: { background_image: 'images/estate_bg.png' },
+  products: { background_image: 'images/estate_bg.png' },
+  faq: { background_image: '' }
+};
+const FALLBACK = FALLBACK_CONTENT;
+
+const FALLBACK_PROCESS_STEPS = [
+  { step_number: '01', title: 'Harvesting', short_desc: 'Mature stems are carefully harvested at dawn to ensure the highest concentration of bark essential oils.', full_desc: 'At our estates, skilled harvesters select mature branches (typically 2-3 years old) with optimal bark thickness. Harvesting takes place in the early morning when moisture content is highest, making the bark easier to peel.', image_url: 'images/step1.png', display_order: 1 },
+  { step_number: '02', title: 'Cleaning and Preparation', short_desc: 'Harvested stems are washed in pure filtered water and outer bark is scraped to expose the clean inner bark.', full_desc: 'Once harvested, the stems are immediately brought to our facility, washed thoroughly with clean water on stainless steel tables, and trimmed. The rough outer cork and green layers are scraped away to expose the golden-bronze inner bark underneath.', image_url: 'images/step2.png', display_order: 2 },
+  { step_number: '03', title: 'Scraping and Rubbing', short_desc: 'The inner bark is rubbed with a brass rod to loosen it, vital for clean, unbroken peeling.', full_desc: 'Artisans vigorously rub the prepared stems with a smooth brass rod. This traditional friction technique loosens the thin inner bark layer from the wood core, allowing it to be peeled in large, clean, unbroken sheets.', image_url: 'images/step3.png', display_order: 3 },
+  { step_number: '04', title: 'Peeling', short_desc: 'Expert peelers make precise longitudinal cuts to slide the delicate inner bark off the wood.', full_desc: 'Highly trained artisans use custom curved stainless steel knives to make precise incisions. With immense dexterity, they slide the micro-thin sheets of inner bark off the wood core, taking care to minimize splitting.', image_url: 'images/step4.png', display_order: 4 },
+  { step_number: '05', title: 'Quill Making', short_desc: 'The thin inner bark is layered and rolled by hand into multi-layered cylindrical quills.', full_desc: 'The peeled bark sheets are immediately packed together, layered, and rolled into continuous cylindrical pipes called quills. The hollow center is filled with smaller fragments of high-grade cinnamon bark to create a solid, uniform cylinder.', image_url: 'images/step5.png', display_order: 5 },
+  { step_number: '06', title: 'Drying', short_desc: 'Quills are shade-dried on coir racks, then finished in state-of-the-art mechanical dryers.', full_desc: 'The wet quills are initially hung and dried in shade-drying rooms on coconut coir racks to protect the sensitive cinnamaldehyde oils. Once cured, they undergo low-temperature mechanical drying to achieve export-ready moisture content below 12%.', image_url: 'images/step6.png', display_order: 6 },
+  { step_number: '07', title: 'Grading, Cutting and Milling', short_desc: 'Quills are sorted into international export grades, then cut or milled into ultra-fine powder.', full_desc: 'Cinnamon quills are inspected and sorted into strict export grades (Alba, C5 Special, C5, C4, M5, H1) based on diameter, color, and density. Premium quills are cut to standard lengths, while select pieces are stone-milled into pure, micro-ground powder.', image_url: 'images/step7.png', display_order: 7 },
+  { step_number: '08', title: 'Essential-Oil Distillation', short_desc: 'Unused leaves and bark chips are steam-distilled into pure leaf and bark essential oils.', full_desc: 'To support zero-waste production, cinnamon leaves and bark chips are loaded into our steam distillation chambers. Steam passes through the organic matter, vaporizing the essential oils, which are then cooled, condensed, and separated to yield pure therapeutic-grade oils.', image_url: 'images/step8.png', display_order: 8 },
+  { step_number: '09', title: 'Packing and Storage', short_desc: 'Finished products are vacuum-packed and stored in climate-controlled warehouses ready for export.', full_desc: 'To protect against humidity and maintain absolute freshness, our cinnamon products are vacuum-sealed in hygienic food-grade packaging. They are stored in our climate-controlled warehouse, ready for shipping to international markets.', image_url: 'images/step9.png', display_order: 9 }
+];
+const FALLBACK_FAQS = [
+  { id: 'f1', question: 'What is Ceylon Cinnamon?', answer: 'Ceylon Cinnamon (Cinnamomum verum) is the "true cinnamon" native to Sri Lanka. It is distinguished by its delicate, multi-layered quills, light tan colour, subtle sweet flavour, and ultra-low coumarin content — making it the safest and most premium variety for daily culinary and wellness use.', display_order: 1, is_active: true },
+  { id: 'f2', question: 'What is the difference between Ceylon Cinnamon and Cassia?', answer: 'Ceylon Cinnamon has thin, multi-layered bark, a mild sweet taste, and contains only trace amounts of coumarin (0.004%). Cassia has a single thick bark layer, a stronger spicy taste, and significantly higher coumarin levels (up to 1%), which can be harmful in large doses. Ceylon is considered the premium, health-safe choice.', display_order: 2, is_active: true },
+  { id: 'f3', question: 'Do you supply cinnamon in bulk?', answer: 'Yes. We offer comprehensive bulk supply for wholesalers, distributors, food manufacturers and hospitality businesses. Our minimum order quantities are flexible, and we provide competitive pricing for large volumes across all product lines — quills, powder, chips, tea cut, and essential oils.', display_order: 3, is_active: true },
+  { id: 'f4', question: 'What is Ceylon Cinnamon Leaf Oil?', answer: 'Cinnamon Leaf Oil is steam-distilled from fresh Ceylon Cinnamon leaves. It is rich in eugenol (70-85%) and is widely used in aromatherapy, natural skincare, massage therapy, and as a natural antiseptic. It has a warm, spicy-clove aroma.', display_order: 4, is_active: true },
+  { id: 'f5', question: 'What is Ceylon Cinnamon Bark Oil?', answer: 'Cinnamon Bark Oil is steam-distilled from the inner bark of the Ceylon Cinnamon tree. It contains 60-75% cinnamaldehyde, making it one of the most potent essential oils available. Used in premium perfumery, pharmaceutical applications, and high-end wellness products.', display_order: 5, is_active: true },
+  { id: 'f6', question: 'Do you offer Private Label / White Label services?', answer: 'Yes. We provide full private label and white label packaging services. You supply your branding and we handle everything from sourcing and processing to packaging and labelling, delivering shelf-ready products under your brand name.', display_order: 6, is_active: true },
+  { id: 'f7', question: 'Can you provide a Certificate of Analysis (COA)?', answer: 'Absolutely. Every batch we produce is accompanied by a Certificate of Analysis from accredited laboratories. Our COAs include moisture content, volatile oil content, ash levels, coumarin levels, and microbiological test results.', display_order: 7, is_active: true },
+  { id: 'f8', question: 'What certifications do you hold?', answer: 'Cinnamon Heritage holds ISO 22000 (Food Safety Management), HACCP (Hazard Analysis Critical Control Points), and Sri Lanka Standards Institution (SLSI) certifications. Our products are 100% natural with no additives or preservatives.', display_order: 8, is_active: true },
+  { id: 'f9', question: 'Can we visit your estate or processing facility?', answer: 'Yes! We welcome visits to our cinnamon estate and processing facility in Galle, Sri Lanka. Experience the entire cinnamon journey from plantation to product. Please contact us in advance to arrange a guided tour and tasting session.', display_order: 9, is_active: true },
+  { id: 'f10', question: 'Do you ship internationally?', answer: 'Yes, we export to markets worldwide including Europe, North America, the Middle East, and East Asia. All shipments are professionally packed in food-grade, humidity-controlled containers. We handle customs documentation and provide CIF/FOB pricing.', display_order: 10, is_active: true }
+];
+
+// Kick off all data fetches in parallel immediately
+const dataPromises = {
+  content:       fetchWithCache('cache_content', getContent, null),
+  products:      fetchWithCache('cache_products', getProducts, FALLBACK_PRODUCTS),
+  settings:      fetchWithCache('cache_settings', getSettings, {}),
+  deliveryRates: fetchWithCache('cache_delivery_rates', getDeliveryRates, []),
+  processSteps:  fetchWithCache('cache_process_steps', getProcessSteps, FALLBACK_PROCESS_STEPS),
+  faqs:          fetchWithCache('cache_faqs', getFaqs, FALLBACK_FAQS)
+};
+
+const DEFAULT_HERO_BG = 'images/cinnamon_spices.jpg';
+
+// ============================================================
+// Apply hero content & background
+// ============================================================
+function applyHeroBackground(content) {
+  const heroSection = document.getElementById('hero-section');
+  if (!heroSection) return;
+
+  const hero = (content && content.hero) ? content.hero : FALLBACK_CONTENT.hero;
+  const bgUrl = hero.background_image || DEFAULT_HERO_BG;
+  heroSection.style.background = `linear-gradient(rgba(10,10,15,0.55), rgba(10,10,15,0.7)), url('${bgUrl}')`;
+  heroSection.style.backgroundSize = 'cover';
+  heroSection.style.backgroundPosition = 'center';
+  heroSection.style.backgroundAttachment = 'fixed';
+  heroSection.classList.add('hero-bg-updated');
+}
+function applyHeroContent(content) {
+  const heroTitle    = document.getElementById('hero-title');
+  const heroSubtitle = document.getElementById('hero-subtitle');
+  const heroCta      = document.getElementById('hero-cta');
+  const hero = (content && content.hero) ? content.hero : FALLBACK_CONTENT.hero;
+
+  if (heroTitle) {
+    heroTitle.textContent = hero.title || FALLBACK_CONTENT.hero.title;
+    heroTitle.classList.add('hero-text-animate');
+  }
+  if (heroSubtitle) {
+    heroSubtitle.textContent = hero.subtitle || FALLBACK_CONTENT.hero.subtitle;
+    heroSubtitle.classList.add('hero-text-animate-delay');
+  }
+  if (heroCta) {
+    heroCta.textContent = hero.cta_text || FALLBACK_CONTENT.hero.cta_text;
+    heroCta.style.display = 'inline-block';
+    heroCta.classList.add('hero-cta-animate');
+  }
+
+  applyHeroBackground(content);
+}
+
+function applyAboutContent(content) {
+  const about = (content && content.about && content.about.title) ? content.about : FALLBACK_CONTENT.about;
+  if (!about) return;
+  const aboutTitle = document.getElementById('about-title');
+  const aboutTextContainer = document.getElementById('about-text-container');
+  const aboutSection = document.getElementById('heritage');
+  if (aboutTitle && about.title) {
+    aboutTitle.textContent = about.title;
+  }
+
+  if (aboutTextContainer && about.text) {
+    const paragraphs = about.text.split('\n\n').filter(p => p.trim());
+    aboutTextContainer.innerHTML = paragraphs.map((p, idx) => {
+      const cls = idx === 0 ? 'lead mb-0' : 'mt-3';
+      const colorStyle = idx === 0 ? '' : 'color: #e0e0e0 !important; font-size: 1.05rem;';
+      return `<p class="${cls}" style="${colorStyle}">${p}</p>`;
+    }).join('');
+  }
+
+  if (aboutSection && about.background_image) {
+    aboutSection.style.backgroundImage = `url('${about.background_image}')`;
+    aboutSection.style.backgroundSize = 'cover';
+    aboutSection.style.backgroundPosition = 'center';
+    aboutSection.style.backgroundAttachment = 'fixed';
+  }
+
+  const aboutImage = document.getElementById('about-image');
+  if (aboutImage && about.image) {
+    aboutImage.src = about.image;
+  }
+}
+
+function applyFactoryContent(content) {
+  const factory = (content && content.factory && content.factory.title) ? content.factory : FALLBACK_CONTENT.factory;
+  if (!factory) return;
+
+  const factoryTitle = document.getElementById('factory-title');
+  const factoryTextContainer = document.getElementById('factory-text-container');
+  const factorySection = document.getElementById('factory');
+  const factoryImage = document.getElementById('factory-image');
+
+  if (factoryTitle && factory.title) {
+    factoryTitle.textContent = factory.title;
+  }
+  if (factoryTextContainer && factory.text) {
+    const paragraphs = factory.text.split('\n\n').filter(p => p.trim());
+    factoryTextContainer.innerHTML = paragraphs.map((p, idx) => {
+      const cls = idx === 0 ? 'lead mb-0' : 'mt-3';
+      const colorStyle = idx === 0 ? '' : 'color: #e0e0e0 !important; font-size: 1.05rem;';
+      return `<p class="${cls}" style="${colorStyle}">${p}</p>`;
+    }).join('');
+  }
+  if (factorySection && factory.background_image) {
+    factorySection.style.backgroundImage = `url('${factory.background_image}')`;
+    factorySection.style.backgroundSize = 'cover';
+    factorySection.style.backgroundPosition = 'center';
+    factorySection.style.backgroundAttachment = 'fixed';
+  }
+  if (factoryImage && factory.image_url) {
+    factoryImage.src = factory.image_url;
+    factoryImage.alt = factory.title || 'Factory';
+  }
+}
+
+function applyProcessContent(content) {
+  if (!content || !content.process) return;
+  const process = content.process;
+  const processSection = document.getElementById('process');
+  if (processSection && process.background_image) {
+    processSection.style.backgroundImage = `url('${process.background_image}')`;
+    processSection.style.backgroundSize = 'cover';
+    processSection.style.backgroundPosition = 'center';
+    processSection.style.backgroundAttachment = 'fixed';
+  }
+}
+
+function applyProductsContent(content) {
+  if (!content || !content.products) return;
+  const products = content.products;
+  const productsSection = document.getElementById('products');
+  if (productsSection && products.background_image) {
+    productsSection.style.backgroundImage = `url('${products.background_image}')`;
+    productsSection.style.backgroundSize = 'cover';
+    productsSection.style.backgroundPosition = 'center';
+    productsSection.style.backgroundAttachment = 'fixed';
+  }
+}
+
+function applyB2BContent(content) {
+  const b2b = (content && content.b2b && content.b2b.title) ? content.b2b : FALLBACK_CONTENT.b2b;
+  if (!b2b) return;
+  const b2bSection = document.getElementById('b2b');
+  
+  if (b2bSection) {
+    const bgUrl = b2b.background_image || 'images/estate_bg.png';
+    b2bSection.style.backgroundImage = `linear-gradient(rgba(10, 10, 15, 0.72), rgba(10, 10, 15, 0.9)), url('${bgUrl}')`;
+    b2bSection.style.backgroundSize = 'cover';
+    b2bSection.style.backgroundPosition = 'center';
+    b2bSection.style.backgroundAttachment = 'fixed';
+  }
+  
+  // Update section title and subtitle using IDs
+  const sectionTitle = document.getElementById('b2bSectionTitle');
+  const sectionSubtitle = document.getElementById('b2bSubtitle');
+  const sectionDescription = document.getElementById('b2bDescription');
+  
+  if (sectionTitle && b2b.title) {
+    sectionTitle.textContent = b2b.title;
+  }
+  if (sectionSubtitle && b2b.subtitle) {
+    sectionSubtitle.textContent = b2b.subtitle;
+  }
+  if (sectionDescription && b2b.description) {
+    sectionDescription.textContent = b2b.description;
+  }
+
+  // Update partner types
+  if (b2b.partner_types && b2b.partner_types.length > 0) {
+    const partnerTypesRow = document.getElementById('partnerTypesRow');
+    if (partnerTypesRow) {
+      let partnerTypesHtml = '';
+      b2b.partner_types.forEach(pt => {
+        partnerTypesHtml += `
+          <div class="col-md-6 col-lg-4">
+            <div class="b2b-card h-100">
+              <div class="b2b-icon">
+                <i class="fas fa-${pt.icon || 'industry'}"></i>
+              </div>
+              <h5 class="text-white">${pt.title}</h5>
+              <p class="text-white-50">${pt.description}</p>
+            </div>
+          </div>`;
+      });
+      partnerTypesRow.innerHTML = partnerTypesHtml;
+    }
+  }
+
+  // Update B2B solutions
+  if (b2b.solutions && b2b.solutions.length > 0) {
+    const solutionsRow = document.getElementById('solutionsRow');
+    if (solutionsRow) {
+      let solutionsHtml = '';
+      b2b.solutions.forEach(sol => {
+        solutionsHtml += `
+          <div class="col-md-6 col-lg-3">
+            <div class="b2b-solution-card h-100">
+              <div class="b2b-solution-icon">
+                <i class="fas fa-${sol.icon || 'boxes'}"></i>
+              </div>
+              <h5 class="text-white">${sol.title}</h5>
+              <p class="text-white-50">${sol.description}</p>
+            </div>
+          </div>`;
+      });
+      solutionsRow.innerHTML = solutionsHtml;
+    }
+  }
+
+  // Update CTA section using IDs
+  const ctaTitle = document.getElementById('b2bCtaTitle');
+  const ctaDescription = document.getElementById('b2bCtaDescription');
+  const ctaButton = document.getElementById('b2bCtaButton');
+  
+  if (ctaTitle && b2b.cta_title) {
+    ctaTitle.textContent = b2b.cta_title;
+  }
+  if (ctaDescription && b2b.cta_description) {
+    ctaDescription.textContent = b2b.cta_description;
+  }
+  if (ctaButton && b2b.button_text) {
+    ctaButton.textContent = b2b.button_text;
+  }
+}
+
+function applyVillaContent(content) {
+  const villa = (content && content.villa && (content.villa.title || content.villa.background_image)) ? content.villa : FALLBACK_CONTENT.villa;
+  if (!villa) return;
+  
+  const villaSection = document.getElementById('villa');
+  if (villaSection && villa.background_image) {
+    villaSection.style.backgroundImage = `url('${villa.background_image}')`;
+    villaSection.style.backgroundSize = 'cover';
+    villaSection.style.backgroundPosition = 'center';
+    villaSection.style.backgroundAttachment = 'fixed';
+  }
+
+  const titleEl = document.getElementById('villa-title');
+  if (titleEl && villa.title) titleEl.textContent = villa.title;
+
+  const subtitleEl = document.getElementById('villa-subtitle');
+  if (subtitleEl && villa.subtitle) subtitleEl.textContent = villa.subtitle;
+
+  const textEl = document.getElementById('villa-text-container');
+  if (textEl && villa.text) {
+    const paragraphs = villa.text.split('\n\n').filter(p => p.trim());
+    textEl.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+  }
+
+  const imgEl = document.getElementById('villa-image');
+  if (imgEl && villa.image) {
+    imgEl.src = villa.image;
+  }
+}
+
+function applyExperienceContent(content) {
+  const experience = (content && content.experience && content.experience.title) ? content.experience : FALLBACK_CONTENT.experience;
+  if (!experience) return;
+  const experienceSection = document.getElementById('experience');
+
+  if (experienceSection) {
+    const bgUrl = experience.background_image || 'images/estate_bg.png';
+    experienceSection.style.backgroundImage = `linear-gradient(rgba(10, 10, 15, 0.72), rgba(10, 10, 15, 0.9)), url('${bgUrl}')`;
+    experienceSection.style.backgroundSize = 'cover';
+    experienceSection.style.backgroundPosition = 'center';
+    experienceSection.style.backgroundAttachment = 'fixed';
+  }
+  
+  // Update section title and subtitle using IDs
+  const sectionTitle = document.getElementById('experienceSectionTitle');
+  const sectionSubtitle = document.getElementById('experienceSubtitle');
+  const sectionDescription = document.getElementById('experienceDescription');
+  
+  if (sectionTitle && experience.title) {
+    sectionTitle.textContent = experience.title;
+  }
+  if (sectionSubtitle && experience.subtitle) {
+    sectionSubtitle.textContent = experience.subtitle;
+  }
+  if (sectionDescription && experience.description) {
+    sectionDescription.textContent = experience.description;
+  }
+
+  // Update experience items
+  if (experience.items && experience.items.length > 0) {
+    const experiencesRow = document.getElementById('experiencesRow');
+    if (experiencesRow) {
+      let experiencesHtml = '';
+      experience.items.forEach(item => {
+        experiencesHtml += `
+          <div class="col-md-6 col-lg-4">
+            <div class="experience-card h-100">
+              <div class="experience-icon">
+                <i class="fas fa-${item.icon || 'leaf'}"></i>
+              </div>
+              <h5 class="text-white">${item.title}</h5>
+              <p class="text-white-50">${item.description}</p>
+            </div>
+          </div>`;
+      });
+      experiencesRow.innerHTML = experiencesHtml;
+    }
+  }
+
+  // Update CTA section using IDs
+  const ctaTitle = document.getElementById('experienceCtaTitle');
+  const ctaDescription = document.getElementById('experienceCtaDescription');
+  const ctaButton = document.getElementById('experienceCtaButton');
+  
+  if (ctaTitle && experience.cta_title) {
+    ctaTitle.textContent = experience.cta_title;
+  }
+  if (ctaDescription && experience.cta_description) {
+    ctaDescription.textContent = experience.cta_description;
+  }
+  if (ctaButton && experience.button_text) {
+    ctaButton.textContent = experience.button_text;
+  }
+}
+
+function applyEssentialOilsContent(content) {
+  const eo = (content && content.essential_oils && content.essential_oils.title) ? content.essential_oils : FALLBACK_CONTENT.essential_oils;
+  if (!eo) return;
+  const essentialOilsSection = document.getElementById('essential-oils');
+
+  if (essentialOilsSection) {
+    const bgUrl = eo.background_image || 'images/estate_bg.png';
+    essentialOilsSection.style.backgroundImage = `linear-gradient(rgba(10, 10, 15, 0.72), rgba(10, 10, 15, 0.9)), url('${bgUrl}')`;
+    essentialOilsSection.style.backgroundSize = 'cover';
+    essentialOilsSection.style.backgroundPosition = 'center';
+    essentialOilsSection.style.backgroundAttachment = 'fixed';
+  }
+  
+  // Update section content
+  const title = document.getElementById('essentialOilsTitle');
+  const subtitle = document.getElementById('essentialOilsSubtitle');
+  const description = document.getElementById('essentialOilsDescription');
+  const text = document.getElementById('essentialOilsText');
+  const sampleBtn = document.getElementById('essentialOilsSampleBtn');
+  const techBtn = document.getElementById('essentialOilsTechBtn');
+  
+  if (title && eo.title) title.textContent = eo.title;
+  if (subtitle && eo.subtitle) subtitle.textContent = eo.subtitle;
+  if (description && eo.description) description.textContent = eo.description;
+  if (text && eo.text) text.textContent = eo.text;
+  if (sampleBtn && eo.sample_button) sampleBtn.textContent = eo.sample_button;
+  if (techBtn && eo.tech_button) techBtn.textContent = eo.tech_button;
+
+  // Update leaf oil content
+  if (eo.leaf) {
+    const leafTitle = document.getElementById('leafOilTitle');
+    const leafSubtitle = document.getElementById('leafOilSubtitle');
+    const leafDescription = document.getElementById('leafOilDescription');
+    const leafFeatures = document.getElementById('leafOilFeatures');
+    const leafConstituents = document.getElementById('leafOilConstituents');
+    const leafApplications = document.getElementById('leafOilApplications');
+    
+    if (leafTitle && eo.leaf.title) leafTitle.textContent = eo.leaf.title;
+    if (leafSubtitle && eo.leaf.subtitle) leafSubtitle.textContent = eo.leaf.subtitle;
+    if (leafDescription && eo.leaf.description) leafDescription.textContent = eo.leaf.description;
+    if (leafFeatures && eo.leaf.features) {
+      const features = eo.leaf.features.split('\n').filter(f => f.trim());
+      leafFeatures.innerHTML = features.map(f => `<li>${f.trim()}</li>`).join('');
+    }
+    if (leafConstituents && eo.leaf.constituents) leafConstituents.textContent = eo.leaf.constituents;
+    if (leafApplications && eo.leaf.applications) leafApplications.textContent = eo.leaf.applications;
+  }
+
+  // Update bark oil content
+  if (eo.bark) {
+    const barkTitle = document.getElementById('barkOilTitle');
+    const barkSubtitle = document.getElementById('barkOilSubtitle');
+    const barkDescription = document.getElementById('barkOilDescription');
+    const barkFeatures = document.getElementById('barkOilFeatures');
+    const barkConstituents = document.getElementById('barkOilConstituents');
+    const barkApplications = document.getElementById('barkOilApplications');
+    
+    if (barkTitle && eo.bark.title) barkTitle.textContent = eo.bark.title;
+    if (barkSubtitle && eo.bark.subtitle) barkSubtitle.textContent = eo.bark.subtitle;
+    if (barkDescription && eo.bark.description) barkDescription.textContent = eo.bark.description;
+    if (barkFeatures && eo.bark.features) {
+      const features = eo.bark.features.split('\n').filter(f => f.trim());
+      barkFeatures.innerHTML = features.map(f => `<li>${f.trim()}</li>`).join('');
+    }
+    if (barkConstituents && eo.bark.constituents) barkConstituents.textContent = eo.bark.constituents;
+    if (barkApplications && eo.bark.applications) barkApplications.textContent = eo.bark.applications;
+  }
+
+  // Update aroma profiles
+  if (eo.aroma) {
+    const leafAromaTitle = document.getElementById('leafAromaTitle');
+    const leafAromaDescription = document.getElementById('leafAromaDescription');
+    const leafAromaNotes = document.getElementById('leafAromaNotes');
+    const barkAromaTitle = document.getElementById('barkAromaTitle');
+    const barkAromaDescription = document.getElementById('barkAromaDescription');
+    const barkAromaNotes = document.getElementById('barkAromaNotes');
+    
+    if (leafAromaTitle && eo.aroma.leaf_title) leafAromaTitle.textContent = eo.aroma.leaf_title;
+    if (leafAromaDescription && eo.aroma.leaf_description) leafAromaDescription.textContent = eo.aroma.leaf_description;
+    if (leafAromaNotes && eo.aroma.leaf_notes) {
+      const notes = eo.aroma.leaf_notes.split(',').map(n => n.trim());
+      leafAromaNotes.innerHTML = notes.map(n => `<li>${n}</li>`).join('');
+    }
+    if (barkAromaTitle && eo.aroma.bark_title) barkAromaTitle.textContent = eo.aroma.bark_title;
+    if (barkAromaDescription && eo.aroma.bark_description) barkAromaDescription.textContent = eo.aroma.bark_description;
+    if (barkAromaNotes && eo.aroma.bark_notes) {
+      const notes = eo.aroma.bark_notes.split(',').map(n => n.trim());
+      barkAromaNotes.innerHTML = notes.map(n => `<li>${n}</li>`).join('');
+    }
+  }
+
+  // Update footer
+  const footer = document.getElementById('essentialOilsFooter');
+  if (footer && eo.footer) footer.textContent = eo.footer;
+}
+
+// ============================================================
+// Sequential Multi-Product Promo Popup System
+// ============================================================
+let promoAlertInitialized = false;
+let promoQueue = [];         // Array of discounted products to cycle through
+let promoQueueIndex = 0;    // Current position in queue
+let promoTimeout = null;    // Timeout handle for auto-advance
+
+function initPromoAlert(products) {
+  if (promoAlertInitialized) return;
+
+  // Filter products that are configured as popups in DB, are active and in stock
+  let popupProducts = products.filter(p => p.is_popup === true && p.is_active !== false && p.stock_quantity > 0);
+  
+  // Cap popup limit based on settings (default 5, max 10)
+  let maxPopups = parseInt(siteSettings.max_popups) || 5;
+  if (maxPopups > 10) maxPopups = 10;
+  if (maxPopups < 1) maxPopups = 5;
+
+  if (popupProducts.length === 0) {
+    // Fallback to discounted products if none are explicitly marked as popup
+    popupProducts = products.filter(p => parseFloat(p.discount) > 0 && p.stock_quantity > 0);
+  }
+
+  // Slice queue to max limit
+  promoQueue = popupProducts.slice(0, maxPopups);
+  promoQueueIndex = 0;
+
+  const promoAlert   = document.getElementById('promoAlert');
+  if (!promoAlert || promoQueue.length === 0) return;
+
+  // Show a specific product promo in the popup
+  function showPromoForProduct(product) {
+    const displayPrice = parseFloat(product.price);
+    const oldPrice     = displayPrice + parseFloat(product.discount || 0);
+    const pct          = oldPrice > 0 ? Math.round((parseFloat(product.discount || 0) / oldPrice) * 100) : 0;
+
+    // Build the popup HTML with image + text
+    promoAlert.innerHTML = `
+      <div class="promo-alert-header">
+        <span><i class="fa-solid fa-fire text-danger me-1"></i> SPECIAL OFFER</span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="promo-counter">${promoQueueIndex + 1}/${promoQueue.length}</span>
+          <button class="promo-close-btn" id="closePromoBtn">&times;</button>
+        </div>
+      </div>
+      <div class="promo-alert-body">
+        <div class="promo-product-img">
+          <img src="${product.image_url}" alt="${product.title}">
+        </div>
+        <div class="promo-product-info">
+          <div class="promo-alert-title mb-1 fw-bold text-white text-truncate">${product.title}</div>
+          <p class="small text-white-50 mb-0 text-truncate-2" style="font-size:0.75rem; line-height:1.3; max-height: 2.6em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal;">${product.short_desc}</p>
+          <div class="promo-prices">
+            <span class="promo-new-price">LKR ${displayPrice.toLocaleString()}</span>
+            <span class="promo-old-price">LKR ${oldPrice.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+      <button class="promo-alert-btn w-100 mt-2" id="claimPromoBtn">Add to Cart</button>
+    `;
+
+    // Re-bind claim button
+    const claimBtn = document.getElementById('claimPromoBtn'); if (claimBtn) claimBtn.onclick = (e) => {
+      e.stopPropagation();
+      clearTimeout(promoTimeout);
+      promoAlert.classList.remove('active');
+      addToCart(product.id);
+      
+      // Advance to next product
+      promoQueueIndex = (promoQueueIndex + 1) % promoQueue.length;
+      promoTimeout = setTimeout(() => showAndActivate(), 8000);
+    };
+
+    // Re-bind close button — on close, show NEXT product after delay
+    const closeBtn = document.getElementById('closePromoBtn'); if (closeBtn) closeBtn.onclick = (e) => {
+      e.stopPropagation();
+      clearTimeout(promoTimeout);
+      promoAlert.classList.remove('active');
+      // Advance to next product
+      promoQueueIndex = (promoQueueIndex + 1) % promoQueue.length;
+      if (promoQueueIndex !== 0 || promoQueue.length === 1) {
+        // Show next popup after short pause (only cycle through once)
+        if (promoQueueIndex > 0) {
+          promoTimeout = setTimeout(() => showAndActivate(), 8000);
+        }
+      }
+    };
+
+    // Show the popup
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => promoAlert.classList.add('active'));
+    });
+  }
+
+  function showAndActivate() {
+    if (promoQueueIndex >= promoQueue.length) return;
+    promoAlert.classList.remove('active');
+    setTimeout(() => showPromoForProduct(promoQueue[promoQueueIndex]), 350);
+  }
+
+  // Initial show after 3 seconds
+  promoTimeout = setTimeout(() => showAndActivate(), 3000);
+  promoAlertInitialized = true;
+}
+
+// ============================================================
+// Render Products
+// ============================================================
+function renderProducts(products) {
+  const productsRow = document.getElementById('productsRow');
+  if (!productsRow) return;
+
+  if (!products || products.length === 0) {
+    productsRow.innerHTML = '<div class="col-12 text-center"><p class="text-secondary">No products available.</p></div>';
+    return;
+  }
+
+  productsRow.innerHTML = '';
+  products.forEach((p, i) => {
+    const isContactCard = p.card_type === 'contact';
+    const hasDiscount  = p.discount > 0;
+    const displayPrice = parseFloat(p.price);
+    const oldPrice     = displayPrice + (parseFloat(p.discount) || 0);
+    const isLowStock   = p.stock_quantity > 0 && p.stock_quantity <= 10;
+    const isOutOfStock = p.stock_quantity <= 0;
+    const isTopSeller  = p.total_sales >= 50;
+
+    // Calculate dynamic discount percentage
+    const discountPct = oldPrice > 0 ? Math.round((parseFloat(p.discount) / oldPrice) * 100) : 0;
+    const discountLabel = discountPct > 0 ? `${discountPct}% OFF` : `LKR ${parseFloat(p.discount).toLocaleString()} OFF`;
+
+    const col = document.createElement('div');
+    col.className = 'col-lg-3 col-md-6';
+    col.style.cssText = `opacity:0;transform:translateY(30px);transition:opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1) ${i * 0.1}s,transform 0.5s cubic-bezier(0.23, 1, 0.32, 1) ${i * 0.1}s`;
+
+    if (isContactCard) {
+      // Render special Contact Us card
+      col.innerHTML = `
+        <div class="card h-100 product-card product-card-contact"
+             data-id="${p.id}" data-title="${p.title}" data-img="${p.image_url}"
+             data-desc="${p.short_desc}" data-price="0"
+             data-discount="0" data-stock="999">
+          <div class="contact-card-icon">
+            <div class="contact-icon-bg"></div>
+            <i class="fas fa-handshake"></i>
+          </div>
+          <div class="card-body d-flex flex-column p-4">
+            <div class="mb-2">
+              <span class="contact-card-badge">B2B Partner</span>
+            </div>
+            <h3 class="card-title fs-5 mb-2" style="font-family:'Oswald',sans-serif;">${p.title}</h3>
+            <p class="card-text small flex-grow-1" style="color:var(--text-secondary);">${p.short_desc}</p>
+            <div class="mt-3">
+              <a href="#contact" class="btn contact-us-btn fw-bold w-100 text-uppercase">
+                <i class="fas fa-envelope me-2"></i>Contact Us
+              </a>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      // Render standard product card
+      col.innerHTML = `
+        <div class="card h-100 product-card ${isOutOfStock ? 'opacity-75' : ''}"
+             data-id="${p.id}" data-title="${p.title}" data-img="${p.image_url}"
+             data-desc="${p.short_desc}" data-price="${p.price}"
+             data-discount="${p.discount}" data-stock="${p.stock_quantity}">
+          <div class="overflow-hidden" style="height:200px;position:relative;">
+            ${hasDiscount  ? `<span class="discount-badge position-absolute top-0 end-0 m-2" style="z-index:1;">${discountLabel}</span>` : ''}
+            ${isTopSeller  ? `<span class="topseller-badge position-absolute top-0 start-0 m-2" style="z-index:1;">TOP SELLER</span>` : ''}
+            <img src="${p.image_url}" alt="${p.title}" class="card-img-top h-100 w-100 object-fit-cover product-img" style="transition:transform 0.6s ease;">
+          </div>
+          <div class="card-body d-flex flex-column p-4">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <h3 class="card-title fs-5 mb-0" style="font-family:'Oswald',sans-serif;">${p.title}</h3>
+              <small style="font-size:0.7rem;color:var(--text-secondary);">${p.total_sales} Sold</small>
+            </div>
+            <div class="mb-2">
+              <span class="fw-bold" style="color:var(--accent);">LKR ${displayPrice.toLocaleString()}</span>
+              ${hasDiscount ? `<small class="text-decoration-line-through ms-1" style="color:var(--text-secondary);font-size:0.8rem;">LKR ${oldPrice.toLocaleString()}</small>` : ''}
+            </div>
+            <div class="mb-3">
+              ${isOutOfStock ? '<span class="badge bg-secondary w-100" style="border-radius:6px;">OUT OF STOCK</span>' :
+                isLowStock   ? `<span class="badge bg-warning text-dark w-100" style="border-radius:6px;">LOW STOCK: ${p.stock_quantity} LEFT</span>` :
+                               `<small class="text-success" style="font-size:0.75rem;">✓ In Stock (${p.stock_quantity})</small>`}
+            </div>
+            <p class="card-text small flex-grow-1" style="color:var(--text-secondary);">${p.short_desc}</p>
+            <div class="mt-3 d-flex gap-2">
+              <span class="btn btn-outline-dark product-btn fw-bold flex-grow-1 text-uppercase" style="font-family:'Oswald',sans-serif;font-size:0.75rem;letter-spacing:1px;border-radius:8px;">Details</span>
+              ${isOutOfStock ?
+                '<button class="btn btn-secondary fw-bold flex-grow-1 text-uppercase disabled" style="font-family:\'Oswald\',sans-serif;font-size:0.75rem;border-radius:8px;">Sold Out</button>' :
+                `<button class="btn add-to-cart-btn fw-bold flex-grow-1 text-uppercase" data-id="${p.id}" style="background:var(--accent);border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:0.75rem;border-radius:8px;">Add to Cart</button>`}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    productsRow.appendChild(col);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      col.style.opacity = '1';
+      col.style.transform = 'translateY(0)';
+    }));
+  });
+
+  // Trigger dynamic promo alert for products with discounts
+  initPromoAlert(products);
+}
+
+// ============================================================
+// Render Process Steps
+// ============================================================
+function renderProcessSteps(steps) {
+  const processRow = document.getElementById('processRow');
+  if (!processRow) return;
+
+  if (!steps || steps.length === 0) {
+    processRow.innerHTML = '<div class="col-12 text-center"><p class="text-secondary">No process steps available.</p></div>';
+    return;
+  }
+
+  processRow.innerHTML = '';
+  steps.forEach((step, i) => {
+    const stepNum = parseInt(step.step_number, 10) || (i + 1);
+    const localStepImg = `images/step${stepNum}.png`;
+
+    // If step image is missing, empty, or the dummy Cloudinary placeholder, use authentic local image
+    let finalImg = step.image_url;
+    if (!finalImg || finalImg.includes('exdcterg55wpdxwrfhke') || finalImg.includes('placeholder') || finalImg.includes('coming_soon')) {
+      finalImg = localStepImg;
+    }
+
+    const col = document.createElement('div');
+    col.className = 'col-xl-4 col-lg-4 col-md-6';
+    col.style.cssText = `opacity:0;transform:translateY(30px);transition:opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1) ${i * 0.1}s,transform 0.5s cubic-bezier(0.23, 1, 0.32, 1) ${i * 0.1}s`;
+
+    col.innerHTML = `
+      <div class="card h-100 rounded-0 border shadow-sm process-card" 
+           data-num="${step.step_number}" data-title="${step.title}" data-img="${finalImg}" data-desc="${step.full_desc || step.short_desc}">
+        <div class="overflow-hidden" style="height: 180px; background-color: #f5f5f5;">
+          <div class="card-img-top h-100 w-100 process-img" style="background-image: url('${finalImg}'), url('${localStepImg}'); background-size: cover; background-position: center; transition: transform 0.5s ease;"></div>
+        </div>
+        <div class="card-body d-flex flex-column p-4 border-top">
+          <h3 class="card-title d-flex align-items-center gap-3 fs-4 mb-3" style="font-family: 'Oswald', sans-serif;">
+            <span class="display-4 fw-bold text-muted lh-1 process-num" style="transition: color 0.3s ease;">${step.step_number}</span> ${step.title}
+          </h3>
+          <p class="card-text text-secondary flex-grow-1">${step.short_desc}</p>
+          <span class="btn btn-outline-dark rounded-0 fw-bold mt-auto align-self-start text-uppercase process-btn" style="font-family: 'Oswald', sans-serif; font-size: 0.85rem; letter-spacing: 1px; transition: all 0.3s ease;">View Details &rarr;</span>
+        </div>
+      </div>`;
+
+    processRow.appendChild(col);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      col.style.opacity = '1';
+      col.style.transform = 'translateY(0)';
+    }));
+  });
+}
+
+// ============================================================
+// FAQ RENDERING
+// ============================================================
+function renderFaqs(faqs) {
+  const faqAccordion = document.getElementById('faqAccordion');
+  if (!faqAccordion) return;
+
+  const activeFaqs = (faqs || []).filter(f => f.is_active !== false);
+
+  if (activeFaqs.length === 0) {
+    faqAccordion.innerHTML = '<div class="text-center py-4 text-white-50">No FAQs available at the moment. Check back later!</div>';
+    return;
+  }
+
+  // Sort by display_order
+  const sortedFaqs = [...activeFaqs].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+
+  let html = '';
+  sortedFaqs.forEach(faq => {
+    html += `
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading-faq-${faq.id}">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-faq-${faq.id}" aria-expanded="false" aria-controls="#collapse-faq-${faq.id}">
+            ${faq.question}
+          </button>
+        </h2>
+        <div id="collapse-faq-${faq.id}" class="accordion-collapse collapse" aria-labelledby="heading-faq-${faq.id}" data-bs-parent="#faqAccordion">
+          <div class="accordion-body">
+            ${faq.answer}
+          </div>
+        </div>
+      </div>`;
+  });
+
+  faqAccordion.innerHTML = html;
+}
+
+// Load FAQ Background Image
+async function loadFaqBackground() {
+  const faqBackground = document.getElementById('faqBackground');
+  if (!faqBackground) return;
+
+  try {
+    const content = await getContent();
+    const bgUrl = content?.faq?.background_image;
+    
+    if (bgUrl) {
+      faqBackground.style.backgroundImage = `url('${bgUrl}')`;
+    }
+  } catch (error) {
+    console.error('Error loading FAQ background:', error);
+  }
+}
+
+
+// ============================================================
+// Skeleton loaders
+// ============================================================
+function showSkeletons() {
+  const productsRow = document.getElementById('productsRow');
+  if (!productsRow) return;
+  let html = '';
+  for (let i = 0; i < 4; i++) {
+    html += `<div class="col-lg-3 col-md-6">
+      <div class="skeleton-card" style="border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);">
+        <div class="skeleton skeleton-img"></div>
+        <div style="padding:16px;">
+          <div class="skeleton skeleton-text medium"></div>
+          <div class="skeleton skeleton-text short"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text short" style="margin-top:12px;height:36px;"></div>
+        </div>
+      </div>
+    </div>`;
+  }
+  productsRow.innerHTML = html;
+}
+
+// ============================================================
+// Apply settings (footer etc.)
+// ============================================================
+function applySettings(settings) {
+  const map = {
+    footer_about:   'footerAboutText',
+    footer_address: 'footerAddress',
+    footer_phone:   'footerPhone',
+    footer_email:   'footerEmail'
+  };
+  for (const [key, elId] of Object.entries(map)) {
+    if (settings[key]) {
+      const el = document.getElementById(elId);
+      if (el) el.textContent = settings[key];
+    }
+  }
+  const socials = { social_facebook: 'socialFacebook', social_instagram: 'socialInstagram', social_twitter: 'socialTwitter' };
+  for (const [key, elId] of Object.entries(socials)) {
+    if (settings[key]) {
+      const el = document.getElementById(elId);
+      if (el) el.href = settings[key];
+    }
+  }
+  
+  // Announcement Bar
+  const announcementBar = document.getElementById('announcementBar');
+  if (announcementBar) {
+    if (settings.announcement_enabled === '0') {
+      announcementBar.style.display = 'none';
+    } else {
+      announcementBar.style.display = 'block';
+      
+      const aText = document.getElementById('announcementText');
+      if (aText && settings.announcement_text) aText.textContent = settings.announcement_text;
+      
+      const btn1Text = document.getElementById('announcementBtn1Text');
+      const btn1Link = document.getElementById('announcementBtn1');
+      if (btn1Text && settings.announcement_btn1_text) btn1Text.textContent = settings.announcement_btn1_text;
+      if (btn1Link && settings.announcement_btn1_link) btn1Link.href = settings.announcement_btn1_link;
+      
+      const btn2Text = document.getElementById('announcementBtn2Text');
+      const btn2Link = document.getElementById('announcementBtn2');
+      if (btn2Text && settings.announcement_btn2_text) btn2Text.textContent = settings.announcement_btn2_text;
+      if (btn2Link && settings.announcement_btn2_link) btn2Link.href = settings.announcement_btn2_link;
+    }
+  }
+}
+
+// ============================================================
+// DOM Ready
+// ============================================================
+
+function setupSignupLocationSelectors() {
+  const provinceSelect = document.getElementById('signupProvince');
+  const districtSelect = document.getElementById('signupCity');
+  
+  if (!provinceSelect || !districtSelect) return;
+  if (!deliveryRates || !deliveryRates.length) return; // rates not loaded yet
+
+  // Repopulate provinces
+  const currentProvince = provinceSelect.value;
+  provinceSelect.innerHTML = '<option value="">Select Province</option>';
+  districtSelect.innerHTML = '<option value="">Select District</option>';
+  districtSelect.disabled = true;
+
+  const provinces = [...new Set(deliveryRates.map(r => r.province))].filter(Boolean);
+  provinces.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    provinceSelect.appendChild(opt);
+  });
+  if (currentProvince) provinceSelect.value = currentProvince;
+
+  // Replace listener to avoid duplicates
+  const newProvince = provinceSelect.cloneNode(true);
+  provinceSelect.parentNode.replaceChild(newProvince, provinceSelect);
+
+  document.getElementById('signupProvince').addEventListener('change', () => {
+    const province = document.getElementById('signupProvince').value;
+    const city = document.getElementById('signupCity');
+    city.innerHTML = '<option value="">Select District</option>';
+    city.disabled = !province;
+    if (province) {
+      deliveryRates.filter(r => r.province === province).forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.district;
+        opt.textContent = d.district;
+        city.appendChild(opt);
+      });
+    }
+  });
+}
+
+function setupProfileLocationSelectors() {
+  const provinceSelect = document.getElementById('profileProvince');
+  const districtSelect = document.getElementById('profileCity');
+  
+  if (!provinceSelect || !districtSelect) return;
+  if (!deliveryRates || !deliveryRates.length) return;
+
+  const currentProvince = provinceSelect.value;
+  provinceSelect.innerHTML = '<option value="">Select Province</option>';
+  districtSelect.innerHTML = '<option value="">Select District</option>';
+  districtSelect.disabled = true;
+
+  const provinces = [...new Set(deliveryRates.map(r => r.province))].filter(Boolean);
+  provinces.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    provinceSelect.appendChild(opt);
+  });
+  if (currentProvince) provinceSelect.value = currentProvince;
+
+  // Replace listener to avoid duplicates
+  const newProvince = provinceSelect.cloneNode(true);
+  provinceSelect.parentNode.replaceChild(newProvince, provinceSelect);
+
+  document.getElementById('profileProvince').addEventListener('change', () => {
+    const province = document.getElementById('profileProvince').value;
+    const city = document.getElementById('profileCity');
+    city.innerHTML = '<option value="">Select District</option>';
+    city.disabled = !province;
+    if (province) {
+      deliveryRates.filter(r => r.province === province).forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.district;
+        opt.textContent = d.district;
+        city.appendChild(opt);
+      });
+    }
+  });
+}
+
+async function initApp() {
+  // 0. Render fallbacks immediately for 0ms initial render
+  try { renderProcessSteps(FALLBACK_PROCESS_STEPS); } catch(e) {}
+  try { renderFaqs(FALLBACK_FAQS); } catch(e) {}
+  try { renderProducts(FALLBACK_PRODUCTS); } catch(e) {}
+
+  // 1. Immediately initialize UI and scroll animations (never wait for network)
+  initScrollAnimations();
+  initNavDrawer();
+  initCartAndAuthListeners();
+
+  // 2. Immediate 0ms hydration from localStorage if available (zero flash of defaults)
+  try {
+    const cachedContent = JSON.parse(localStorage.getItem('cache_content') || 'null');
+    const cachedProducts = JSON.parse(localStorage.getItem('cache_products') || 'null');
+    const cachedSettings = JSON.parse(localStorage.getItem('cache_settings') || 'null');
+    const cachedSteps = JSON.parse(localStorage.getItem('cache_process_steps') || 'null');
+    const cachedFaqs = JSON.parse(localStorage.getItem('cache_faqs') || 'null');
+
+    // Always apply content — functions use FALLBACK_CONTENT when data is missing
+    applyHeroContent(cachedContent);
+    applyAboutContent(cachedContent);
+    applyFactoryContent(cachedContent);
+    applyProcessContent(cachedContent);
+    applyProductsContent(cachedContent);
+    applyB2BContent(cachedContent);
+    applyVillaContent(cachedContent);
+    applyExperienceContent(cachedContent);
+    applyEssentialOilsContent(cachedContent);
+    loadFaqBackground();
+    if (cachedProducts && cachedProducts.length) {
+      allProducts = cachedProducts;
+      renderProducts(cachedProducts);
+    } else {
+      allProducts = FALLBACK_PRODUCTS;
+      renderProducts(FALLBACK_PRODUCTS);
+    }
+    if (cachedSettings) {
+      siteSettings = cachedSettings;
+      applySettings(cachedSettings);
+    }
+    renderProcessSteps((cachedSteps && cachedSteps.length) ? cachedSteps : FALLBACK_PROCESS_STEPS);
+    renderFaqs((cachedFaqs && cachedFaqs.length) ? cachedFaqs : FALLBACK_FAQS);
+  } catch (err) {
+    console.warn("Early hydration error:", err);
+    showSkeletons();
+  }
+
+  // 3. Resolve all network data in parallel safely
+  try {
+    const results = await Promise.allSettled([
+      dataPromises.content,
+      dataPromises.products,
+      dataPromises.settings,
+      dataPromises.deliveryRates,
+      dataPromises.processSteps,
+      dataPromises.faqs
+    ]);
+
+    const content  = results[0].status === 'fulfilled' ? results[0].value : null;
+    const products = results[1].status === 'fulfilled' ? results[1].value : [];
+    const settings = results[2].status === 'fulfilled' ? results[2].value : {};
+    const rates    = results[3].status === 'fulfilled' ? results[3].value : [];
+    const steps    = results[4].status === 'fulfilled' ? results[4].value : [];
+    const faqs     = results[5].status === 'fulfilled' ? results[5].value : [];
+
+    allProducts = (products && products.length) ? products : (allProducts.length ? allProducts : FALLBACK_PRODUCTS);
+    renderProducts(allProducts);
+    siteSettings = settings || siteSettings;
+    deliveryRates = rates || [];
+
+    // Apply content to all sections (functions use FALLBACK_CONTENT when data missing)
+    applyHeroContent(content);
+    applyAboutContent(content);
+    applyFactoryContent(content);
+    applyProcessContent(content);
+    applyProductsContent(content);
+    applyB2BContent(content);
+    applyVillaContent(content);
+    applyExperienceContent(content);
+    applyEssentialOilsContent(content);
+    loadFaqBackground();
+    if (settings) applySettings(settings);
+    if (products && products.length) renderProducts(products);
+    renderProcessSteps((steps && steps.length) ? steps : FALLBACK_PROCESS_STEPS);
+    renderFaqs((faqs && faqs.length) ? faqs : FALLBACK_FAQS);
+    
+    setupSignupLocationSelectors();
+    setupProfileLocationSelectors();
+  } catch (err) {
+    console.error("Data loading error:", err);
+  } finally {
+    hidePreloader();
+  }
+
+  // 4. Check auth & setup real-time listeners safely
+  try {
+    await checkAuthStatus();
+  } catch (err) {
+    console.error("Auth status error:", err);
+  }
+
+  initRealtimeUpdates();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
+
+// ============================================================
+// Real-time Firestore listeners — site updates instantly
+// ============================================================
+function initRealtimeUpdates() {
+  if (typeof subscribeToContent !== 'function') return;
+
+  subscribeToContent(content => {
+    applyHeroContent(content);
+    applyAboutContent(content);
+    applyFactoryContent(content);
+    applyProcessContent(content);
+    applyProductsContent(content);
+    applyB2BContent(content);
+    applyVillaContent(content);
+    applyExperienceContent(content);
+    applyEssentialOilsContent(content);
+  });
+
+  subscribeToProducts(products => {
+    renderProducts(products);
+  });
+
+  subscribeToSettings(settings => {
+    applySettings(settings);
+  });
+
+  if (typeof subscribeToProcessSteps === 'function') {
+    subscribeToProcessSteps(steps => {
+      renderProcessSteps((steps && steps.length) ? steps : FALLBACK_PROCESS_STEPS);
+    });
+  }
+
+  if (typeof subscribeToFaqs === 'function') {
+    subscribeToFaqs(faqs => {
+      renderFaqs((faqs && faqs.length) ? faqs : FALLBACK_FAQS);
+    });
+  }
+
+  // Subscribe to content changes for FAQ background
+  if (typeof subscribeToContent === 'function') {
+    subscribeToContent(content => {
+      if (content?.faq?.background_image) {
+        const faqBackground = document.getElementById('faqBackground');
+        if (faqBackground) {
+          faqBackground.style.backgroundImage = `url('${content.faq.background_image}')`;
+        }
+      }
+    });
+  }
+}
+
+// ============================================================
+// Modal — Process & Product click handler (unchanged)
+// ============================================================
+const modal     = document.getElementById('processModal');
+const closeModal = document.getElementById('closeModal');
+const modalImg   = document.getElementById('modalImg');
+const modalNum   = document.getElementById('modalNum');
+const modalTitle = document.getElementById('modalTitle');
+const modalDesc  = document.getElementById('modalDesc');
+
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('add-to-cart-btn')) {
+    e.preventDefault();
+    e.stopPropagation();
+    const productId = e.target.getAttribute('data-id');
+    addToCart(productId);
+    return;
+  }
+
+  const card = e.target.closest('.process-card, .product-card');
+  if (!card) return;
+  
+  // If user clicks anything inside product card but targeted add-to-cart-btn, ignore details modal
+  if (e.target.closest('.add-to-cart-btn')) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const title     = card.getAttribute('data-title');
+  const desc      = card.getAttribute('data-desc');
+  const img       = card.getAttribute('data-img');
+  const num       = card.getAttribute('data-num');
+  const isProduct = card.classList.contains('product-card');
+  const productId = card.getAttribute('data-id');
+  const price     = card.getAttribute('data-price');
+  const discount  = card.getAttribute('data-discount');
+  const stock     = card.getAttribute('data-stock');
+
+  modalTitle.textContent = title;
+  modalDesc.textContent  = desc;
+
+  if (num) { modalNum.textContent = num; modalNum.style.display = 'block'; }
+  else { modalNum.style.display = 'none'; }
+
+  const priceContainer  = document.getElementById('modalPriceContainer');
+  const stockContainer  = document.getElementById('modalStockContainer');
+  const actionContainer = document.getElementById('modalActionContainer');
+  const buyBtn          = document.getElementById('modalBuyBtn');
+
+  if (isProduct && price) {
+    priceContainer.classList.remove('d-none');
+    stockContainer.classList.remove('d-none');
+    actionContainer.classList.remove('d-none');
+    const currentPrice = parseFloat(price);
+    const discAmt      = parseFloat(discount || 0);
+    document.getElementById('modalPrice').textContent = `LKR ${currentPrice.toLocaleString()}`;
+    if (discAmt > 0) {
+      document.getElementById('modalOldPrice').textContent = `LKR ${(currentPrice + discAmt).toLocaleString()}`;
+      document.getElementById('modalOldPrice').classList.remove('d-none');
+    } else {
+      document.getElementById('modalOldPrice').classList.add('d-none');
+    }
+    document.getElementById('modalStock').textContent = stock || '0';
+    buyBtn.onclick = () => window.location.href = `checkout.html?product_id=${productId}`;
+  } else {
+    priceContainer.classList.add('d-none');
+    stockContainer.classList.add('d-none');
+    actionContainer.classList.add('d-none');
+  }
+
+  modalImg.style.backgroundImage = `url('${img}')`;
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+});
+
+closeModal.addEventListener('click', function(e) {
+  e.stopPropagation();
+  modal.classList.remove('active');
+  document.body.style.overflow = 'auto';
+});
+
+modal.addEventListener('click', function(e) {
+  if (e.target === modal || e.target.classList.contains('modal-overlay')) {
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && modal.classList.contains('active')) {
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+  }
+});
+
+// ============================================================
+// Contact Form — now uses Supabase submitContact()
+// ============================================================
+const contactForm = document.getElementById('contactForm');
+if (contactForm) {
+  contactForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!contactForm.checkValidity()) { contactForm.classList.add('was-validated'); return; }
+
+    const enquiryType = document.getElementById('contactEnquiryType').value;
+    
+    // If B2B enquiry, redirect to B2B form
+    if (enquiryType === 'b2b') {
+      const b2bModal = new bootstrap.Modal(document.getElementById('b2bEnquiryModal'));
+      
+      // Pre-fill B2B form with contact form data
+      document.getElementById('b2bContactPerson').value = document.getElementById('contactName').value;
+      document.getElementById('b2bEmail').value = document.getElementById('contactEmail').value;
+      document.getElementById('b2bPhone').value = document.getElementById('contactPhone').value;
+      document.getElementById('b2bMessage').value = document.getElementById('contactMessage').value;
+      
+      // Open B2B modal
+      b2bModal.show();
+      
+      // Reset contact form
+      contactForm.reset();
+      contactForm.classList.remove('was-validated');
+      return;
+    }
+
+    const submitBtn = document.getElementById('contactSubmitBtn');
+    const btnText   = document.getElementById('submitBtnText');
+    const spinner   = document.getElementById('submitBtnSpinner');
+    const errorDiv  = document.getElementById('contactFormError');
+    
+    submitBtn.disabled = true;
+    btnText.textContent = 'Sending...';
+    spinner.classList.remove('d-none');
+    errorDiv.classList.add('d-none');
+
+    const formData = {
+      from_name:  document.getElementById('contactName').value,
+      from_email: document.getElementById('contactEmail').value,
+      phone:      document.getElementById('contactPhone').value || 'Not provided',
+      subject:    document.getElementById('contactSubject').value || 'General Enquiry',
+      message:    document.getElementById('contactMessage').value,
+      enquiry_type: 'general'
+    };
+
+    // Try EmailJS first (if configured), then Supabase
+    if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, formData)
+        .then(() => { showToast('Message sent successfully!', 'success'); contactForm.reset(); contactForm.classList.remove('was-validated'); })
+        .catch(() => { errorDiv.textContent = 'Failed to send. Please try again.'; errorDiv.classList.remove('d-none'); })
+        .finally(() => { submitBtn.disabled = false; btnText.textContent = 'Send Message'; spinner.classList.add('d-none'); });
+    } else {
+      // *** SUPABASE: replaces fetch('/api/contact', ...) ***
+      try {
+        await submitContact(formData);
+        showToast('Message sent successfully!', 'success');
+        contactForm.reset();
+        contactForm.classList.remove('was-validated');
+      } catch (err) {
+        errorDiv.textContent = 'Failed to send. Please try again.';
+        errorDiv.classList.remove('d-none');
+      } finally {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Send Message';
+        spinner.classList.add('d-none');
+      }
+    }
+  });
+}
+
+// ============================================================
+// Toast
+// ============================================================
+function showToast(message, type = 'success') {
+  const toastEl  = document.getElementById('contactToast');
+  const toastMsg = document.getElementById('toastMessage');
+  if (!toastEl || !toastMsg) return;
+
+  toastMsg.textContent = message;
+  toastEl.classList.remove('bg-success', 'bg-danger', 'bg-info', 'bg-warning', 'text-white', 'text-dark');
+  if (type === 'success') {
+    toastEl.classList.add('bg-success', 'text-white');
+  } else if (type === 'info') {
+    toastEl.classList.add('bg-info', 'text-dark');
+  } else if (type === 'warning') {
+    toastEl.classList.add('bg-warning', 'text-dark');
+  } else {
+    toastEl.classList.add('bg-danger', 'text-white');
+  }
+
+  try {
+    let bsToast = bootstrap.Toast.getInstance(toastEl);
+    if (!bsToast) bsToast = new bootstrap.Toast(toastEl, { delay: 6000 });
+    bsToast.show();
+  } catch (e) {
+    console.warn('Toast display error:', e);
+  }
+}
+window.showToast = showToast;
+
+// ============================================================
+// Smooth Scroll
+// ============================================================
+document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+  anchor.addEventListener('click', function(e) {
+    const targetId = this.getAttribute('href');
+    if (targetId === '#') return;
+    const target = document.querySelector(targetId);
+    if (target) {
+      e.preventDefault();
+      const navHeight = document.querySelector('.navbar').offsetHeight;
+      window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - navHeight, behavior: 'smooth' });
+      closeNavDrawer();
+    }
+  });
+});
+
+// ============================================================
+// Scroll Animations (with safety fallback)
+// ============================================================
+function initScrollAnimations() {
+  const elements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger-children');
+  if (!elements || !elements.length) return;
+
+  if (!('IntersectionObserver' in window)) {
+    elements.forEach(el => el.classList.add('visible'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.05, rootMargin: '0px 0px 50px 0px' });
+
+  elements.forEach(el => observer.observe(el));
+
+  // Safety fallback: Ensure any content in viewport or delayed becomes visible within 1.2s
+  setTimeout(() => {
+    elements.forEach(el => {
+      if (!el.classList.contains('visible')) {
+        el.classList.add('visible');
+      }
+    });
+  }, 1200);
+}
+
+// ============================================================
+// Navbar scroll behaviour
+// ============================================================
+window.addEventListener('scroll', function() {
+  const navbar = document.querySelector('.navbar');
+  if (navbar) {
+    if (window.scrollY > 100) {
+      navbar.style.background = 'rgba(10,10,15,0.95)';
+      navbar.style.padding    = '10px 0';
+    } else {
+      navbar.style.background = 'rgba(0,0,0,0.3)';
+      navbar.style.padding    = '20px 0';
+    }
+  }
+});
+
+// ============================================================
+// SHOPPING CART & CLIENT AUTH SYSTEM
+// ============================================================
+// (globals initialized at top)
+
+const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+
+async function checkAuthStatus() {
+  const status = await authStatus();
+  const loginBtn = document.getElementById('navLoginBtn');
+  const signupBtn = document.getElementById('navSignupBtn');
+  const authButtons = document.getElementById('navAuthButtons');
+  const profileMenu = document.getElementById('userProfileMenu');
+  const loginBtnMobile = document.getElementById('navLoginBtnMobile');
+  const signupBtnMobile = document.getElementById('navSignupBtnMobile');
+  const authButtonsMobile = document.getElementById('navDrawerAuthButtons');
+  const profileMenuMobile = document.getElementById('userProfileMenuMobile');
+  
+  if (status.isLoggedIn) {
+    currentUser = status.profile;
+    if (authButtons) authButtons.classList.add('d-none');
+    if (profileMenu) profileMenu.classList.remove('d-none');
+    if (authButtonsMobile) authButtonsMobile.classList.add('d-none');
+    if (profileMenuMobile) profileMenuMobile.classList.remove('d-none');
+    
+    const navPic = document.getElementById('navProfilePic');
+    const navName = document.getElementById('navUsername');
+    const navPicMobile = document.getElementById('navProfilePicMobile');
+    const navNameMobile = document.getElementById('navUsernameMobile');
+    if (navPic) navPic.src = currentUser.profile_pic_url || DEFAULT_AVATAR;
+    if (navName) navName.textContent = currentUser.first_name || currentUser.username;
+    if (navPicMobile) navPicMobile.src = currentUser.profile_pic_url || DEFAULT_AVATAR;
+    if (navNameMobile) navNameMobile.textContent = currentUser.first_name || currentUser.username;
+    
+    const adminPanelLink = document.getElementById('navAdminPanelLink');
+    const adminPanelDivider = document.getElementById('navAdminPanelDivider');
+    if (adminPanelLink) {
+      if (currentUser.role === 'admin') {
+        adminPanelLink.classList.remove('d-none');
+        if (adminPanelDivider) adminPanelDivider.classList.remove('d-none');
+      } else {
+        adminPanelLink.classList.add('d-none');
+        if (adminPanelDivider) adminPanelDivider.classList.add('d-none');
+      }
+    }
+    
+    // Each user has their own Firestore cart — never share via guestCart
+    currentCart = await getCartItems(status.userId);
+    if (!Array.isArray(currentCart)) currentCart = [];
+    // Wipe shared guestCart so it never bleeds to another user
+    try { localStorage.removeItem('guestCart'); } catch (e) {}
+    // (removed guest cart merge — was causing cart bleeding between users)
+    // end fix
+
+
+
+
+
+
+    // Subscribe to live order updates for this user
+    setupUserOrdersTracking(currentUser.email);
+
+  } else {
+    currentUser = null;
+    // Clear cart on logout — cart is per-user, not shared
+    currentCart = [];
+    try { localStorage.removeItem('guestCart'); } catch (e) {}
+
+    if (authButtons) authButtons.classList.remove('d-none');
+    if (profileMenu) profileMenu.classList.add('d-none');
+    if (authButtonsMobile) authButtonsMobile.classList.remove('d-none');
+    if (profileMenuMobile) profileMenuMobile.classList.add('d-none');
+    updateCartUI();
+
+    // Check if there's a guest order email stored in localStorage to track
+    const guestEmail = localStorage.getItem('customer_order_email');
+    if (guestEmail) {
+      setupUserOrdersTracking(guestEmail);
+    } else {
+      setupUserOrdersTracking(null);
+    }
+  }
+}
+
+// User Orders Real-Time State
+let userOrdersUnsubscribe = null;
+let currentUserOrders = [];
+
+function setupUserOrdersTracking(email) {
+  if (userOrdersUnsubscribe) {
+    userOrdersUnsubscribe();
+    userOrdersUnsubscribe = null;
+  }
+  
+  if (!email) {
+    renderUserOrders([]);
+    return;
+  }
+
+  userOrdersUnsubscribe = subscribeToUserOrders(email, (orders) => {
+    currentUserOrders = orders || [];
+    renderUserOrders(currentUserOrders);
+  });
+}
+
+function renderUserOrders(orders) {
+  const container = document.getElementById('cartDrawerOrders');
+  const activeDot = document.getElementById('cartOrdersDot');
+  const activeDotMobile = document.getElementById('cartOrdersDotMobile');
+  const ordersBadge = document.getElementById('drawerOrdersBadge');
+  const tabDot = document.getElementById('drawerOrdersTabDot');
+  const summaryText = document.getElementById('ordersStatusSummaryText');
+
+  const activeOrders = orders.filter(o => ['Pending', 'In Progress', 'Packed', 'Shipped'].includes(o.status));
+
+  // Active Notification Dots & Badges
+  if (activeOrders.length > 0) {
+    if (activeDot) activeDot.classList.remove('d-none');
+    if (activeDotMobile) activeDotMobile.classList.remove('d-none');
+    if (tabDot) tabDot.classList.remove('d-none');
+    if (ordersBadge) {
+      ordersBadge.textContent = activeOrders.length;
+      ordersBadge.className = 'badge bg-warning text-dark ms-1';
+      ordersBadge.classList.remove('d-none');
+    }
+    if (summaryText) {
+      summaryText.textContent = `${activeOrders.length} Active`;
+      summaryText.className = 'badge bg-warning text-dark';
+    }
+  } else {
+    if (activeDot) activeDot.classList.add('d-none');
+    if (activeDotMobile) activeDotMobile.classList.add('d-none');
+    if (tabDot) tabDot.classList.add('d-none');
+    if (orders.length > 0) {
+      if (ordersBadge) {
+        ordersBadge.textContent = orders.length;
+        ordersBadge.className = 'badge bg-secondary ms-1';
+        ordersBadge.classList.remove('d-none');
+      }
+      if (summaryText) {
+        summaryText.textContent = `${orders.length} Total`;
+        summaryText.className = 'badge bg-secondary';
+      }
+    } else {
+      if (ordersBadge) ordersBadge.classList.add('d-none');
+      if (summaryText) summaryText.textContent = '0 Orders';
+    }
+  }
+
+  if (!container) return;
+
+  if (orders.length === 0) {
+    container.innerHTML = `
+      <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center py-5">
+        <i class="fas fa-box-open fa-3x text-muted mb-3" style="color: rgba(255,255,255,0.2) !important;"></i>
+        <h5 class="text-white">No active orders</h5>
+        <p class="text-white-50 small">When you place an order, live tracking will appear here.</p>
+      </div>`;
+    return;
+  }
+
+  const stepsList = [
+    { key: 'Pending', label: 'Placed', icon: 'fa-file-invoice' },
+    { key: 'In Progress', label: 'In Progress', icon: 'fa-cogs' },
+    { key: 'Packed', label: 'Packed', icon: 'fa-box' },
+    { key: 'Shipped', label: 'Shipped', icon: 'fa-shipping-fast' },
+    { key: 'Completed', label: 'Completed', icon: 'fa-check-circle' }
+  ];
+
+  const getStepIndex = (status) => {
+    if (status === 'Delivered') return 4;
+    return stepsList.findIndex(s => s.key.toLowerCase() === (status || '').toLowerCase());
+  };
+
+  let html = '';
+  orders.forEach(o => {
+    const isCancelled = o.status === 'Cancelled';
+    const currentStepIdx = getStepIndex(o.status);
+    const dateStr = o.created_at ? new Date(o.created_at).toLocaleDateString() : '';
+    const timeStr = o.created_at ? new Date(o.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+    
+    // Status Badge Class
+    let statusBadgeClass = 'status-badge-pending';
+    if (o.status === 'In Progress') statusBadgeClass = 'status-badge-in-progress';
+    else if (o.status === 'Packed') statusBadgeClass = 'status-badge-packed';
+    else if (o.status === 'Shipped') statusBadgeClass = 'status-badge-shipped';
+    else if (o.status === 'Completed' || o.status === 'Delivered') statusBadgeClass = 'status-badge-completed';
+    else if (isCancelled) statusBadgeClass = 'status-badge-cancelled';
+
+    // Items list preview
+    let itemsSummary = '';
+    if (o.order_items && o.order_items.length > 0) {
+      itemsSummary = o.order_items.map(item => `
+        <div class="d-flex justify-content-between text-white-50 small mb-1">
+          <span class="text-truncate" style="max-width: 190px;">${item.product_name}</span>
+          <span class="text-white">x${item.quantity}</span>
+        </div>
+      `).join('');
+    } else if (o.product_name) {
+      itemsSummary = `
+        <div class="d-flex justify-content-between text-white-50 small mb-1">
+          <span class="text-truncate" style="max-width: 190px;">${o.product_name}</span>
+          <span class="text-white">x${o.item_quantity || 1}</span>
+        </div>
+      `;
+    }
+
+    // Stepper HTML
+    let stepperHtml = '';
+    if (isCancelled) {
+      stepperHtml = `
+        <div class="alert alert-danger py-2 px-3 small d-flex align-items-center gap-2 mb-2 rounded-2" style="background: rgba(220,53,69,0.15); border: 1px solid rgba(220,53,69,0.3); color: #ff858d;">
+          <i class="fas fa-times-circle"></i>
+          <span>Order has been cancelled</span>
+        </div>
+      `;
+    } else {
+      stepperHtml = `
+        <div class="order-track-stepper">
+          ${stepsList.map((step, idx) => {
+            let stepState = '';
+            if (currentStepIdx >= 0) {
+              if (idx < currentStepIdx) stepState = 'completed';
+              else if (idx === currentStepIdx) stepState = 'active';
+            }
+            const icon = stepState === 'completed' ? 'fa-check' : step.icon;
+            return `
+              <div class="order-track-step ${stepState}">
+                <div class="order-step-node">
+                  <i class="fas ${icon}"></i>
+                </div>
+                <div class="order-step-label">${step.label}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    html += `
+      <div class="order-track-card" id="order-card-${o.id}">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <div class="fw-bold text-white small" style="font-family:'Oswald',sans-serif; letter-spacing:0.5px;">#${o.id}</div>
+            <div class="text-white-50" style="font-size: 0.72rem;">${dateStr} at ${timeStr}</div>
+          </div>
+          <span class="badge ${statusBadgeClass} px-2 py-1" style="font-size: 0.75rem; border-radius: 4px;">
+            ${o.status === 'In Progress' ? '<span class="spinner-grow spinner-grow-sm me-1" style="width:6px;height:6px;" role="status"></span>' : ''}${o.status}
+          </span>
+        </div>
+
+        ${stepperHtml}
+
+        <div class="p-2 rounded-2 mb-2" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+          ${itemsSummary}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center pt-2 border-top border-secondary small">
+          <span class="text-white-50">Total (${o.payment_method || 'COD'})</span>
+          <span class="fw-bold text-accent">LKR ${(parseFloat(o.total_amount) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function updateCartUI() {
+  const badge = document.getElementById('cartBadge');
+  const badgeMobile = document.getElementById('cartBadgeMobile');
+  const drawerCartBadge = document.getElementById('drawerCartBadge');
+  const drawerBody = document.getElementById('cartDrawerItems');
+  
+  const totalQty = currentCart.reduce((sum, item) => sum + item.quantity, 0);
+  [badge, badgeMobile].forEach(el => {
+    if (!el) return;
+    if (totalQty > 0) {
+      el.textContent = totalQty;
+      el.classList.remove('d-none');
+    } else {
+      el.classList.add('d-none');
+    }
+  });
+
+  if (drawerCartBadge) {
+    drawerCartBadge.textContent = totalQty;
+  }
+  
+  if (!drawerBody) return;
+  
+  if (currentCart.length === 0) {
+    drawerBody.innerHTML = `
+      <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center py-5">
+        <i class="fas fa-shopping-basket fa-3x text-muted mb-3" style="color: rgba(255,255,255,0.2) !important;"></i>
+        <h5 class="text-white">Your cart is empty</h5>
+        <p class="text-white-50 small">Add premium cinnamon products to get started.</p>
+      </div>`;
+    updateCartTotals(0, 0);
+    return;
+  }
+  
+  let html = '';
+  let subtotal = 0;
+  let discountTotal = 0;
+  
+  currentCart.forEach(item => {
+    // Find product details
+    const product = allProducts.find(p => p.id === item.product_id);
+    if (!product) return;
+    
+    const price = parseFloat(product.price);
+    const discount = parseFloat(product.discount || 0);
+    const itemSubtotal = price * item.quantity;
+    const itemDiscount = discount * item.quantity;
+    
+    subtotal += itemSubtotal;
+    discountTotal += itemDiscount;
+    
+    html += `
+      <div class="cart-item" data-id="${item.product_id}">
+        <div class="cart-item-img">
+          <img src="${product.image_url}" alt="${product.title}">
+        </div>
+        <div class="cart-item-details">
+          <div class="cart-item-title">${product.title}</div>
+          <div class="cart-item-price">LKR ${price.toLocaleString()}</div>
+          <div class="cart-item-actions">
+            <div class="cart-qty-ctrl">
+              <button class="cart-qty-btn" onclick="changeCartQty('${item.product_id}', -1)">-</button>
+              <div class="cart-qty-val">${item.quantity}</div>
+              <button class="cart-qty-btn" onclick="changeCartQty('${item.product_id}', 1)">+</button>
+            </div>
+            <button class="cart-remove-btn" onclick="removeFromCart('${item.product_id}')">
+              <i class="fas fa-trash-alt me-1"></i> Remove
+            </button>
+          </div>
+        </div>
+      </div>`;
+  });
+  
+  drawerBody.innerHTML = html;
+  updateCartTotals(subtotal, discountTotal);
+}
+
+function updateCartTotals(subtotal, discountTotal) {
+  const total = subtotal - discountTotal;
+  document.getElementById('cartSubtotal').textContent = `LKR ${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+  document.getElementById('cartDiscount').textContent = `- LKR ${discountTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+  document.getElementById('cartTotal').textContent = `LKR ${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+}
+
+async function changeCartQty(productId, delta) {
+  if (!currentUser) return;
+  const item = currentCart.find(i => i.product_id === productId);
+  if (!item) return;
+  
+  // Find product stock
+  const product = allProducts.find(p => p.id === productId);
+  const maxStock = product ? (product.stock_quantity ?? 0) : 0;
+  
+  const newQty = item.quantity + delta;
+  if (newQty <= 0) {
+    await removeFromCart(productId);
+    return;
+  }
+  
+  if (newQty > maxStock) {
+    showToast(`Cannot exceed available stock of ${maxStock}!`, 'error');
+    return;
+  }
+  
+  item.quantity = newQty;
+  updateCartUI();
+  await persistCart();
+}
+
+async function persistCart() {
+  if (currentUser && (currentUser.id || currentUser.userId)) {
+    const uid = currentUser.id || currentUser.userId;
+    await saveCartItems(uid, currentCart);
+  }
+  // Logged-in: save to Firestore only (user-isolated cart)
+  // Guest/logged-out: no cart persistence needed (cart is empty anyway)
+
+}
+
+async function removeFromCart(productId) {
+  currentCart = currentCart.filter(i => i.product_id !== productId);
+  updateCartUI();
+  await persistCart();
+  showToast("Product removed from cart", "success");
+}
+
+async function addToCart(productId) {
+  // Require login - cart is per-user, not shared
+  if (!currentUser) {
+    openAuthModal('login');
+    showToast('Please log in to add items to your cart.', 'error');
+    return;
+  }
+  const product = allProducts.find(p => p.id === productId);
+  if (!product) return;
+  
+  if (product.stock_quantity <= 0) {
+    showToast("This product is out of stock!", "error");
+    return;
+  }
+  
+  const existing = currentCart.find(i => i.product_id === productId);
+  if (existing) {
+    if (existing.quantity >= product.stock_quantity) {
+      showToast(`Cannot add more. Available stock is ${product.stock_quantity}!`, "error");
+      return;
+    }
+    existing.quantity += 1;
+  } else {
+    currentCart.push({
+      product_id: productId,
+      quantity: 1
+    });
+  }
+  
+  updateCartUI();
+  await persistCart();
+  showToast(`${product.title} added to cart!`, "success");
+  
+  // Open Cart Drawer
+  document.getElementById('cartDrawer').classList.add('open');
+  document.getElementById('cartOverlay').classList.add('open');
+}
+
+// Expose functions globally for dynamic elements
+window.changeCartQty = changeCartQty;
+window.removeFromCart = removeFromCart;
+window.addToCart = addToCart;
+
+function openAuthModal(tab) {
+  const authModal = document.getElementById('authModal');
+  const toggleLoginTab = document.getElementById('toggleLoginTab');
+  const toggleSignupTab = document.getElementById('toggleSignupTab');
+  const loginTab = document.getElementById('authLoginTab');
+  const signupTab = document.getElementById('authSignupTab');
+
+  if (tab === 'signup') {
+    toggleLoginTab?.classList.remove('active');
+    toggleSignupTab?.classList.add('active');
+    loginTab?.classList.add('d-none');
+    signupTab?.classList.remove('d-none');
+    setupSignupLocationSelectors();
+  } else {
+    toggleSignupTab?.classList.remove('active');
+    toggleLoginTab?.classList.add('active');
+    signupTab?.classList.add('d-none');
+    loginTab?.classList.remove('d-none');
+  }
+
+  new bootstrap.Modal(authModal).show();
+}
+
+function openCartDrawer() {
+  if (!currentUser) {
+    openAuthModal('login');
+    showToast("Please log in to view your cart.", "error");
+    return;
+  }
+  document.getElementById('cartDrawer').classList.add('open');
+  document.getElementById('cartOverlay').classList.add('open');
+}
+
+// ============================================================
+// Mobile Nav Drawer
+// ============================================================
+function openNavDrawer() {
+  const drawer = document.getElementById('navDrawer');
+  const overlay = document.getElementById('navDrawerOverlay');
+  const toggle = document.getElementById('navDrawerToggle');
+  if (!drawer || !overlay) return;
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+  toggle?.classList.add('active');
+  toggle?.setAttribute('aria-expanded', 'true');
+  drawer.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('nav-drawer-open');
+}
+
+function closeNavDrawer() {
+  const drawer = document.getElementById('navDrawer');
+  const overlay = document.getElementById('navDrawerOverlay');
+  const toggle = document.getElementById('navDrawerToggle');
+  if (!drawer || !overlay) return;
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+  toggle?.classList.remove('active');
+  toggle?.setAttribute('aria-expanded', 'false');
+  drawer.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('nav-drawer-open');
+}
+
+function initNavDrawer() {
+  const toggle = document.getElementById('navDrawerToggle');
+  const closeBtn = document.getElementById('navDrawerClose');
+  const overlay = document.getElementById('navDrawerOverlay');
+  const drawer = document.getElementById('navDrawer');
+  if (!toggle || !drawer) return;
+
+  toggle.addEventListener('click', () => {
+    if (drawer.classList.contains('open')) closeNavDrawer();
+    else openNavDrawer();
+  });
+  closeBtn?.addEventListener('click', closeNavDrawer);
+  overlay?.addEventListener('click', closeNavDrawer);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer.classList.contains('open')) closeNavDrawer();
+  });
+}
+
+function initCartAndAuthListeners() {
+  const cartBtn = document.getElementById('cartBtn');
+  const cartBtnMobile = document.getElementById('cartBtnMobile');
+  const closeCartBtn = document.getElementById('closeCartBtn');
+  const cartDrawer = document.getElementById('cartDrawer');
+  const cartOverlay = document.getElementById('cartOverlay');
+  
+  if (cartBtn) {
+    cartBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openCartDrawer();
+    });
+  }
+
+  if (cartBtnMobile) {
+    cartBtnMobile.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeNavDrawer();
+      openCartDrawer();
+    });
+  }
+  
+  if (closeCartBtn) {
+    closeCartBtn.addEventListener('click', () => {
+      cartDrawer.classList.remove('open');
+      cartOverlay.classList.remove('open');
+    });
+  }
+  
+  if (cartOverlay) {
+    cartOverlay.addEventListener('click', () => {
+      cartDrawer.classList.remove('remove');
+      cartDrawer.classList.remove('open');
+      cartOverlay.classList.remove('open');
+    });
+  }
+
+  // Drawer Tab Switching (Cart vs My Orders)
+  const drawerCartTabBtn   = document.getElementById('drawerCartTabBtn');
+  const drawerOrdersTabBtn = document.getElementById('drawerOrdersTabBtn');
+  const drawerCartPane     = document.getElementById('drawerCartPane');
+  const drawerOrdersPane   = document.getElementById('drawerOrdersPane');
+
+  function switchDrawerTab(tab) {
+    if (tab === 'orders') {
+      drawerCartPane?.classList.add('d-none');
+      drawerOrdersPane?.classList.remove('d-none');
+      if (drawerCartTabBtn) {
+        drawerCartTabBtn.style.background = 'transparent';
+        drawerCartTabBtn.classList.add('text-white-50');
+      }
+      if (drawerOrdersTabBtn) {
+        drawerOrdersTabBtn.style.background = 'var(--accent)';
+        drawerOrdersTabBtn.classList.remove('text-white-50');
+        drawerOrdersTabBtn.classList.add('text-white');
+      }
+    } else {
+      drawerOrdersPane?.classList.add('d-none');
+      drawerCartPane?.classList.remove('d-none');
+      if (drawerOrdersTabBtn) {
+        drawerOrdersTabBtn.style.background = 'transparent';
+        drawerOrdersTabBtn.classList.add('text-white-50');
+      }
+      if (drawerCartTabBtn) {
+        drawerCartTabBtn.style.background = 'var(--accent)';
+        drawerCartTabBtn.classList.remove('text-white-50');
+        drawerCartTabBtn.classList.add('text-white');
+      }
+    }
+  }
+
+  drawerCartTabBtn?.addEventListener('click', () => switchDrawerTab('cart'));
+  drawerOrdersTabBtn?.addEventListener('click', () => switchDrawerTab('orders'));
+  window.switchDrawerTab = switchDrawerTab;
+
+  // Check if redirected from order placement (e.g. ?order_placed=CH-...)
+  const urlParams = new URLSearchParams(window.location.search);
+  const placedOrderId = urlParams.get('order_placed');
+  if (placedOrderId) {
+    setTimeout(() => {
+      document.getElementById('cartDrawer')?.classList.add('open');
+      document.getElementById('cartOverlay')?.classList.add('open');
+      switchDrawerTab('orders');
+      showToast('🎉 Order placed successfully! You can track live progress here.', 'success');
+      const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+      window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+    }, 600);
+  }
+
+  // Auth Tabs Toggle
+  const toggleLoginTab = document.getElementById('toggleLoginTab');
+  const toggleSignupTab = document.getElementById('toggleSignupTab');
+  const loginTab = document.getElementById('authLoginTab');
+  const signupTab = document.getElementById('authSignupTab');
+
+  if (toggleLoginTab && toggleSignupTab) {
+    toggleLoginTab.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleSignupTab.classList.remove('active');
+      toggleLoginTab.classList.add('active');
+      signupTab.classList.add('d-none');
+      loginTab.classList.remove('d-none');
+    });
+
+    toggleSignupTab.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleLoginTab.classList.remove('active');
+      toggleSignupTab.classList.add('active');
+      loginTab.classList.add('d-none');
+      signupTab.classList.remove('d-none');
+      // Ensure province/district dropdowns are populated each time signup tab opens
+      setupSignupLocationSelectors();
+    });
+  }
+
+  // Navigation login / signup buttons
+  ['navLoginBtn', 'navLoginBtnMobile'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeNavDrawer();
+        openAuthModal('login');
+      });
+    }
+  });
+
+  ['navSignupBtn', 'navSignupBtnMobile'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeNavDrawer();
+        openAuthModal('signup');
+      });
+    }
+  });
+
+  // Password visibility toggle helper
+  function setupPasswordToggle(toggleBtnId, inputId) {
+    const btn = document.getElementById(toggleBtnId);
+    if (!btn) return;
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const input = document.getElementById(inputId);
+      const icon = this.querySelector('i');
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) {
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      } else {
+        input.type = 'password';
+        if (icon) {
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        }
+      }
+    });
+  }
+
+  setupPasswordToggle('toggleClientLoginPassword', 'clientLoginPassword');
+  setupPasswordToggle('toggleSignupPassword', 'signupPassword');
+  setupPasswordToggle('toggleSignupConfirmPassword', 'signupConfirmPassword');
+
+  // Signup Image Upload to Cloudinary
+  const signupPicInput = document.getElementById('signupPicInput');
+  const signupPicPreview = document.getElementById('signupPicPreview');
+  const signupPicUrl = document.getElementById('signupPicUrl');
+  const picUploadSpinner = document.getElementById('picUploadSpinner');
+
+  if (signupPicInput) {
+    signupPicInput.addEventListener('change', async () => {
+      const file = signupPicInput.files[0];
+      if (!file) return;
+      
+      try {
+        if (picUploadSpinner) picUploadSpinner.classList.remove('d-none');
+        const url = await uploadImage(file);
+        if (signupPicPreview) signupPicPreview.src = url;
+        if (signupPicUrl) signupPicUrl.value = url;
+        showToast("Profile photo uploaded!", "success");
+      } catch (err) {
+        showToast("Failed to upload image to Cloudinary", "error");
+      } finally {
+        if (picUploadSpinner) picUploadSpinner.classList.add('d-none');
+      }
+    });
+  }
+
+  // Submit Client Login Form
+  const clientLoginForm = document.getElementById('clientLoginForm');
+  const clientLoginError = document.getElementById('clientLoginError');
+  if (clientLoginForm) {
+    clientLoginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (clientLoginError) clientLoginError.classList.add('d-none');
+
+      const submitBtn = clientLoginForm.querySelector('button[type="submit"]');
+      const origBtnText = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing In...';
+      }
+
+      const email = document.getElementById('clientLoginEmail').value.trim();
+      const password = document.getElementById('clientLoginPassword').value;
+
+      try {
+        const res = await authLogin(email, password);
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = origBtnText; }
+
+        if (res.success) {
+          showToast("Welcome back, " + (res.username || "User") + "!", "success");
+          const modalInstance = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+          if (modalInstance) modalInstance.hide();
+          clientLoginForm.reset();
+          await checkAuthStatus();
+        } else {
+          const errorMsg = res.error || "Login failed. Please check your credentials.";
+          if (clientLoginError) {
+            clientLoginError.textContent = errorMsg;
+            clientLoginError.classList.remove('d-none');
+          }
+          showToast(errorMsg, "error");
+        }
+      } catch (err) {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = origBtnText; }
+        const errText = err.message || "An unexpected error occurred during sign-in.";
+        if (clientLoginError) {
+          clientLoginError.textContent = errText;
+          clientLoginError.classList.remove('d-none');
+        }
+        showToast(errText, "error");
+      }
+    });
+  }
+
+  // Submit Client Signup Form
+  const clientSignupForm = document.getElementById('clientSignupForm');
+  const clientSignupError = document.getElementById('clientSignupError');
+  if (clientSignupForm) {
+    // Dynamic fields toggling based on Register As selection
+    const roleRadios = document.querySelectorAll('input[name="signupRole"]');
+    roleRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const role = e.target.value;
+        const picSection = document.getElementById('signupPicUploadSection');
+        const nameRow = document.getElementById('signupNameRow');
+        const mobileRow = document.getElementById('signupMobileRow');
+        const locationRow = document.getElementById('signupLocationRow');
+        const usernameInput = document.getElementById('signupUsername');
+        const usernameGroup = usernameInput ? usernameInput.closest('.col-md-6, .mb-2') : null;
+
+        if (role === 'admin') {
+          // Admin: needs name + email + password only
+          if (picSection) picSection.classList.add('d-none');
+          if (mobileRow) mobileRow.classList.add('d-none');
+          if (locationRow) locationRow.classList.add('d-none');
+          if (nameRow) nameRow.classList.remove('d-none');
+
+          document.getElementById('signupFirstName').required = true;
+          document.getElementById('signupLastName').required = true;
+          document.getElementById('signupMobile').required = false;
+          document.getElementById('signupProvince').required = false;
+          document.getElementById('signupCity').required = false;
+          const nicEl = document.getElementById('signupNic');
+          if (nicEl) { nicEl.required = false; nicEl.closest('.col-md-12, .row, div')?.classList?.add('d-none'); }
+        } else {
+          // Customer: all fields visible and required
+          if (picSection) picSection.classList.remove('d-none');
+          if (nameRow) nameRow.classList.remove('d-none');
+          if (mobileRow) mobileRow.classList.remove('d-none');
+          if (locationRow) locationRow.classList.remove('d-none');
+
+          document.getElementById('signupFirstName').required = true;
+          document.getElementById('signupLastName').required = true;
+          document.getElementById('signupMobile').required = true;
+          document.getElementById('signupProvince').required = true;
+          document.getElementById('signupCity').required = true;
+          const nicEl = document.getElementById('signupNic');
+          if (nicEl) { nicEl.required = true; nicEl.closest('.col-md-12, .row, div')?.classList?.remove('d-none'); }
+        }
+      });
+    });
+
+    clientSignupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (clientSignupError) clientSignupError.classList.add('d-none');
+
+      const password = document.getElementById('signupPassword').value;
+      const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+      if (password !== confirmPassword) {
+        const mismatchMsg = "Passwords do not match!";
+        if (clientSignupError) {
+          clientSignupError.textContent = mismatchMsg;
+          clientSignupError.classList.remove('d-none');
+        }
+        showToast(mismatchMsg, "error");
+        return;
+      }
+
+      const signupSubmitBtn = clientSignupForm.querySelector('button[type="submit"]');
+      const origSignupText = signupSubmitBtn ? signupSubmitBtn.innerHTML : '';
+      if (signupSubmitBtn) {
+        signupSubmitBtn.disabled = true;
+        signupSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating Account...';
+      }
+
+      const email = document.getElementById('signupEmail').value.trim();
+      const role = document.querySelector('input[name="signupRole"]:checked')?.value || 'customer';
+      const firstName = document.getElementById('signupFirstName').value.trim();
+      const lastName  = document.getElementById('signupLastName').value.trim();
+      const usernameEl = document.getElementById('signupUsername');
+      const username = usernameEl && usernameEl.value.trim()
+        ? usernameEl.value.trim()
+        : (firstName + lastName).toLowerCase().replace(/\s+/g, '') || email.split('@')[0];
+
+      const extraData = {
+        role: role,
+        first_name: firstName,
+        last_name: lastName,
+        mobile: role === 'customer' ? document.getElementById('signupMobile').value.trim() : '',
+        nic: document.getElementById('signupNic').value.trim(),
+        city: role === 'customer' ? document.getElementById('signupCity').value.trim() : '',
+        profile_pic_url: role === 'customer' ? (document.getElementById('signupPicUrl').value || '') : ''
+      };
+
+      try {
+        const res = await authSignup(username, email, password, extraData);
+        if (signupSubmitBtn) { signupSubmitBtn.disabled = false; signupSubmitBtn.innerHTML = origSignupText; }
+
+        if (res.success) {
+          if (role === 'admin') {
+            showToast(res.message || "Admin account registered! Pending approval.", "info");
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+            if (modalInstance) modalInstance.hide();
+            clientSignupForm.reset();
+          } else {
+            showToast("Account created successfully! Signing you in...", "success");
+            const loginRes = await authLogin(email, password);
+            if (loginRes.success) {
+              showToast("Welcome to Cinnamon Heritage, " + (loginRes.username || username) + "!", "success");
+              const modalInstance = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+              if (modalInstance) modalInstance.hide();
+              clientSignupForm.reset();
+              if (signupPicPreview) signupPicPreview.src = DEFAULT_AVATAR;
+              if (signupPicUrl) signupPicUrl.value = '';
+              await checkAuthStatus();
+            } else {
+              if (clientSignupError) {
+                clientSignupError.textContent = "Account created! Auto sign-in encountered an issue. Please sign in via the Sign In tab.";
+                clientSignupError.classList.remove('d-none');
+              }
+              showToast("Account created! Please sign in using the Sign In tab.", "info");
+            }
+          }
+        } else {
+          const errorMsg = res.error || "Signup failed. Please try again.";
+          if (clientSignupError) {
+            clientSignupError.textContent = errorMsg;
+            clientSignupError.classList.remove('d-none');
+          }
+          showToast(errorMsg, "error");
+        }
+      } catch (err) {
+        if (signupSubmitBtn) { signupSubmitBtn.disabled = false; signupSubmitBtn.innerHTML = origSignupText; }
+        const errText = err.message || "An unexpected error occurred during signup.";
+        if (clientSignupError) {
+          clientSignupError.textContent = errText;
+          clientSignupError.classList.remove('d-none');
+        }
+        showToast(errText, "error");
+      }
+    });
+  }
+
+  // Logout Click
+  
+  
+  // Ensure Google buttons exist in DOM (safeguard against stale cached HTML)
+  const loginForm = document.getElementById('clientLoginForm');
+  if (loginForm && !document.getElementById('clientGoogleLoginBtn')) {
+    const divider = document.createElement('div');
+    divider.className = 'd-flex align-items-center my-3';
+    divider.innerHTML = '<hr class="flex-grow-1 border-secondary m-0" style="opacity: 0.3;"><span class="px-3 small text-white-50 fw-bold">OR</span><hr class="flex-grow-1 border-secondary m-0" style="opacity: 0.3;">';
+    
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-0 shadow-sm mb-2';
+    btn.id = 'clientGoogleLoginBtn';
+    btn.style.cssText = "background: #ffffff; color: #3c4043; border: 1px solid #dadce0; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; font-size: 0.95rem; text-transform: uppercase;";
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg><span>Sign In with Google</span>';
+
+    loginForm.appendChild(divider);
+    loginForm.appendChild(btn);
+  }
+
+  const signupForm = document.getElementById('clientSignupForm');
+  if (signupForm && !document.getElementById('clientGoogleSignupBtn')) {
+    const divider = document.createElement('div');
+    divider.className = 'd-flex align-items-center my-3';
+    divider.innerHTML = '<hr class="flex-grow-1 border-secondary m-0" style="opacity: 0.3;"><span class="px-3 small text-white-50 fw-bold">OR</span><hr class="flex-grow-1 border-secondary m-0" style="opacity: 0.3;">';
+    
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-0 shadow-sm mb-2';
+    btn.id = 'clientGoogleSignupBtn';
+    btn.style.cssText = "background: #ffffff; color: #3c4043; border: 1px solid #dadce0; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; font-size: 0.95rem; text-transform: uppercase;";
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg><span>Sign Up with Google</span>';
+
+    signupForm.appendChild(divider);
+    signupForm.appendChild(btn);
+  }
+
+  // Google Sign-In on Client Auth Modal (Login Tab)
+  const clientGoogleLoginBtn = document.getElementById('clientGoogleLoginBtn');
+  if (clientGoogleLoginBtn) {
+    clientGoogleLoginBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (clientLoginError) clientLoginError.classList.add('d-none');
+      const origHtml = clientGoogleLoginBtn.innerHTML;
+      clientGoogleLoginBtn.disabled = true;
+      clientGoogleLoginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connecting to Google...';
+
+      try {
+        const res = await authGoogleSignIn(null);
+        clientGoogleLoginBtn.disabled = false;
+        clientGoogleLoginBtn.innerHTML = origHtml;
+
+        if (res.success) {
+          showToast("Welcome, " + (res.username || "User") + "!", "success");
+          const modalInstance = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+          if (modalInstance) modalInstance.hide();
+          if (clientLoginForm) clientLoginForm.reset();
+          await checkAuthStatus();
+        } else if (res.isPending) {
+          if (clientLoginError) {
+            clientLoginError.textContent = res.error;
+            clientLoginError.classList.remove('d-none');
+          }
+          showToast(res.error, "info");
+        } else {
+          const errMsg = res.error || "Google sign-in failed.";
+          if (clientLoginError) {
+            clientLoginError.textContent = errMsg;
+            clientLoginError.classList.remove('d-none');
+          }
+          showToast(errMsg, "error");
+        }
+      } catch (err) {
+        clientGoogleLoginBtn.disabled = false;
+        clientGoogleLoginBtn.innerHTML = origHtml;
+        const errMsg = err.message || "An unexpected error occurred during Google sign-in.";
+        if (clientLoginError) {
+          clientLoginError.textContent = errMsg;
+          clientLoginError.classList.remove('d-none');
+        }
+        showToast(errMsg, "error");
+      }
+    });
+  }
+
+  // Google Sign-Up on Client Auth Modal (Sign Up Tab)
+  const clientGoogleSignupBtn = document.getElementById('clientGoogleSignupBtn');
+  if (clientGoogleSignupBtn) {
+    clientGoogleSignupBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (clientSignupError) clientSignupError.classList.add('d-none');
+
+      const role = document.querySelector('input[name="signupRole"]:checked')?.value || 'customer';
+      const origHtml = clientGoogleSignupBtn.innerHTML;
+      clientGoogleSignupBtn.disabled = true;
+      clientGoogleSignupBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connecting to Google...';
+
+      try {
+        const res = await authGoogleSignIn(role);
+        clientGoogleSignupBtn.disabled = false;
+        clientGoogleSignupBtn.innerHTML = origHtml;
+
+        if (res.success) {
+          showToast("Welcome, " + (res.username || "User") + "!", "success");
+          const modalInstance = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+          if (modalInstance) modalInstance.hide();
+          if (clientSignupForm) clientSignupForm.reset();
+          await checkAuthStatus();
+        } else if (res.isPending) {
+          if (clientSignupError) {
+            clientSignupError.textContent = res.error;
+            clientSignupError.classList.remove('d-none');
+          }
+          showToast(res.error, "info");
+        } else {
+          const errMsg = res.error || "Google sign-up failed.";
+          if (clientSignupError) {
+            clientSignupError.textContent = errMsg;
+            clientSignupError.classList.remove('d-none');
+          }
+          showToast(errMsg, "error");
+        }
+      } catch (err) {
+        clientGoogleSignupBtn.disabled = false;
+        clientGoogleSignupBtn.innerHTML = origHtml;
+        const errMsg = err.message || "An unexpected error occurred during Google sign-up.";
+        if (clientSignupError) {
+          clientSignupError.textContent = errMsg;
+          clientSignupError.classList.remove('d-none');
+        }
+        showToast(errMsg, "error");
+      }
+    });
+  }
+
+  ['clientLogoutBtn', 'clientLogoutBtnMobile'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        closeNavDrawer();
+        await authLogout();
+      });
+    }
+  });
+
+  // Profile Details Button Click (populates settings modal)
+  function openProfileModal(e) {
+    e.preventDefault();
+    closeNavDrawer();
+    if (!currentUser) return;
+
+      document.getElementById('profileFirstName').value = currentUser.first_name || currentUser.username || '';
+      document.getElementById('profileLastName').value = currentUser.last_name || '';
+      document.getElementById('profileMobile').value = currentUser.mobile || '';
+
+      
+      const userCity = currentUser.city || '';
+      const matchedRate = deliveryRates.find(r => r.district.toLowerCase() === userCity.toLowerCase());
+      const userProvince = matchedRate ? matchedRate.province : '';
+
+      const provinceSelect = document.getElementById('profileProvince');
+      const districtSelect = document.getElementById('profileCity');
+      
+      if (provinceSelect && districtSelect) {
+        // Re-populate province options each time to ensure they're loaded
+        provinceSelect.innerHTML = '<option value="">Select Province</option>';
+        const provinces = [...new Set(deliveryRates.map(r => r.province))].filter(Boolean);
+        provinces.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p;
+          opt.textContent = p;
+          provinceSelect.appendChild(opt);
+        });
+        provinceSelect.value = userProvince;
+        
+        // Populate districts for the matched province
+        districtSelect.innerHTML = '<option value="">Select District</option>';
+        if (userProvince) {
+          districtSelect.disabled = false;
+          deliveryRates.filter(r => r.province === userProvince).forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.district;
+            opt.textContent = d.district;
+            if (d.district.toLowerCase() === userCity.toLowerCase()) {
+              opt.selected = true;
+            }
+            districtSelect.appendChild(opt);
+          });
+          districtSelect.value = userCity;
+        } else {
+          districtSelect.disabled = true;
+        }
+      }
+
+      document.getElementById('profileNic').value = currentUser.nic || '';
+      document.getElementById('profileEmail').value = currentUser.email || '';
+      
+      const profilePicPreview = document.getElementById('profilePicPreview');
+      if (profilePicPreview) {
+        profilePicPreview.src = currentUser.profile_pic_url || DEFAULT_AVATAR;
+      }
+      document.getElementById('profilePicUrl').value = currentUser.profile_pic_url || '';
+
+      // Hide updates
+      document.getElementById('profileUpdateError').classList.add('d-none');
+      document.getElementById('profileUpdateSuccess').classList.add('d-none');
+
+      new bootstrap.Modal(document.getElementById('profileModal')).show();
+  }
+
+  ['profileDetailsBtn', 'profileDetailsBtnMobile'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', openProfileModal);
+  });
+
+
+
+  // Profile Pic Upload (in profile details modal)
+  const profilePicInput = document.getElementById('profilePicInput');
+  const profilePicPreview = document.getElementById('profilePicPreview');
+  const profilePicSpinner = document.getElementById('profilePicSpinner');
+  const profilePicUrl = document.getElementById('profilePicUrl');
+
+  if (profilePicInput) {
+    profilePicInput.addEventListener('change', async () => {
+      const file = profilePicInput.files[0];
+      if (!file || !currentUser) return;
+
+      try {
+        if (profilePicSpinner) profilePicSpinner.classList.remove('d-none');
+        const url = await uploadImage(file);
+        if (profilePicPreview) profilePicPreview.src = url;
+        if (profilePicUrl) profilePicUrl.value = url;
+        
+        // Atomically update pic in db immediately
+        await updateProfilePicture(currentUser.id, url);
+        currentUser.profile_pic_url = url;
+        
+        // Update Nav bar picture too
+        const navPic = document.getElementById('navProfilePic');
+        if (navPic) navPic.src = url;
+
+        showToast("Profile picture updated!", "success");
+      } catch (err) {
+        showToast("Failed to upload image to Cloudinary", "error");
+      } finally {
+        if (profilePicSpinner) profilePicSpinner.classList.add('d-none');
+      }
+    });
+  }
+
+  // Save general profile details form
+  const profileUpdateForm = document.getElementById('profileUpdateForm');
+  const profileUpdateError = document.getElementById('profileUpdateError');
+  const profileUpdateSuccess = document.getElementById('profileUpdateSuccess');
+
+  if (profileUpdateForm) {
+    profileUpdateForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (profileUpdateError) profileUpdateError.classList.add('d-none');
+      if (profileUpdateSuccess) profileUpdateSuccess.classList.add('d-none');
+
+      const updates = {
+        first_name: document.getElementById('profileFirstName').value.trim(),
+        last_name: document.getElementById('profileLastName').value.trim(),
+        mobile: document.getElementById('profileMobile').value.trim(),
+        city: document.getElementById('profileCity').value.trim(),
+        nic: document.getElementById('profileNic').value.trim()
+      };
+
+      const res = await updateProfileData(currentUser.id, updates);
+      if (res.success) {
+        if (profileUpdateSuccess) profileUpdateSuccess.classList.remove('d-none');
+        currentUser = { ...currentUser, ...updates };
+        
+        // Update nav bar name too
+        const navName = document.getElementById('navUsername');
+        if (navName) navName.textContent = currentUser.first_name;
+
+        setTimeout(() => {
+          bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
+        }, 1500);
+      } else {
+        if (profileUpdateError) {
+          profileUpdateError.textContent = res.error || "Update failed";
+          profileUpdateError.classList.remove('d-none');
+        }
+      }
+    });
+  }
+
+  // Checkout Button
+  const cartCheckoutBtn = document.getElementById('cartCheckoutBtn');
+  if (cartCheckoutBtn) {
+    cartCheckoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (currentCart.length === 0) {
+        showToast("Your cart is empty!", "error");
+        return;
+      }
+      // Cart is in Firestore per-user; checkout.html reads it via getCartItems(uid)
+
+
+
+      window.location.href = "checkout.html?cart=true";
+    });
+  }
+
+  // B2B Enquiry Form
+  const b2bEnquiryForm = document.getElementById('b2bEnquiryForm');
+  if (b2bEnquiryForm) {
+    b2bEnquiryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const errorDiv = document.getElementById('b2bEnquiryError');
+      const successDiv = document.getElementById('b2bEnquirySuccess');
+      const submitText = document.getElementById('b2bSubmitText');
+      const submitSpinner = document.getElementById('b2bSubmitSpinner');
+      
+      errorDiv.classList.add('d-none');
+      successDiv.classList.add('d-none');
+      submitText.textContent = 'Submitting...';
+      submitSpinner.classList.remove('d-none');
+
+      try {
+        // Collect form data
+        const certifications = [];
+        if (document.getElementById('b2bDocISO').checked) certifications.push('ISO 22000');
+        if (document.getElementById('b2bDocHACCP').checked) certifications.push('HACCP');
+        if (document.getElementById('b2bDocOrganic').checked) certifications.push('Organic Certificate');
+        if (document.getElementById('b2bDocCOA').checked) certifications.push('Certificate of Analysis (COA)');
+        if (document.getElementById('b2bDocExport').checked) certifications.push('Export Documents');
+        if (document.getElementById('b2bDocOther').checked) certifications.push('Other');
+
+        const enquiryData = {
+          company_name: document.getElementById('b2bCompanyName').value.trim(),
+          website: document.getElementById('b2bWebsite').value.trim(),
+          country: document.getElementById('b2bCountry').value.trim(),
+          destination_market: document.getElementById('b2bDestinationMarket').value.trim(),
+          contact_person: document.getElementById('b2bContactPerson').value.trim(),
+          position: document.getElementById('b2bPosition').value.trim(),
+          email: document.getElementById('b2bEmail').value.trim(),
+          phone: document.getElementById('b2bPhone').value.trim(),
+          industry: document.getElementById('b2bIndustry').value,
+          intended_product: document.getElementById('b2bIntendedProduct').value.trim(),
+          ingredient_required: document.getElementById('b2bIngredientRequired').value.trim(),
+          trial_quantity: document.getElementById('b2bTrialQuantity').value.trim(),
+          annual_volume: document.getElementById('b2bAnnualVolume').value.trim(),
+          pack_size: document.getElementById('b2bPackSize').value.trim(),
+          packaging_type: document.getElementById('b2bPackagingType').value.trim(),
+          certifications: certifications,
+          target_launch_date: document.getElementById('b2bTargetLaunchDate').value,
+          message: document.getElementById('b2bMessage').value.trim(),
+          created_at: new Date().toISOString(),
+          enquiry_id: 'B2B-' + Date.now().toString(36).toUpperCase()
+        };
+
+        // Save to Firestore
+        await saveB2BEnquiry(enquiryData);
+
+        // Send email via EmailJS
+        await sendB2BEnquiryEmail(enquiryData);
+
+        // Show success message
+        successDiv.classList.remove('d-none');
+        b2bEnquiryForm.reset();
+
+        // Close modal after delay
+        setTimeout(() => {
+          bootstrap.Modal.getInstance(document.getElementById('b2bEnquiryModal')).hide();
+          successDiv.classList.add('d-none');
+        }, 3000);
+
+      } catch (err) {
+        console.error('B2B enquiry submission error:', err);
+        errorDiv.textContent = 'Failed to submit enquiry. Please try again.';
+        errorDiv.classList.remove('d-none');
+      } finally {
+        submitText.textContent = 'Submit Enquiry';
+        submitSpinner.classList.add('d-none');
+      }
+    });
+  }
+
+  // Experience Booking Form
+  const experienceBookingForm = document.getElementById('experienceBookingForm');
+  if (experienceBookingForm) {
+    experienceBookingForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const errorDiv = document.getElementById('experienceBookingError');
+      const successDiv = document.getElementById('experienceBookingSuccess');
+      const submitText = document.getElementById('experienceSubmitText');
+      const submitSpinner = document.getElementById('experienceSubmitSpinner');
+      
+      errorDiv.classList.add('d-none');
+      successDiv.classList.add('d-none');
+      submitText.textContent = 'Submitting...';
+      submitSpinner.classList.remove('d-none');
+
+      try {
+        // Collect selected experiences
+        const selectedExperiences = [];
+        if (document.getElementById('expGuidedWalk').checked) selectedExperiences.push('Guided Cinnamon Estate Walk');
+        if (document.getElementById('expHarvesting').checked) selectedExperiences.push('Harvesting & Peeling Demonstration');
+        if (document.getElementById('expHandsOn').checked) selectedExperiences.push('Hands-on Cinnamon Activity');
+        if (document.getElementById('expTeaTasting').checked) selectedExperiences.push('Cinnamon Tea & Product Tasting');
+        if (document.getElementById('expFoodExperience').checked) selectedExperiences.push('Sri Lankan Spice & Food Experience');
+        if (document.getElementById('expShopVisit').checked) selectedExperiences.push('Cinnamon Heritage Shop Visit');
+
+        const bookingData = {
+          // Personal Information
+          name: document.getElementById('experienceName').value.trim(),
+          email: document.getElementById('experienceEmail').value.trim(),
+          phone: document.getElementById('experiencePhone').value.trim(),
+          country: document.getElementById('experienceCountry').value.trim(),
+          
+          // Visit Details
+          visit_type: document.getElementById('experienceVisitType').value,
+          preferred_date: document.getElementById('experienceDate').value,
+          preferred_time: document.getElementById('experienceTime').value,
+          number_of_visitors: document.getElementById('experienceVisitors').value,
+          
+          // Experience Selection
+          selected_experiences: selectedExperiences,
+          
+          // Business Information (Optional)
+          company_name: document.getElementById('experienceCompany').value.trim(),
+          position: document.getElementById('experiencePosition').value.trim(),
+          industry: document.getElementById('experienceIndustry').value.trim(),
+          
+          // Additional Information
+          special_requirements: document.getElementById('experienceSpecialRequirements').value.trim(),
+          message: document.getElementById('experienceMessage').value.trim(),
+          
+          // Metadata
+          created_at: new Date().toISOString(),
+          booking_id: 'EXP-' + Date.now().toString(36).toUpperCase(),
+          status: 'pending'
+        };
+
+        // Save to Firestore
+        await saveExperienceBooking(bookingData);
+
+        // Send email notification
+        await sendExperienceBookingEmail(bookingData);
+
+        // Show success message
+        successDiv.classList.remove('d-none');
+        experienceBookingForm.reset();
+
+        // Close modal after delay
+        setTimeout(() => {
+          bootstrap.Modal.getInstance(document.getElementById('experienceBookingModal')).hide();
+          successDiv.classList.add('d-none');
+        }, 3000);
+
+      } catch (err) {
+        console.error('Experience booking submission error:', err);
+        errorDiv.textContent = 'Failed to submit booking request. Please try again.';
+        errorDiv.classList.remove('d-none');
+      } finally {
+        submitText.textContent = 'Book Now';
+        submitSpinner.classList.add('d-none');
+      }
+    });
+  }
+
+  // Essential Oils Sample Request Form
+  const essentialOilsSampleForm = document.getElementById('essentialOilsSampleForm');
+  if (essentialOilsSampleForm) {
+    essentialOilsSampleForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const errorDiv = document.getElementById('sampleError');
+      const successDiv = document.getElementById('sampleSuccess');
+      const submitText = document.getElementById('sampleSubmitText');
+      const submitSpinner = document.getElementById('sampleSubmitSpinner');
+      
+      errorDiv.classList.add('d-none');
+      successDiv.classList.add('d-none');
+      submitText.textContent = 'Submitting...';
+      submitSpinner.classList.remove('d-none');
+
+      try {
+        // Collect selected oils
+        const selectedOils = [];
+        if (document.getElementById('sampleLeafOil').checked) selectedOils.push('Cinnamon Leaf Oil');
+        if (document.getElementById('sampleBarkOil').checked) selectedOils.push('Cinnamon Bark Oil');
+
+        const sampleData = {
+          name: document.getElementById('sampleName').value.trim(),
+          company: document.getElementById('sampleCompany').value.trim(),
+          email: document.getElementById('sampleEmail').value.trim(),
+          phone: document.getElementById('samplePhone').value.trim(),
+          country: document.getElementById('sampleCountry').value.trim(),
+          sample_size: document.getElementById('sampleSize').value,
+          selected_oils: selectedOils,
+          message: document.getElementById('sampleMessage').value.trim(),
+          created_at: new Date().toISOString(),
+          request_id: 'EO-' + Date.now().toString(36).toUpperCase(),
+          type: 'sample_request'
+        };
+
+        // Save to Firestore
+        await saveEssentialOilsEnquiry(sampleData);
+
+        // Send email notification
+        await sendEssentialOilsEmail(sampleData);
+
+        // Show success message
+        successDiv.classList.remove('d-none');
+        essentialOilsSampleForm.reset();
+
+        // Close modal after delay
+        setTimeout(() => {
+          bootstrap.Modal.getInstance(document.getElementById('essentialOilsSampleModal')).hide();
+          successDiv.classList.add('d-none');
+        }, 3000);
+
+      } catch (err) {
+        console.error('Essential Oils sample request error:', err);
+        errorDiv.textContent = 'Failed to submit sample request. Please try again.';
+        errorDiv.classList.remove('d-none');
+      } finally {
+        submitText.textContent = 'Request Sample';
+        submitSpinner.classList.add('d-none');
+      }
+    });
+  }
+
+  // Essential Oils Technical Discussion Form
+  const essentialOilsTechForm = document.getElementById('essentialOilsTechForm');
+  if (essentialOilsTechForm) {
+    essentialOilsTechForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const errorDiv = document.getElementById('techError');
+      const successDiv = document.getElementById('techSuccess');
+      const submitText = document.getElementById('techSubmitText');
+      const submitSpinner = document.getElementById('techSubmitSpinner');
+      
+      errorDiv.classList.add('d-none');
+      successDiv.classList.add('d-none');
+      submitText.textContent = 'Submitting...';
+      submitSpinner.classList.remove('d-none');
+
+      try {
+        const techData = {
+          name: document.getElementById('techName').value.trim(),
+          company: document.getElementById('techCompany').value.trim(),
+          email: document.getElementById('techEmail').value.trim(),
+          phone: document.getElementById('techPhone').value.trim(),
+          industry: document.getElementById('techIndustry').value.trim(),
+          requirements: document.getElementById('techRequirements').value.trim(),
+          created_at: new Date().toISOString(),
+          request_id: 'EO-' + Date.now().toString(36).toUpperCase(),
+          type: 'technical_discussion'
+        };
+
+        // Save to Firestore
+        await saveEssentialOilsEnquiry(techData);
+
+        // Send email notification
+        await sendEssentialOilsEmail(techData);
+
+        // Show success message
+        successDiv.classList.remove('d-none');
+        essentialOilsTechForm.reset();
+
+        // Close modal after delay
+        setTimeout(() => {
+          bootstrap.Modal.getInstance(document.getElementById('essentialOilsTechModal')).hide();
+          successDiv.classList.add('d-none');
+        }, 3000);
+
+      } catch (err) {
+        console.error('Essential Oils technical discussion error:', err);
+        errorDiv.textContent = 'Failed to submit request. Please try again.';
+        errorDiv.classList.remove('d-none');
+      } finally {
+        submitText.textContent = 'Contact Technical Team';
+        submitSpinner.classList.add('d-none');
+      }
+    });
+  }
+}

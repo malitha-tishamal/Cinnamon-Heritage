@@ -1,0 +1,1979 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Panel | Cinnamon Heritage</title>
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="text-center mb-4">
+        <h2 class="fw-bold" style="font-family: 'Oswald', sans-serif; letter-spacing: 2px;">CINNAMON HERITAGE</h2>
+        <p class="text-muted mb-0">Admin Panel</p>
+      </div>
+
+      <!-- Setup Form (shown only if no admin exists) -->
+      <div id="setupForm" class="d-none">
+        <div class="alert alert-info small">
+          <i class="bi bi-info-circle"></i> No admin account found. Create one to get started.
+        </div>
+        <form id="adminSetupForm">
+          <div class="mb-3">
+            <label class="form-label small fw-bold" style="color: rgba(255,255,255,0.9);">Username</label>
+            <input type="text" class="form-control" id="setupUsername" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" style="color: rgba(255,255,255,0.9);">Email</label>
+            <input type="email" class="form-control" id="setupEmail" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" style="color: rgba(255,255,255,0.9);">Password</label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="setupPassword" required minlength="6">
+              <button class="btn btn-outline-light" type="button" id="toggleSetupPassword" style="border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.1);"><i class="bi bi-eye-slash"></i></button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-accent w-100 fw-bold py-2">Create Admin Account</button>
+        </form>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm">
+        <div class="mb-3">
+          <label class="form-label small fw-bold" style="color: rgba(255,255,255,0.9);">Email</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input type="email" class="form-control" id="loginEmail" placeholder="Enter email" required>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" style="color: rgba(255,255,255,0.9);">Password</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input type="password" class="form-control" id="loginPassword" placeholder="Enter password" required>
+            <button class="btn btn-outline-light" type="button" id="toggleLoginPassword" style="border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.1);"><i class="bi bi-eye-slash"></i></button>
+          </div>
+        </div>
+        <div id="loginError" class="alert alert-danger small d-none"></div>
+                <button type="submit" class="btn btn-accent w-100 fw-bold py-2 mb-3">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+        </button>
+        <div class="d-flex align-items-center my-3">
+          <hr class="flex-grow-1 border-secondary m-0">
+          <span class="px-2 small text-white-50">OR</span>
+          <hr class="flex-grow-1 border-secondary m-0">
+        </div>
+        <button type="button" class="btn btn-outline-light w-100 fw-bold py-2 mb-3 d-flex align-items-center justify-content-center gap-2" id="adminGoogleLoginBtn" style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25);">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
+          <span>Sign In with Google</span>
+        </button>
+        <div class="d-flex justify-content-between small">
+          <a href="#" id="showForgotPassword" class="text-white text-decoration-none" style="opacity: 0.8;">Forgot Password?</a>
+          <!--a href="#" id="showSignup" class="text-white text-decoration-none fw-bold">Create Account</a-->
+        </div>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="signupForm" class="d-none">
+        <div class="mb-3">
+          <label class="form-label small fw-bold" style="color: rgba(255,255,255,0.9);">Username</label>
+          <input type="text" class="form-control" id="regUsername" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" style="color: rgba(255,255,255,0.9);">Email</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input type="email" class="form-control" id="regEmail" placeholder="Enter email" required>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" style="color: rgba(255,255,255,0.9);">Password</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input type="password" class="form-control" id="regPassword" placeholder="Create password" required minlength="6">
+            <button class="btn btn-outline-light" type="button" id="toggleRegPassword" style="border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.1);"><i class="bi bi-eye-slash"></i></button>
+          </div>
+        </div>
+        <div id="signupError" class="alert alert-danger small d-none"></div>
+        <button type="submit" class="btn btn-accent w-100 fw-bold py-2 mb-3">Sign Up</button>
+        <div class="text-center small">
+          <span class="text-white-50">Already have an account?</span> 
+          <a href="#" id="showLoginFromSignup" class="text-white text-decoration-none fw-bold">Sign In</a>
+        </div>
+      </form>
+
+      <!-- Forgot Password Form -->
+      <form id="forgotPasswordForm" class="d-none">
+        <p class="text-white-50 small mb-4">Enter your email address and we'll send you instructions to reset your password.</p>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" style="color: rgba(255,255,255,0.9);">Email</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input type="email" class="form-control" id="forgotEmail" placeholder="Enter email" required>
+          </div>
+        </div>
+        <div id="forgotError" class="alert alert-danger small d-none"></div>
+        <div id="forgotSuccess" class="alert alert-success small d-none"></div>
+        <button type="submit" class="btn btn-accent w-100 fw-bold py-2 mb-3">Reset Password</button>
+        <div class="text-center small">
+          <a href="#" id="showLoginFromForgot" class="text-white text-decoration-none fw-bold"><i class="bi bi-arrow-left me-1"></i> Back to Sign In</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div id="dashboardScreen" class="d-none">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <h5 class="fw-bold mb-0" style="letter-spacing: 1px;">ðŸŒ¿ ADMIN</h5>
+        <small class="text-muted" id="adminUsername">admin</small>
+      </div>
+      <ul class="sidebar-nav">
+        <li class="active" data-section="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</li>
+        <li data-section="hero"><i class="bi bi-image"></i> Hero Section</li>
+        <li data-section="about"><i class="bi bi-info-circle"></i> About Us</li>
+        <li data-section="factory"><i class="bi bi-building"></i> Factory</li>
+        <li data-section="process"><i class="bi bi-gear"></i> Process Steps</li>
+        <li data-section="products"><i class="bi bi-box-seam"></i> Products</li>
+        <li data-section="essential-oils"><i class="bi bi-droplet"></i> Essential Oils</li>
+        <li data-section="b2b"><i class="bi bi-people-fill"></i> B2B Partnerships</li>
+        <li data-section="b2b-enquiries"><i class="bi bi-envelope-paper"></i> B2B Enquiries</li>
+        <li data-section="experience"><i class="bi bi-tree"></i> Cinnamon Experience</li>
+        <li data-section="villa"><i class="bi bi-house-door"></i> Cinnamon Villa</li>
+        <li data-section="experience-bookings"><i class="bi bi-calendar-check"></i> Experience Bookings</li>
+        <li data-section="popups"><i class="bi bi-megaphone-fill"></i> Manage Popups</li>
+        <li data-section="orders"><i class="bi bi-cart-check"></i> Orders</li>
+        <li data-section="accounts"><i class="bi bi-bank"></i> Accounts & Sales</li>
+        <li data-section="footer-management"><i class="bi bi-layout-text-sidebar"></i> Footer Management</li>
+        <li data-section="social-media"><i class="bi bi-share"></i> Social Media</li>
+        <li data-section="settings"><i class="bi bi-sliders"></i> E-commerce Settings</li>
+        <li data-section="quality"><i class="bi bi-shield-check"></i> Quality</li>
+        <li data-section="faq"><i class="bi bi-question-circle"></i> FAQ</li>
+        <li data-section="contact-info"><i class="bi bi-telephone"></i> Contact Info</li>
+        <li data-section="messages"><i class="bi bi-envelope"></i> Messages <span id="unreadBadge" class="badge bg-danger ms-auto d-none">0</span></li>
+        <li data-section="admin-accounts"><i class="bi bi-people-fill"></i> Admin Accounts <span id="pendingAdminBadge" class="badge bg-warning text-dark ms-auto d-none">0</span></li>
+      </ul>
+      <div class="sidebar-footer">
+        <a href="/" class="btn btn-outline-light btn-sm w-100 mb-2" target="_blank"><i class="bi bi-eye me-1"></i> View Website</a>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-box-arrow-left me-1"></i> Logout</button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard -->
+      <div id="sec-dashboard" class="content-section">
+        <h3 class="section-heading">Dashboard</h3>
+        <div class="row g-3 mb-4 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-5">
+          <div class="col">
+            <div class="stat-card bg-gradient-1">
+              <i class="bi bi-wallet2"></i>
+              <div class="stat-value" id="statEarningsToday">LKR 0</div>
+              <div class="stat-label">Earnings (Today)</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="stat-card bg-gradient-4">
+              <i class="bi bi-graph-up-arrow"></i>
+              <div class="stat-value" id="statEarningsMonth">LKR 0</div>
+              <div class="stat-label">Earnings (Month)</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="stat-card bg-gradient-2">
+              <i class="bi bi-cart-check-fill"></i>
+              <div class="stat-value" id="statOrders">0</div>
+              <div class="stat-label">Total Orders</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="stat-card" style="background: linear-gradient(135deg, #fd7e14 0%, #d4873a 100%);">
+              <i class="bi bi-hourglass-split"></i>
+              <div class="stat-value" id="statInProgress">0</div>
+              <div class="stat-label">In Progress</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="stat-card bg-gradient-3">
+              <i class="bi bi-box-seam-fill"></i>
+              <div class="stat-value" id="statProducts">0</div>
+              <div class="stat-label">Active Products</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body">
+                <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Product Performance</h5>
+                <div class="table-responsive">
+                  <table class="table table-sm align-middle">
+                    <thead>
+                      <tr class="small text-muted">
+                        <th>Product</th>
+                        <th>Sales</th>
+                        <th>Current Stock</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="productPerformance">
+                      <!-- Loaded via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body">
+                <h5 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Quick Stats</h5>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted small">Total Messages</span>
+                  <span class="fw-bold" id="statMessages">0</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted small">Unread Messages</span>
+                  <span class="badge bg-danger" id="statUnread">0</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted small">Process Steps</span>
+                  <span class="fw-bold" id="statSteps">0</span>
+                </div>
+                <hr>
+                <div class="text-center">
+                  <div class="stat-label mb-1">Lifetime Earnings</div>
+                  <div class="h4 fw-bold text-accent" id="statTotalEarnings">LKR 0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h5 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Recent Messages</h5>
+            <div id="recentMessages" class="table-responsive">
+              <p class="text-muted">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Section Editor -->
+      <div id="sec-hero" class="content-section d-none">
+        <h3 class="section-heading">Hero Section</h3>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Main Title</label>
+              <input type="text" class="form-control" id="heroTitle" placeholder="e.g. PURE CEYLON CINNAMON">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Subtitle</label>
+              <textarea class="form-control" id="heroSubtitle" rows="3" placeholder="Subtitle text..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Button Text</label>
+              <input type="text" class="form-control" id="heroCta" placeholder="e.g. Discover Our Heritage">
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold">Hero Background Wallpaper</label>
+              <div class="hero-bg-preview mb-3" id="heroBgPreviewWrap">
+                <img id="heroBgPreviewImg" src="images/cinnamon_spices.jpg" alt="Hero background preview" class="img-fluid rounded">
+              </div>
+              <input type="hidden" id="heroBackgroundImage" value="">
+              <input type="file" class="d-none" id="heroBgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('heroBgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+              </button>
+              <div id="heroUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="heroUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="heroUploadBar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              <div id="heroUploadSuccess" class="upload-success-badge d-none mt-3">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Background uploaded! Click Save to apply on the website.</span>
+              </div>
+            </div>
+            <button class="btn btn-accent" onclick="saveContent('hero')"><i class="bi bi-check-lg me-1"></i> Save Changes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Section Editor -->
+      <div id="sec-about" class="content-section d-none">
+        <h3 class="section-heading">About Us</h3>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Section Title</label>
+              <input type="text" class="form-control" id="aboutTitle">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Content</label>
+              <textarea class="form-control" id="aboutText" rows="6"></textarea>
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold">About Section Background Wallpaper</label>
+              <div class="about-bg-preview mb-3" id="aboutBgPreviewWrap" style="max-width: 400px;">
+                <img id="aboutBgPreviewImg" src="images/estate_bg.png" alt="About background preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+              </div>
+              <input type="hidden" id="aboutBackgroundImage" value="">
+              <input type="file" class="d-none" id="aboutBgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('aboutBgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+              </button>
+              <div id="aboutUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="aboutUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="aboutUploadBar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              <div id="aboutUploadSuccess" class="upload-success-badge d-none mt-3 text-success small">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Background uploaded! Click Save to apply on the website.</span>
+              </div>
+            </div>
+
+            <!-- About Section Image Upload -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">About Section Image</label>
+              <div class="about-bg-preview mb-3" id="aboutImgPreviewWrap" style="max-width: 400px;">
+                <img id="aboutImgPreviewImg" src="images/cinnamon_plantlings.jpg" alt="About image preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+              </div>
+              <input type="hidden" id="aboutImage" value="">
+              <input type="file" class="d-none" id="aboutImgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('aboutImgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Image
+              </button>
+              <div id="aboutImgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="aboutImgUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="aboutImgUploadBar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              <div id="aboutImgUploadSuccess" class="upload-success-badge d-none mt-3 text-success small">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Image uploaded! Click Save to apply on the website.</span>
+              </div>
+              <div id="aboutImgUploadFailed" class="upload-success-badge d-none mt-3 text-danger small">
+                <i class="bi bi-x-circle-fill"></i>
+                <span id="aboutImgUploadFailedMsg">Upload failed. Please try again.</span>
+              </div>
+            </div>
+
+            <button class="btn btn-accent" onclick="saveContent('about')"><i class="bi bi-check-lg me-1"></i> Save Changes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Factory Section Editor -->
+      <div id="sec-factory" class="content-section d-none">
+        <h3 class="section-heading">Factory</h3>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Section Title</label>
+              <input type="text" class="form-control" id="factoryTitle">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Content</label>
+              <textarea class="form-control" id="factoryText" rows="6"></textarea>
+            </div>
+
+            <!-- Factory Background Wallpaper Upload -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Factory Section Background Wallpaper</label>
+              <div class="about-bg-preview mb-3" style="max-width:400px;">
+                <img id="factoryBgPreviewImg" src="images/estate_bg.png" alt="Factory background preview" class="img-fluid rounded border shadow-sm" style="max-height:200px;width:100%;object-fit:cover;">
+              </div>
+              <input type="hidden" id="factoryBackgroundImage" value="">
+              <input type="file" class="d-none" id="factoryBgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('factoryBgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+              </button>
+              <div id="factoryBgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="factoryBgUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="factoryBgUploadBar" role="progressbar" style="width:0%"></div>
+                </div>
+              </div>
+              <div id="factoryBgUploadSuccess" class="upload-success-badge d-none mt-3">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Background uploaded! Click Save to apply.</span>
+              </div>
+              <div id="factoryBgUploadFailed" class="alert alert-danger d-none mt-3 small py-2">
+                <i class="bi bi-x-circle-fill me-1"></i> <span id="factoryBgUploadFailedMsg">Upload failed.</span>
+              </div>
+            </div>
+
+            <!-- Factory Product Image Upload -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Factory Product Image <small class="text-muted">(right-side visible image)</small></label>
+              <div class="about-bg-preview mb-3" style="max-width:400px;">
+                <img id="factoryImgPreview" src="images/cinnamon_srilanka.jpg" alt="Factory product image preview" class="img-fluid rounded border shadow-sm" style="max-height:200px;width:100%;object-fit:cover;">
+              </div>
+              <input type="hidden" id="factoryImageUrl" value="">
+              <input type="file" class="d-none" id="factoryImgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('factoryImgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload Product Image
+              </button>
+              <div id="factoryImgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="factoryImgUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="factoryImgUploadBar" role="progressbar" style="width:0%"></div>
+                </div>
+              </div>
+              <div id="factoryImgUploadSuccess" class="upload-success-badge d-none mt-3">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Image uploaded! Click Save to apply.</span>
+              </div>
+              <div id="factoryImgUploadFailed" class="alert alert-danger d-none mt-3 small py-2">
+                <i class="bi bi-x-circle-fill me-1"></i> <span id="factoryImgUploadFailedMsg">Upload failed.</span>
+              </div>
+            </div>
+
+            <button class="btn btn-accent" onclick="saveContent('factory')"><i class="bi bi-check-lg me-1"></i> Save Changes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Process Steps Editor -->
+      <div id="sec-process" class="content-section d-none">
+        <h3 class="section-heading">Process Steps <button class="btn btn-accent btn-sm float-end" onclick="addProcessStep()"><i class="bi bi-plus-lg me-1"></i>Add Step</button></h3>
+        
+        <!-- Process Section Background Image -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h6 class="fw-bold mb-3"><i class="bi bi-image me-2 text-accent"></i>Process Section Background Image</h6>
+            <div class="about-bg-preview mb-3" style="max-width:400px;">
+              <img id="processBgPreviewImg" src="images/estate_bg.png" alt="Process section background preview" class="img-fluid rounded border shadow-sm" style="max-height:200px;width:100%;object-fit:cover;">
+            </div>
+            <input type="hidden" id="processBackgroundImage" value="">
+            <input type="file" class="d-none" id="processBgUpload" accept="image/*">
+            <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="document.getElementById('processBgUpload').click()">
+              <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+            </button>
+            <button class="btn btn-accent btn-sm" onclick="saveContent('process')"><i class="bi bi-check-lg me-1"></i> Save Background</button>
+            <div id="processBgUploadProgress" class="upload-progress-wrap d-none mt-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-muted">Uploading to Cloudinary...</span>
+                <span id="processBgUploadPercent" class="fw-bold text-accent">0%</span>
+              </div>
+              <div class="progress upload-progress-bar">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" id="processBgUploadBar" role="progressbar" style="width:0%"></div>
+              </div>
+            </div>
+            <div id="processBgUploadSuccess" class="upload-success-badge d-none mt-3">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>Background uploaded! Click Save Background to apply.</span>
+            </div>
+            <div id="processBgUploadFailed" class="alert alert-danger d-none mt-3 small py-2">
+              <i class="bi bi-x-circle-fill me-1"></i> <span id="processBgUploadFailedMsg">Upload failed.</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="processStepsList"></div>
+      </div>
+
+      <!-- Products Editor -->
+      <div class="content-section d-none" id="sec-products">
+        <h3 class="section-heading">Products <button class="btn btn-accent btn-sm float-end" onclick="addProduct()"><i class="bi bi-plus-lg me-1"></i>Add Product</button></h3>
+        
+        <!-- Products Section Background Image -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h6 class="fw-bold mb-3"><i class="bi bi-image me-2 text-accent"></i>Products Section Background Image</h6>
+            <div class="about-bg-preview mb-3" style="max-width:400px;">
+              <img id="productsBgPreviewImg" src="images/estate_bg.png" alt="Products section background preview" class="img-fluid rounded border shadow-sm" style="max-height:200px;width:100%;object-fit:cover;">
+            </div>
+            <input type="hidden" id="productsBackgroundImage" value="">
+            <input type="file" class="d-none" id="productsBgUpload" accept="image/*">
+            <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="document.getElementById('productsBgUpload').click()">
+              <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+            </button>
+            <button class="btn btn-accent btn-sm" onclick="saveContent('products')"><i class="bi bi-check-lg me-1"></i> Save Background</button>
+            <div id="productsBgUploadProgress" class="upload-progress-wrap d-none mt-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-muted">Uploading to Cloudinary...</span>
+                <span id="productsBgUploadPercent" class="fw-bold text-accent">0%</span>
+              </div>
+              <div class="progress upload-progress-bar">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" id="productsBgUploadBar" role="progressbar" style="width:0%"></div>
+              </div>
+            </div>
+            <div id="productsBgUploadSuccess" class="upload-success-badge d-none mt-3">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>Background uploaded! Click Save Background to apply.</span>
+            </div>
+            <div id="productsBgUploadFailed" class="alert alert-danger d-none mt-3 small py-2">
+              <i class="bi bi-x-circle-fill me-1"></i> <span id="productsBgUploadFailedMsg">Upload failed.</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="productsList"></div>
+      </div>
+
+      <!-- Essential Oils Editor -->
+      <div class="content-section d-none" id="sec-essential-oils">
+        <h3 class="section-heading">Essential Oils</h3>
+        
+        <!-- Section Content -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>Section Content</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Section Title</label>
+                <input type="text" class="form-control" id="eoTitle" placeholder="Essential Oils">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Subtitle</label>
+                <input type="text" class="form-control" id="eoSubtitle" placeholder="Pure Ceylon Cinnamon Essential Oils">
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Description</label>
+                <textarea class="form-control" id="eoDescription" rows="2" placeholder="Steam Distilled From Authentic Ceylon Cinnamon"></textarea>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Main Text</label>
+                <textarea class="form-control" id="eoText" rows="3" placeholder="Experience the natural power of authentic Ceylon Cinnamon..."></textarea>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Essential Oils Section Background Wallpaper</label>
+                <div class="about-bg-preview mb-3" style="max-width: 400px;">
+                  <img id="eoBgPreviewImg" src="images/estate_bg.png" alt="Essential Oils background preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+                </div>
+                <input type="hidden" id="eoBackgroundImage" value="">
+                <input type="file" class="d-none" id="eoBgUpload" accept="image/*">
+                <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="document.getElementById('eoBgUpload').click()">
+                  <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+                </button>
+                <div id="eoBgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                  <div class="d-flex justify-content-between small mb-1">
+                    <span class="text-muted">Uploading to Cloudinary...</span>
+                    <span id="eoBgUploadPercent" class="fw-bold text-accent">0%</span>
+                  </div>
+                  <div class="progress upload-progress-bar">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="eoBgUploadBar" role="progressbar" style="width:0%"></div>
+                  </div>
+                </div>
+                <div id="eoBgUploadSuccess" class="upload-success-badge d-none mt-3">
+                  <i class="bi bi-check-circle-fill"></i>
+                  <span>Background uploaded! Click Save Section Content to apply.</span>
+                </div>
+                <div id="eoBgUploadFailed" class="alert alert-danger d-none mt-3 small py-2">
+                  <i class="bi bi-x-circle-fill me-1"></i> <span id="eoBgUploadFailedMsg">Upload failed.</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Sample Button Text</label>
+                <input type="text" class="form-control" id="eoSampleBtn" placeholder="Request B2B Sample">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Tech Button Text</label>
+                <input type="text" class="form-control" id="eoTechBtn" placeholder="Technical Discussion">
+              </div>
+            </div>
+            <button class="btn btn-accent mt-3" onclick="saveEssentialOilsContent()"><i class="bi bi-check-lg me-1"></i>Save Section Content</button>
+          </div>
+        </div>
+
+        <!-- Cinnamon Leaf Oil -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-leaf me-2"></i>Cinnamon Leaf Oil</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Title</label>
+                <input type="text" class="form-control" id="eoLeafTitle" placeholder="Cinnamon Leaf Oil">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Subtitle</label>
+                <input type="text" class="form-control" id="eoLeafSubtitle" placeholder="Pure Ceylon Cinnamon Leaf Oil">
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Description</label>
+                <textarea class="form-control" id="eoLeafDescription" rows="3" placeholder="Our Cinnamon Leaf Oil is produced through steam distillation..."></textarea>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Key Features (one per line)</label>
+                <textarea class="form-control" id="eoLeafFeatures" rows="3" placeholder="âœ“ Steam distilled from authentic Ceylon cinnamon leaves&#10;âœ“ High natural eugenol content..."></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Main Constituents</label>
+                <input type="text" class="form-control" id="eoLeafConstituents" placeholder="Eugenol, Benzyl Benzoate, Linalool...">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Applications</label>
+                <input type="text" class="form-control" id="eoLeafApplications" placeholder="Aromatherapy products, Natural fragrances...">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cinnamon Bark Oil -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-tree me-2"></i>Cinnamon Bark Oil</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Title</label>
+                <input type="text" class="form-control" id="eoBarkTitle" placeholder="Cinnamon Bark Oil">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Subtitle</label>
+                <input type="text" class="form-control" id="eoBarkSubtitle" placeholder="Premium Ceylon Cinnamon Bark Oil">
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Description</label>
+                <textarea class="form-control" id="eoBarkDescription" rows="3" placeholder="Cinnamon Bark Oil is one of the most valuable essential oils..."></textarea>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Key Features (one per line)</label>
+                <textarea class="form-control" id="eoBarkFeatures" rows="3" placeholder="âœ“ Produced from premium Ceylon cinnamon bark&#10;âœ“ High cinnamaldehyde content..."></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Main Constituents</label>
+                <input type="text" class="form-control" id="eoBarkConstituents" placeholder="Cinnamaldehyde, Eugenol, Benzyl Benzoate...">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Applications</label>
+                <input type="text" class="form-control" id="eoBarkApplications" placeholder="Premium fragrances, Food flavouring solutions...">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aroma Profiles -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-music-note me-2"></i>Aroma Profiles</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Leaf Oil Aroma Title</label>
+                <input type="text" class="form-control" id="eoLeafAromaTitle" placeholder="Cinnamon Leaf Oil Aroma">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Bark Oil Aroma Title</label>
+                <input type="text" class="form-control" id="eoBarkAromaTitle" placeholder="Cinnamon Bark Oil Aroma">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Leaf Aroma Description</label>
+                <textarea class="form-control" id="eoLeafAromaDescription" rows="2" placeholder="Warm and spicy with a distinctive clove-like character."></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Bark Aroma Description</label>
+                <textarea class="form-control" id="eoBarkAromaDescription" rows="2" placeholder="A powerful traditional cinnamon fragrance..."></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Leaf Aroma Notes (comma separated)</label>
+                <input type="text" class="form-control" id="eoLeafAromaNotes" placeholder="Herbal, Spicy, Woody, Slightly sweet">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Bark Aroma Notes (comma separated)</label>
+                <input type="text" class="form-control" id="eoBarkAromaNotes" placeholder="Sweet, Rich, Warm, Intense cinnamon">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Statement -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Footer Statement</h5>
+            <textarea class="form-control" id="eoFooter" rows="3" placeholder="Authentic Ceylon Cinnamon Quality - From our family estate in Galle, Sri Lanka..."></textarea>
+            <button class="btn btn-accent mt-3" onclick="saveEssentialOilsFooter()"><i class="bi bi-check-lg me-1"></i>Save Footer Statement</button>
+          </div>
+        </div>
+
+        <!-- Email Configuration -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-envelope me-2"></i>Essential Oils Email Configuration</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Recipient Email</label>
+                <input type="email" class="form-control" id="eoRecipientEmail" placeholder="info@cinnamonheritage.com">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Service ID</label>
+                <input type="text" class="form-control" id="eoEmailJSServiceId" placeholder="YOUR_SERVICE_ID">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Template ID</label>
+                <input type="text" class="form-control" id="eoEmailJSTemplateId" placeholder="YOUR_TEMPLATE_ID">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Public Key</label>
+                <input type="text" class="form-control" id="eoEmailJSPublicKey" placeholder="YOUR_PUBLIC_KEY">
+              </div>
+            </div>
+            <button class="btn btn-accent mt-3" onclick="saveEssentialOilsEmailConfig()"><i class="bi bi-check-lg me-1"></i>Save Email Configuration</button>
+          </div>
+        </div>
+
+        <!-- Safety Warnings -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle me-2"></i>Safety Warnings</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Safety Title</label>
+                <input type="text" class="form-control" id="eoSafetyTitle" placeholder="Essential Oil Safety">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Safety Subtitle</label>
+                <input type="text" class="form-control" id="eoSafetySubtitle" placeholder="Professional Use / Safety Disclaimer">
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">Safety Warnings (one per line)</label>
+                <textarea class="form-control" id="eoSafetyWarnings" rows="4" placeholder="âš ï¸ Do not consume directly&#10;âš ï¸ Do not apply undiluted to skin&#10;âš ï¸ For professional use only..."></textarea>
+              </div>
+            </div>
+            <button class="btn btn-accent mt-3" onclick="saveEssentialOilsSafety()"><i class="bi bi-check-lg me-1"></i>Save Safety Warnings</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- B2B Partnerships Editor -->
+      <div class="content-section d-none" id="sec-b2b">
+        <h3 class="section-heading">B2B Partnerships</h3>
+        
+        <!-- Partner Types -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-people me-2"></i>Partner Types</h5>
+            <div class="row g-3" id="partnerTypesList">
+              <!-- Partner types will be loaded here -->
+            </div>
+            <button class="btn btn-accent mt-3" onclick="addPartnerType()"><i class="bi bi-plus-lg me-1"></i>Add Partner Type</button>
+          </div>
+        </div>
+
+        <!-- B2B Solutions -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-lightbulb me-2"></i>B2B Solutions</h5>
+            <div class="row g-3" id="b2bSolutionsList">
+              <!-- B2B solutions will be loaded here -->
+            </div>
+            <button class="btn btn-accent mt-3" onclick="addB2BSolution()"><i class="bi bi-plus-lg me-1"></i>Add Solution</button>
+          </div>
+        </div>
+
+        <!-- B2B Content -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>B2B Section Content</h5>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Section Title</label>
+              <input type="text" class="form-control" id="b2bSectionTitle" placeholder="B2B Partnerships">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Subtitle</label>
+              <input type="text" class="form-control" id="b2bSubtitle" placeholder="Partner With Cinnamon Heritage">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Description</label>
+              <textarea class="form-control" id="b2bDescription" rows="3" placeholder="We provide authentic Ceylon Cinnamon solutions for global businesses..."></textarea>
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold">B2B Section Background Wallpaper</label>
+              <div class="about-bg-preview mb-3" style="max-width: 400px;">
+                <img id="b2bBgPreviewImg" src="images/estate_bg.png" alt="B2B background preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+              </div>
+              <input type="hidden" id="b2bBackgroundImage" value="">
+              <input type="file" class="d-none" id="b2bBgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="document.getElementById('b2bBgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+              </button>
+              <div id="b2bBgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="b2bBgUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="b2bBgUploadBar" role="progressbar" style="width:0%"></div>
+                </div>
+              </div>
+              <div id="b2bBgUploadSuccess" class="upload-success-badge d-none mt-3">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Background uploaded! Click Save B2B Content to apply.</span>
+              </div>
+              <div id="b2bBgUploadFailed" class="alert alert-danger d-none mt-3 small py-2">
+                <i class="bi bi-x-circle-fill me-1"></i> <span id="b2bBgUploadFailedMsg">Upload failed.</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">CTA Title</label>
+              <input type="text" class="form-control" id="b2bCtaTitle" placeholder="Become a Partner">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">CTA Description</label>
+              <textarea class="form-control" id="b2bCtaDescription" rows="2" placeholder="Partner with Cinnamon Heritage for authentic Ceylon Cinnamon products..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Button Text</label>
+              <input type="text" class="form-control" id="b2bButtonText" placeholder="Partner With Us">
+            </div>
+            <button class="btn btn-accent" onclick="saveB2BContent()"><i class="bi bi-check-lg me-1"></i>Save B2B Content</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- B2B Enquiries Management -->
+      <div class="content-section d-none" id="sec-b2b-enquiries">
+        <h3 class="section-heading">B2B Enquiries</h3>
+        
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h6 class="text-muted mb-2">Total Enquiries</h6>
+                <h3 class="fw-bold mb-0" id="b2bTotalEnquiries">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h6 class="text-muted mb-2">This Month</h6>
+                <h3 class="fw-bold mb-0" id="b2bThisMonth">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h6 class="text-muted mb-2">Pending Review</h6>
+                <h3 class="fw-bold mb-0" id="b2bPending">0</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email Configuration -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-envelope me-2"></i>Email Configuration</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Recipient Email</label>
+                <input type="email" class="form-control" id="b2bRecipientEmail" placeholder="info@cinnamonheritage.com">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Service ID</label>
+                <input type="text" class="form-control" id="b2bEmailJSServiceId" placeholder="YOUR_SERVICE_ID">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Template ID</label>
+                <input type="text" class="form-control" id="b2bEmailJSTemplateId" placeholder="YOUR_TEMPLATE_ID">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Public Key</label>
+                <input type="text" class="form-control" id="b2bEmailJSPublicKey" placeholder="YOUR_PUBLIC_KEY">
+              </div>
+            </div>
+            <button class="btn btn-accent mt-3" onclick="saveB2BEmailConfig()"><i class="bi bi-check-lg me-1"></i>Save Email Configuration</button>
+          </div>
+        </div>
+
+        <!-- Enquiries Table -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4">Enquiry ID</th>
+                    <th>Company</th>
+                    <th>Contact Person</th>
+                    <th>Email</th>
+                    <th>Industry</th>
+                    <th>Product</th>
+                    <th>Date</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="b2bEnquiriesTableBody">
+                  <tr>
+                    <td colspan="9" class="text-center py-4 text-muted">Loading enquiries...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cinnamon Villa Editor -->
+      <div class="content-section d-none" id="sec-villa">
+        <h3 class="section-heading">Cinnamon Villa</h3>
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>Villa Section Content</h5>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">Section Title</label>
+              <input type="text" class="form-control" id="villaTitle" placeholder="Cinnamon Villa">
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">Subtitle</label>
+              <input type="text" class="form-control" id="villaSubtitle" placeholder="A Unique Cinnamon Estate Stay Experience">
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-bold">Description Text</label>
+              <textarea class="form-control" id="villaText" rows="4" placeholder="Enter description paragraphs separated by empty lines..."></textarea>
+            </div>
+
+            <!-- Background Image -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Section Background Overlay Image</label>
+              <div class="about-bg-preview mb-3" style="max-width: 400px;">
+                <img id="villaBgPreviewImg" src="images/estate_bg.png" alt="Villa background preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+              </div>
+              <input type="hidden" id="villaBackgroundImage" value="">
+              <input type="file" class="d-none" id="villaBgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('villaBgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+              </button>
+              
+              <div id="villaBgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="villaBgUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="villaBgUploadBar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              
+              <div id="villaBgUploadSuccess" class="upload-success-badge d-none mt-3 text-success small">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Background uploaded! Click Save to apply on the website.</span>
+              </div>
+              <div id="villaBgUploadFailed" class="upload-success-badge d-none mt-3 text-danger small">
+                <i class="bi bi-x-circle-fill"></i>
+                <span id="villaBgUploadFailedMsg">Upload failed. Please try again.</span>
+              </div>
+            </div>
+
+            <!-- Section Image -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Main Section Image</label>
+              <div class="about-bg-preview mb-3" style="max-width: 400px;">
+                <img id="villaImgPreviewImg" src="images/cinnamon_plantlings.jpg" alt="Villa image preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+              </div>
+              <input type="hidden" id="villaImage" value="">
+              <input type="file" class="d-none" id="villaImgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('villaImgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Image
+              </button>
+              
+              <div id="villaImgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="villaImgUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="villaImgUploadBar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              
+              <div id="villaImgUploadSuccess" class="upload-success-badge d-none mt-3 text-success small">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Image uploaded! Click Save to apply on the website.</span>
+              </div>
+              <div id="villaImgUploadFailed" class="upload-success-badge d-none mt-3 text-danger small">
+                <i class="bi bi-x-circle-fill"></i>
+                <span id="villaImgUploadFailedMsg">Upload failed. Please try again.</span>
+              </div>
+            </div>
+
+            <button class="btn btn-accent mt-3" onclick="saveContent('villa')">
+              <i class="bi bi-check-lg me-1"></i> Save Villa Changes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cinnamon Experience Editor -->
+      <div class="content-section d-none" id="sec-experience">
+        <h3 class="section-heading">Cinnamon Experience</h3>
+        
+        <!-- Experience Content -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>Experience Section Content</h5>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Section Title</label>
+              <input type="text" class="form-control" id="experienceSectionTitle" placeholder="Cinnamon Experience">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Subtitle</label>
+              <input type="text" class="form-control" id="experienceSubtitle" placeholder="Discover the Heart of Ceylon Cinnamon">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Description</label>
+              <textarea class="form-control" id="experienceDescription" rows="3" placeholder="Step into our family estate in Galle and experience the authentic journey of Ceylon Cinnamon..."></textarea>
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold">Experience Section Background Wallpaper</label>
+              <div class="about-bg-preview mb-3" style="max-width: 400px;">
+                <img id="experienceBgPreviewImg" src="images/estate_bg.png" alt="Experience background preview" class="img-fluid rounded border shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+              </div>
+              <input type="hidden" id="experienceBackgroundImage" value="">
+              <input type="file" class="d-none" id="experienceBgUpload" accept="image/*">
+              <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="document.getElementById('experienceBgUpload').click()">
+                <i class="bi bi-cloud-upload me-1"></i> Upload New Background
+              </button>
+              <div id="experienceBgUploadProgress" class="upload-progress-wrap d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Uploading to Cloudinary...</span>
+                  <span id="experienceBgUploadPercent" class="fw-bold text-accent">0%</span>
+                </div>
+                <div class="progress upload-progress-bar">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" id="experienceBgUploadBar" role="progressbar" style="width:0%"></div>
+                </div>
+              </div>
+              <div id="experienceBgUploadSuccess" class="upload-success-badge d-none mt-3">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Background uploaded! Click Save Experience Content to apply.</span>
+              </div>
+              <div id="experienceBgUploadFailed" class="alert alert-danger d-none mt-3 small py-2">
+                <i class="bi bi-x-circle-fill me-1"></i> <span id="experienceBgUploadFailedMsg">Upload failed.</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">CTA Title</label>
+              <input type="text" class="form-control" id="experienceCtaTitle" placeholder="Book Your Experience">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">CTA Description</label>
+              <textarea class="form-control" id="experienceCtaDescription" rows="2" placeholder="Discover the heritage, craftsmanship and flavours of authentic Ceylon Cinnamon."></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Button Text</label>
+              <input type="text" class="form-control" id="experienceButtonText" placeholder="Book a Visit">
+            </div>
+            <button class="btn btn-accent" onclick="saveExperienceContent()"><i class="bi bi-check-lg me-1"></i>Save Experience Content</button>
+          </div>
+        </div>
+
+        <!-- Experience Items -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-list me-2"></i>Experience Items</h5>
+            <div class="row g-3" id="experienceItemsList">
+              <!-- Experience items will be loaded here -->
+            </div>
+            <button class="btn btn-accent mt-3" onclick="addExperienceItem()"><i class="bi bi-plus-lg me-1"></i>Add Experience Item</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experience Bookings Management -->
+      <div class="content-section d-none" id="sec-experience-bookings">
+        <h3 class="section-heading">Experience Bookings</h3>
+        
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h6 class="text-muted mb-2">Total Bookings</h6>
+                <h3 class="fw-bold mb-0" id="expTotalBookings">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h6 class="text-muted mb-2">This Month</h6>
+                <h3 class="fw-bold mb-0" id="expThisMonth">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h6 class="text-muted mb-2">Pending Confirmation</h6>
+                <h3 class="fw-bold mb-0" id="expPending">0</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email Configuration -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-envelope me-2"></i>Experience Booking Email Configuration</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Recipient Email</label>
+                <input type="email" class="form-control" id="expRecipientEmail" placeholder="info@cinnamonheritage.com">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Service ID</label>
+                <input type="text" class="form-control" id="expEmailJSServiceId" placeholder="YOUR_SERVICE_ID">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Template ID</label>
+                <input type="text" class="form-control" id="expEmailJSTemplateId" placeholder="YOUR_TEMPLATE_ID">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">EmailJS Public Key</label>
+                <input type="text" class="form-control" id="expEmailJSPublicKey" placeholder="YOUR_PUBLIC_KEY">
+              </div>
+            </div>
+            <button class="btn btn-accent mt-3" onclick="saveExperienceEmailConfig()"><i class="bi bi-check-lg me-1"></i>Save Email Configuration</button>
+          </div>
+        </div>
+
+        <!-- Bookings Table -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4">Booking ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Visit Type</th>
+                    <th>Date</th>
+                    <th>Visitors</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="experienceBookingsTableBody">
+                  <tr>
+                    <td colspan="8" class="text-center py-4 text-muted">Loading bookings...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Popups Editor -->
+      <div id="sec-popups" class="content-section d-none">
+        <h3 class="section-heading">Promo Popups</h3>
+        <div class="row g-4 mb-4">
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-sliders me-2"></i>Popup Settings</h5>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Max Promo Popups (Queue Limit)</label>
+                  <input type="number" class="form-control" id="popupSettingMax" placeholder="5" min="1" max="10">
+                </div>
+                <button class="btn btn-accent w-100" onclick="savePopupSettings()"><i class="bi bi-check-lg me-1"></i>Save Settings</button>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>About Popups</h5>
+                <p class="text-muted small mb-0">
+                  Promo popups display sequential discounted offers to visiting customers. 
+                  You can explicitly toggle which products are included in the rotation below.
+                  If no products are explicitly selected, the system will fall back to displaying all active discounted products.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4" style="width: 80px;">Image</th>
+                    <th>Product Title</th>
+                    <th>Price</th>
+                    <th>Discount</th>
+                    <th>Stock</th>
+                    <th class="text-center" style="width: 180px;">Promo Popup Status</th>
+                  </tr>
+                </thead>
+                <tbody id="popupProductsTable">
+                  <!-- JS populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quality Section Editor -->
+      <div id="sec-quality" class="content-section d-none">
+        <h3 class="section-heading">Quality Assurance</h3>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Section Title</label>
+              <input type="text" class="form-control" id="qualityTitle">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Content</label>
+              <textarea class="form-control" id="qualityText" rows="6"></textarea>
+            </div>
+            <button class="btn btn-accent" onclick="saveContent('quality')"><i class="bi bi-check-lg me-1"></i> Save Changes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Manager -->
+      <div id="sec-faq" class="content-section d-none">
+        <h3 class="section-heading">FAQ Management <button class="btn btn-accent btn-sm float-end" onclick="addFaq()"><i class="bi bi-plus-lg me-1"></i>Add FAQ</button></h3>
+        <div class="alert alert-info small mb-4">
+          <i class="bi bi-info-circle me-1"></i> Manage frequently asked questions. Toggle visibility, reorder, edit or delete items. Changes appear on the website instantly.
+        </div>
+        
+        <!-- FAQ Background Image -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-image me-2"></i>FAQ Section Background Image</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Upload Background Image</label>
+                <input type="file" class="form-control" id="faqBgImageInput" accept="image/*">
+                <div class="form-text small">Recommended size: 1920x1080px. Max 5MB.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Preview</label>
+                <div class="hero-bg-preview">
+                  <img id="faqBgPreview" src="" alt="FAQ Background Preview" style="display: none;">
+                  <div id="faqBgPlaceholder" class="text-center py-4 text-muted">
+                    <i class="bi bi-image display-4 mb-2"></i>
+                    <p class="small mb-0">No background image set</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="faqBgUploadProgress" class="mt-3 d-none">
+              <div class="d-flex justify-content-between small mb-1">
+                <span>Uploading to Cloudinary...</span>
+                <span id="faqBgProgressPercent">0%</span>
+              </div>
+              <div class="upload-progress-bar">
+                <div class="progress-bar" id="faqBgProgressBar" style="width: 0%"></div>
+              </div>
+            </div>
+            <div id="faqBgUploadStatus" class="mt-3 d-none"></div>
+            <button class="btn btn-accent mt-3" onclick="saveFaqBackground()"><i class="bi bi-check-lg me-1"></i>Save Background</button>
+          </div>
+        </div>
+        
+        <div id="faqList">
+          <p class="text-muted"><i class="bi bi-hourglass-split me-1"></i>Loading FAQs...</p>
+        </div>
+      </div>
+
+      <!-- Contact Info Editor -->
+      <div id="sec-contact-info" class="content-section d-none">
+        <h3 class="section-heading">Contact Information</h3>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Address</label>
+                <textarea class="form-control" id="contactAddress" rows="2"></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Phone Number</label>
+                <input type="text" class="form-control" id="contactPhone">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Email</label>
+                <input type="email" class="form-control" id="contactEmailAddr">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">WhatsApp Number (without +)</label>
+                <input type="text" class="form-control" id="contactWhatsapp" placeholder="e.g. 94771234567">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-bold">Contact Subtitle</label>
+                <textarea class="form-control" id="contactSubtitleText" rows="3"></textarea>
+              </div>
+            </div>
+            <button class="btn btn-accent mt-3" onclick="saveContent('contact')"><i class="bi bi-check-lg me-1"></i> Save Changes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders -->
+      <div id="sec-orders" class="content-section d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="section-heading mb-0">Orders</h3>
+          <button class="btn btn-outline-secondary btn-sm" onclick="loadOrders()"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
+        </div>
+
+        <!-- Orders Summary Count Cards -->
+        <div class="row g-2 mb-3 row-cols-2 row-cols-md-4 row-cols-xl-7" id="ordersSummaryRow">
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card active" onclick="filterBySummaryStatus('all')" id="summaryCard-all" style="cursor: pointer;">
+              <div class="text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Total Orders</div>
+              <div class="fs-4 fw-bold text-dark" id="orderCountTotal">0</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card" onclick="filterBySummaryStatus('Pending')" id="summaryCard-Pending" style="cursor: pointer; border-left: 3px solid #ffc107 !important;">
+              <div class="text-warning fw-bold text-uppercase text-dark" style="font-size: 0.7rem;">Pending</div>
+              <div class="fs-4 fw-bold text-warning text-dark" id="orderCountPending">0</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card" onclick="filterBySummaryStatus('In Progress')" id="summaryCard-InProgress" style="cursor: pointer; border-left: 3px solid #fd7e14 !important;">
+              <div class="fw-bold text-uppercase" style="font-size: 0.7rem; color: #fd7e14;">In Progress</div>
+              <div class="fs-4 fw-bold" style="color: #fd7e14;" id="orderCountInProgress">0</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card" onclick="filterBySummaryStatus('Packed')" id="summaryCard-Packed" style="cursor: pointer; border-left: 3px solid #6f42c1 !important;">
+              <div class="fw-bold text-uppercase" style="font-size: 0.7rem; color: #6f42c1;">Packed</div>
+              <div class="fs-4 fw-bold" style="color: #6f42c1;" id="orderCountPacked">0</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card" onclick="filterBySummaryStatus('Shipped')" id="summaryCard-Shipped" style="cursor: pointer; border-left: 3px solid #0d6efd !important;">
+              <div class="text-primary fw-bold text-uppercase" style="font-size: 0.7rem;">Shipped</div>
+              <div class="fs-4 fw-bold text-primary" id="orderCountShipped">0</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card" onclick="filterBySummaryStatus('Completed')" id="summaryCard-Completed" style="cursor: pointer; border-left: 3px solid #198754 !important;">
+              <div class="text-success fw-bold text-uppercase" style="font-size: 0.7rem;">Completed</div>
+              <div class="fs-4 fw-bold text-success" id="orderCountCompleted">0</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card p-2 border-0 bg-light text-center cursor-pointer shadow-sm order-filter-card" onclick="filterBySummaryStatus('Cancelled')" id="summaryCard-Cancelled" style="cursor: pointer; border-left: 3px solid #dc3545 !important;">
+              <div class="text-danger fw-bold text-uppercase" style="font-size: 0.7rem;">Cancelled</div>
+              <div class="fs-4 fw-bold text-danger" id="orderCountCancelled">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders Filters Toolbar -->
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-body p-3">
+            <div class="row g-2 align-items-center">
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-calendar3 me-1"></i>Date / Period</label>
+                <select class="form-select form-select-sm" id="orderPeriodFilter" onchange="onOrderFilterChange()">
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="year">This Year</option>
+                  <option value="custom">Custom Date Range...</option>
+                </select>
+              </div>
+
+              <div class="col-lg-2 col-md-3 d-none" id="orderDateFromCol">
+                <label class="form-label small fw-bold text-muted mb-1">From Date</label>
+                <input type="date" class="form-control form-control-sm" id="orderDateFrom" onchange="onOrderFilterChange()">
+              </div>
+
+              <div class="col-lg-2 col-md-3 d-none" id="orderDateToCol">
+                <label class="form-label small fw-bold text-muted mb-1">To Date</label>
+                <input type="date" class="form-control form-control-sm" id="orderDateTo" onchange="onOrderFilterChange()">
+              </div>
+
+              <div class="col-lg-2 col-md-4">
+                <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-funnel me-1"></i>Status</label>
+                <select class="form-select form-select-sm" id="orderStatusFilter" onchange="onOrderFilterChange()">
+                  <option value="all">All Statuses</option>
+                  <option value="Pending">Pending</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Packed">Packed</option>
+                  <option value="Shipped">Shipped</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              <div class="col-lg-3 col-md-5">
+                <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-search me-1"></i>Search</label>
+                <input type="text" class="form-control form-control-sm" id="orderSearchInput" placeholder="Order ID, customer, phone..." oninput="onOrderFilterChange()">
+              </div>
+
+              <div class="col-lg-2 col-md-3 text-end pt-md-3">
+                <button class="btn btn-outline-secondary btn-sm w-100" onclick="resetOrderFilters()"><i class="bi bi-x-circle me-1"></i>Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4">ID</th>
+                    <th>Customer</th>
+                    <th>Location</th>
+                    <th>Product</th>
+                    <th>Payment</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th class="text-end pe-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersList">
+                  <!-- Orders will be loaded here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accounts & Sales Analysis -->
+      <div id="sec-accounts" class="content-section d-none">
+        <h3 class="section-heading">Accounts & Sales Analysis</h3>
+        
+        <div class="row g-4 mb-4">
+          <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-4">Revenue Trend (Last 30 Days)</h5>
+                <div style="height: 300px;">
+                  <canvas id="revenueChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-4">Payment Methods</h5>
+                <div style="height: 200px;">
+                  <canvas id="paymentChart"></canvas>
+                </div>
+                <div id="paymentStatsList" class="mt-4 small">
+                  <!-- JS populated -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Best Selling Products (by Revenue)</h5>
+                <div class="table-responsive">
+                  <table class="table table-sm align-middle">
+                    <thead>
+                      <tr class="small text-muted">
+                        <th>Product</th>
+                        <th class="text-center">Qty Sold</th>
+                        <th class="text-end">Revenue</th>
+                      </tr>
+                    </thead>
+                    <tbody id="topProductsByRevenue">
+                      <!-- JS populated -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Top Sales Locations (Districts)</h5>
+                <div class="table-responsive">
+                  <table class="table table-sm align-middle">
+                    <thead>
+                      <tr class="small text-muted">
+                        <th>District</th>
+                        <th class="text-center">Orders</th>
+                        <th class="text-end">Revenue</th>
+                      </tr>
+                    </thead>
+                    <tbody id="topLocations">
+                      <!-- JS populated -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Management Section -->
+      <div id="sec-footer-management" class="content-section d-none">
+        <h3 class="section-heading">Footer Management</h3>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Brand Information</h5>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Footer Title</label>
+                  <input type="text" class="form-control" id="footerBrandTitle" placeholder="CINNAMON HERITAGE">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Footer Description</label>
+                  <textarea class="form-control" id="footerBrandDescription" rows="4" placeholder="Premium Ceylon Cinnamon straight from our family estate..."></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Copyright Text</label>
+                  <input type="text" class="form-control" id="footerBrandCopyright" placeholder="Â© 2026 CINNAMON HERITAGE. ALL RIGHTS RESERVED.">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Certifications</label>
+                  <input type="text" class="form-control" id="footerBrandCertifications" placeholder="100% Organic â€¢ Pure Ceylon â€¢ ISO 22000 â€¢ HACCP">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Developer Name</label>
+                  <input type="text" class="form-control" id="developerName" placeholder="Malitha Tishamal">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Developer Website</label>
+                  <input type="url" class="form-control" id="developerWebsite" placeholder="https://malithatishamal.42web.io/?i=1">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Developer LinkedIn</label>
+                  <input type="url" class="form-control" id="developerLinkedin" placeholder="https://linkedin.com/in/malithatishamal">
+                </div>
+                <button class="btn btn-accent w-100" onclick="saveFooterBrandSettings()"><i class="bi bi-check-lg me-1"></i>Save Brand Settings</button>
+              </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt me-2"></i>Contact Information</h5>
+                <div id="contactInfoEditor">
+                  <!-- Contact items will be loaded dynamically -->
+                </div>
+                <button class="btn btn-outline-primary w-100 mt-3" onclick="addContactItem()"><i class="bi bi-plus-lg me-1"></i>Add Contact Item</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-link-45deg me-2"></i>Explore Links</h5>
+                <div id="exploreLinksEditor">
+                  <!-- Explore links will be loaded dynamically -->
+                </div>
+                <button class="btn btn-outline-primary w-100 mt-3" onclick="addExploreLink()"><i class="bi bi-plus-lg me-1"></i>Add Explore Link</button>
+              </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>Policy Links</h5>
+                <div id="policyLinksEditor">
+                  <!-- Policy links will be loaded dynamically -->
+                </div>
+                <button class="btn btn-outline-primary w-100 mt-3" onclick="addPolicyLink()"><i class="bi bi-plus-lg me-1"></i>Add Policy Link</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Media Section -->
+      <div id="sec-social-media" class="content-section d-none">
+        <h3 class="section-heading">Social Media Management</h3>
+        <div class="row g-4">
+          <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-share me-2"></i>Social Media Platforms</h5>
+                <div id="socialMediaEditor">
+                  <!-- Social media platforms will be loaded dynamically -->
+                </div>
+                <button class="btn btn-outline-primary w-100 mt-3" onclick="addSocialPlatform()"><i class="bi bi-plus-lg me-1"></i>Add Social Platform</button>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Available Icons</h5>
+                <div class="small text-muted mb-3">
+                  Bootstrap Icons class names for social media platforms:
+                </div>
+                <ul class="list-unstyled small">
+                  <li><code>bi-facebook</code> - Facebook</li>
+                  <li><code>bi-instagram</code> - Instagram</li>
+                  <li><code>bi-linkedin</code> - LinkedIn</li>
+                  <li><code>bi-tiktok</code> - TikTok</li>
+                  <li><code>bi-youtube</code> - YouTube</li>
+                  <li><code>bi-twitter-x</code> - X (Twitter)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="sec-settings" class="content-section d-none">
+        <h3 class="section-heading">E-commerce Settings</h3>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">General Settings</h5>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Low Stock Threshold</label>
+                  <input type="number" class="form-control" id="settingLowStock" placeholder="10">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Default Delivery Charge (LKR)</label>
+                  <input type="number" class="form-control" id="settingDefaultDelivery" placeholder="350">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Max Promo Popups (Queue Limit)</label>
+                  <input type="number" class="form-control" id="settingMaxPopups" placeholder="5" min="1" max="10">
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="settingCodEnabled">
+                  <label class="form-check-label fw-bold">Enable Cash on Delivery (COD)</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="settingBankTransferEnabled">
+                  <label class="form-check-label fw-bold">Enable Bank Transfer</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="settingOnlineEnabled">
+                  <label class="form-check-label fw-bold">Enable Pay Now (Online Payment)</label>
+                </div>
+
+                <!-- Bank Transfer Details -->
+                <div id="bankDetailsSection" class="border rounded p-3 mb-3 bg-light" style="display:none;">
+                  <h6 class="fw-bold mb-3"><i class="bi bi-bank me-2"></i>Bank Transfer Details</h6>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Bank Name</label>
+                    <input type="text" class="form-control form-control-sm" id="settingBankName" placeholder="e.g. Bank of Ceylon">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Branch</label>
+                    <input type="text" class="form-control form-control-sm" id="settingBankBranch" placeholder="e.g. Galle Branch">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Account Name</label>
+                    <input type="text" class="form-control form-control-sm" id="settingBankAccName" placeholder="e.g. Cinnamon Heritage (Pvt) Ltd">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Account Number</label>
+                    <input type="text" class="form-control form-control-sm" id="settingBankAccNo" placeholder="e.g. 8012345678">
+                  </div>
+                </div>
+
+                <button class="btn btn-accent w-100" onclick="saveSettings()">Save General Settings</button>
+              </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Announcement Bar</h5>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="settingAnnounceEnabled">
+                  <label class="form-check-label fw-bold">Enable Announcement Bar</label>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Announcement Text</label>
+                  <input type="text" class="form-control" id="settingAnnounceText" placeholder="Authentic Ceylon Cinnamon...">
+                </div>
+                <div class="row g-2 mb-3">
+                  <div class="col-6">
+                    <label class="form-label fw-bold small">Btn 1 Text</label>
+                    <input type="text" class="form-control form-control-sm" id="settingAnnounceBtn1Text" placeholder="Explore Products">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label fw-bold small">Btn 1 Link</label>
+                    <input type="text" class="form-control form-control-sm" id="settingAnnounceBtn1Link" placeholder="#products">
+                  </div>
+                </div>
+                <div class="row g-2 mb-4">
+                  <div class="col-6">
+                    <label class="form-label fw-bold small">Btn 2 Text</label>
+                    <input type="text" class="form-control form-control-sm" id="settingAnnounceBtn2Text" placeholder="Partner With Us">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label fw-bold small">Btn 2 Link</label>
+                    <input type="text" class="form-control form-control-sm" id="settingAnnounceBtn2Link" placeholder="#b2b">
+                  </div>
+                </div>
+                <button class="btn btn-accent w-100" onclick="saveAnnouncementSettings()">Save Announcement</button>
+              </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Footer & Social Settings</h5>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">About Text</label>
+                  <textarea class="form-control" id="settingFooterAbout" rows="3" placeholder="Premium Ceylon Cinnamon..."></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Address</label>
+                  <input type="text" class="form-control" id="settingFooterAddress" placeholder="Galle, Sri Lanka">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Phone Number</label>
+                  <input type="text" class="form-control" id="settingFooterPhone" placeholder="+94 77 123 4567">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Email Address</label>
+                  <input type="email" class="form-control" id="settingFooterEmail" placeholder="info@cinnamonheritage.com">
+                </div>
+                <hr>
+                <div class="mb-3">
+                  <label class="form-label fw-bold"><i class="fab fa-facebook text-primary me-2"></i>Facebook URL</label>
+                  <input type="url" class="form-control" id="settingSocialFacebook" placeholder="https://facebook.com/cinnamonheritage">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold"><i class="fab fa-instagram text-danger me-2"></i>Instagram URL</label>
+                  <input type="url" class="form-control" id="settingSocialInstagram" placeholder="https://instagram.com/cinnamonheritage">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold"><i class="fab fa-twitter text-info me-2"></i>Twitter URL</label>
+                  <input type="url" class="form-control" id="settingSocialTwitter" placeholder="https://twitter.com/cinnamonheritage">
+                </div>
+                <button class="btn btn-accent w-100" onclick="saveFooterSettings()">Save Footer Settings</button>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Delivery Rates by District</h5>
+                <div class="table-responsive" style="max-height: 400px;">
+                  <table class="table table-sm table-hover">
+                    <thead class="sticky-top bg-white">
+                      <tr>
+                        <th>District</th>
+                        <th>Rate (LKR)</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="deliveryRatesList">
+                      <!-- Loaded via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div id="sec-messages" class="content-section d-none">
+        <h3 class="section-heading">Contact Messages</h3>
+        <div id="messagesList"></div>
+      </div>
+
+      <!-- Admin Account Management -->
+      <div id="sec-admin-accounts" class="content-section d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="section-heading mb-0">Admin Account Management</h3>
+          <button class="btn btn-outline-secondary btn-sm" onclick="loadAdminAccounts()"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
+        </div>
+        <div class="alert alert-info small mb-4">
+          <i class="bi bi-info-circle me-1"></i> Manage administrator and user accounts. When new admin accounts are created, their status is set to <strong>Pending</strong> by default. Approve pending accounts below so they can log in.
+        </div>
+        <div id="adminAccountsList">
+          <p class="text-muted">Loading accounts...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Product Modal -->
+  <div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add New Product</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Title</label>
+              <input type="text" class="form-control" id="newProdTitle">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Image URL / Upload Image</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="newProdImg" oninput="updateNewProductThumbnail()">
+                <input type="file" class="form-control d-none" id="newProdImgUpload" accept="image/*" onchange="handleNewProductImageUpload()">
+                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('newProdImgUpload').click()"><i class="bi bi-upload"></i></button>
+              </div>
+                           <!-- Thumbnail & Upload Progress UI -->
+              <div class="d-flex align-items-center gap-3 mt-2">
+                <div class="product-thumb-preview border rounded" style="width: 50px; height: 50px; overflow: hidden; background: rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center;">
+                  <img id="newProdThumb" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/></svg>" class="w-100 h-100 object-fit-cover" onerror="handleImageError(this)">
+                </div>
+                <div class="flex-grow-1">
+                  <!-- Progress Bar -->
+                  <div id="newProdUploadProgress" class="upload-progress-wrap d-none">
+                    <div class="d-flex justify-content-between small mb-1">
+                      <span class="text-muted">Uploading to Cloudinary...</span>
+                      <span id="newProdUploadPercent" class="fw-bold text-accent">0%</span>
+                    </div>
+                    <div class="progress upload-progress-bar">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated" id="newProdUploadBar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <!-- Success Badge -->
+                  <div id="newProdUploadSuccess" class="upload-success-badge d-none">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Uploaded!</span>
+                  </div>
+                  <!-- Error Badge -->
+                  <div id="newProdUploadFailed" class="alert alert-danger d-none small py-2 m-0">
+                    <i class="bi bi-x-circle-fill me-1"></i> Upload failed.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Price (LKR)</label>
+              <input type="number" class="form-control" id="newProdPrice" value="0">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Discount (LKR)</label>
+              <input type="number" class="form-control" id="newProdDiscount" value="0">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Stock Qty</label>
+              <input type="number" class="form-control" id="newProdStock" value="10">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Default Delivery</label>
+              <input type="number" class="form-control" id="newProdDelivery" value="350">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Order</label>
+              <input type="number" class="form-control" id="newProdOrder" value="99">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Card Type</label>
+              <select class="form-select" id="newProdCardType">
+                <option value="product" selected>Standard Product</option>
+                <option value="contact">Contact Us (B2B)</option>
+              </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-center">
+              <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" id="newProdIsPopup">
+                <label class="form-check-label small fw-bold" for="newProdIsPopup">Promo Popup</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <label class="form-label small fw-bold">Short Description (card)</label>
+              <textarea class="form-control" id="newProdShort" rows="2"></textarea>
+            </div>
+            <div class="col-md-12">
+              <label class="form-label small fw-bold">Full Description (modal)</label>
+              <textarea class="form-control" id="newProdFull" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-accent" onclick="submitNewProduct()">Save Product</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Details Modal -->
+  <div class="modal fade" id="orderModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Order Details #<span id="modalOrderId"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="modalOrderBody">
+          <!-- Details loaded here -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+    <div id="adminToast" class="toast align-items-center border-0 rounded-0" role="alert">
+      <div class="d-flex">
+        <div class="toast-body fw-bold" id="adminToastMsg"></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <!-- Environment Configuration -->
+  <script src="js/config.js?v=3.4"></script>
+  <script src="js/firebase.js?v=3.4"></script>
+  <script src="js/admin.js?v=3.4"></script>
+  <script src="js/admin-footer.js?v=3.4"></script>
+</body>
+</html>

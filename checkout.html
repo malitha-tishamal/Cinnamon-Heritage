@@ -1,0 +1,940 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buy Ceylon Cinnamon – Secure Checkout | Cinnamon Heritage Sri Lanka</title>
+  <meta name="description" content="Complete your purchase of the best Ceylon Cinnamon products from Cinnamon Heritage, Galle Sri Lanka. Buy authentic Sri Lanka Cinnamon quills, powder &amp; essential oils securely. cinnamonheritage.lk">
+  <meta name="keywords" content="Buy Ceylon Cinnamon, Buy Sri Lanka Cinnamon, Cinnamon Heritage Checkout, Best Cinnamon Online, Order Cinnamon Sri Lanka, cinnamonheritage.lk">
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow">
+  <link rel="canonical" href="https://www.cinnamonheritage.lk/checkout.html">
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <link rel="apple-touch-icon" href="images/logo.png">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.cinnamonheritage.lk/checkout.html">
+  <meta property="og:site_name" content="Cinnamon Heritage">
+  <meta property="og:title" content="Buy Ceylon Cinnamon – Cinnamon Heritage | Best Sri Lanka Cinnamon">
+  <meta property="og:description" content="Secure checkout for the best Ceylon Cinnamon products. Buy Sri Lanka Cinnamon from Cinnamon Heritage – Galle, Sri Lanka. cinnamonheritage.lk">
+  <meta property="og:image" content="https://www.cinnamonheritage.lk/images/cinnamon_spices.jpg">
+
+  <!-- Resource Hints -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      background: #121921;
+      color: #fff;
+      padding-top: 50px;
+    }
+    .checkout-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 20px;
+    }
+    .product-img {
+      width: 100%;
+      max-width: 200px;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: rgba(255,255,255,0.7);
+    }
+    .price-row.total {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 15px;
+      margin-top: 15px;
+    }
+    .btn-buy {
+      background: #a65d25;
+      color: white;
+      border: none;
+      padding: 15px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    .btn-buy:hover {
+      background: #8b4e1f;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .qty-input {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      text-align: center;
+      width: 60px;
+    }
+    .form-control {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+    }
+    .form-control:focus {
+      background: rgba(255,255,255,0.1);
+      border-color: #a65d25;
+      color: white;
+      box-shadow: none;
+    }
+    label {
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 5px;
+    }
+    /* Fix select dropdowns for dark theme */
+    select.form-control {
+      background: rgba(255,255,255,0.08) !important;
+      border: 1px solid rgba(255,255,255,0.15) !important;
+      color: #fff !important;
+      appearance: auto;
+      -webkit-appearance: auto;
+    }
+    select.form-control option {
+      background: #1a1a2e !important;
+      color: #fff !important;
+      padding: 8px;
+    }
+    select.form-control:focus {
+      background: rgba(255,255,255,0.12) !important;
+      border-color: #a65d25 !important;
+      color: #fff !important;
+      box-shadow: 0 0 0 2px rgba(166,93,37,0.2);
+    }
+    select.form-control:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    /* Bank Transfer Details Panel */
+    .bank-details-panel {
+      background: rgba(166,93,37,0.1);
+      border: 1px solid rgba(166,93,37,0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 15px;
+      display: none;
+    }
+    .bank-details-panel.show { display: block; }
+    .bank-details-panel h5 {
+      color: #d4873a;
+      font-family: 'Oswald', sans-serif;
+      margin-bottom: 15px;
+    }
+    .bank-detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .bank-detail-row:last-child { border-bottom: none; }
+    .bank-detail-row .label { color: rgba(255,255,255,0.5); font-size: 0.85rem; }
+    .bank-detail-row .value { color: #fff; font-weight: 600; font-size: 0.9rem; }
+    .copy-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      padding: 2px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-left: 8px;
+    }
+    .copy-btn:hover { background: rgba(166,93,37,0.4); }
+    .payment-radio-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .payment-radio-card:hover,
+    .payment-radio-card.selected {
+      border-color: #a65d25;
+      background: rgba(166,93,37,0.08);
+    }
+    .form-check-input:checked {
+      background-color: #a65d25;
+      border-color: #a65d25;
+    }
+    #loadingOverlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container checkout-container">
+    <div class="text-center mb-5">
+      <h1 class="display-5 fw-bold" style="font-family: 'Oswald', sans-serif;">CHECKOUT</h1>
+      <p class="text-white-50">Complete your order for premium Ceylon cinnamon products</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Product Summary Column -->
+      <div class="col-lg-5">
+        <div class="glass-card" id="productSummary">
+          <div class="text-center mb-4">
+            <img id="productImg" src="images/placeholder.jpg" alt="Product" class="product-img">
+          </div>
+          <h3 id="productTitle" class="h4 mb-2">Loading Product...</h3>
+          <p id="productDesc" class="text-white-50 small mb-4"></p>
+          
+          <div class="d-flex align-items-center mb-4">
+            <span class="me-3">Quantity:</span>
+            <div class="input-group" style="width: 140px;">
+              <button class="btn btn-outline-light btn-sm" onclick="changeQty(-1)">-</button>
+              <input type="number" id="quantity" value="1" min="1" class="form-control qty-input" readonly>
+              <button class="btn btn-outline-light btn-sm" onclick="changeQty(1)">+</button>
+            </div>
+            <div class="ms-3 small text-white-50">
+              Available: <span id="stockQty">0</span>
+            </div>
+          </div>
+
+          <div class="price-details mt-4">
+            <div class="price-row">
+              <span>Subtotal</span>
+              <span id="subtotal">LKR 0.00</span>
+            </div>
+            <div class="price-row">
+              <span>Discount</span>
+              <span id="discount" class="text-success">- LKR 0.00</span>
+            </div>
+            <div class="price-row">
+              <span>Delivery Fee</span>
+              <span id="deliveryCharge">LKR 0.00</span>
+            </div>
+            <div class="price-row total">
+              <span>Total</span>
+              <span id="totalAmount">LKR 0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checkout Form Column -->
+      <div class="col-lg-7">
+        <div class="glass-card">
+          <h4 class="mb-4">Shipping Information</h4>
+          <form id="checkoutForm">
+            <div class="row g-3">
+              <div class="col-md-12">
+                <label for="name">Full Name</label>
+                <input type="text" class="form-control" id="name" required placeholder="John Doe">
+              </div>
+              <div class="col-md-6">
+                <label for="email">Email Address</label>
+                <input type="email" class="form-control" id="email" required placeholder="john@example.com">
+              </div>
+              <div class="col-md-6">
+                <label for="phone">Phone Number</label>
+                <input type="tel" class="form-control" id="phone" required placeholder="+94 7X XXX XXXX">
+              </div>
+              <div class="col-md-6">
+                <label for="province">Province</label>
+                <select class="form-control" id="province" required>
+                  <option value="">Select Province</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="district">District</label>
+                <select class="form-control" id="district" required disabled>
+                  <option value="">Select District</option>
+                </select>
+              </div>
+              <div class="col-md-12">
+                <label for="address">Shipping Address</label>
+                <textarea class="form-control" id="address" rows="3" required placeholder="House No, Street, City, ZIP"></textarea>
+              </div>
+            </div>
+
+            <h4 class="mb-3 mt-5">Payment Method</h4>
+            <div id="paymentMethods">
+              <div class="payment-radio-card d-none" id="codContainer" onclick="selectPayment('COD')">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="paymentMethod" id="payCod" value="COD">
+                  <label class="form-check-label text-white" for="payCod">
+                    <i class="fas fa-truck me-2" style="color:#a65d25;"></i> Cash on Delivery
+                    <br><small class="text-white-50">Pay when your order arrives</small>
+                  </label>
+                </div>
+              </div>
+              <div class="payment-radio-card d-none" id="bankTransferContainer" onclick="selectPayment('BANK')">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="paymentMethod" id="payBank" value="BANK">
+                  <label class="form-check-label text-white" for="payBank">
+                    <i class="fas fa-university me-2" style="color:#a65d25;"></i> Bank Transfer
+                    <br><small class="text-white-50">Transfer to our bank account</small>
+                  </label>
+                </div>
+              </div>
+              <div class="payment-radio-card d-none" id="payNowContainer" onclick="selectPayment('ONLINE')">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="paymentMethod" id="payNow" value="ONLINE">
+                  <label class="form-check-label text-white" for="payNow">
+                    <i class="fas fa-credit-card me-2" style="color:#a65d25;"></i> Pay Now (Card/Online)
+                    <br><small class="text-white-50">Secure online payment</small>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bank Transfer Details -->
+            <div class="bank-details-panel" id="bankDetailsPanel">
+              <h5><i class="fas fa-university me-2"></i>Bank Transfer Details</h5>
+              <p class="text-white-50 small mb-3">Please transfer the total amount to the following bank account and provide the reference number below.</p>
+              <div class="bank-detail-row">
+                <span class="label">Bank Name</span>
+                <span class="value" id="bankName">Bank of Ceylon</span>
+              </div>
+              <div class="bank-detail-row">
+                <span class="label">Branch</span>
+                <span class="value" id="bankBranch">Galle Branch</span>
+              </div>
+              <div class="bank-detail-row">
+                <span class="label">Account Name</span>
+                <span class="value" id="bankAccName">Cinnamon Heritage (Pvt) Ltd</span>
+              </div>
+              <div class="bank-detail-row">
+                <span class="label">Account Number</span>
+                <span class="value">
+                  <span id="bankAccNo">8012345678</span>
+                  <button class="copy-btn" onclick="copyToClipboard('bankAccNo')"><i class="fas fa-copy"></i> Copy</button>
+                </span>
+              </div>
+              <div class="bank-detail-row">
+                <span class="label">Amount to Transfer</span>
+                <span class="value" style="color:#d4873a;font-size:1.1rem;" id="bankTransferAmount">LKR 0.00</span>
+              </div>
+              <div class="mt-3">
+                <label for="bankRefNo" class="small">Payment Reference / Slip Number</label>
+                <input type="text" class="form-control mt-1" id="bankRefNo" placeholder="Enter your bank transfer reference">
+              </div>
+            </div>
+            
+            <div class="mt-4">
+              <button type="submit" class="btn btn-buy" id="submitBtn">Place Order Now</button>
+            </div>
+            <div class="text-center mt-3">
+              <a href="index.html" class="text-white-50 small text-decoration-none"><i class="fas fa-arrow-left me-1"></i> Back to Home</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="loadingOverlay">
+    <div class="text-center">
+      <div class="spinner-border text-light mb-2" role="status"></div>
+      <p>Processing your order...</p>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
+    <div id="checkoutToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body"></div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <!-- Environment Configuration -->
+  <script src="js/config.js"></script>
+  <script src="js/firebase.js"></script>
+  <script>
+    let currentProduct = null;
+    let qty = 1;
+    let deliveryRates = [];
+    let siteSettings = {};
+    let selectedDeliveryCharge = 0;
+    let isCartCheckout = false;
+    let cartItemsList = [];
+
+    async function initCheckout() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('product_id');
+      
+      // If productId is present and not empty, single product checkout; otherwise cart checkout
+      if (productId && productId.trim() !== '') {
+        isCartCheckout = false;
+      } else {
+        isCartCheckout = true;
+      }
+
+      // Show a loading overlay while data is being fetched
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      if (loadingOverlay) loadingOverlay.style.display = 'flex';
+
+      try {
+        await Promise.all([
+          isCartCheckout ? fetchCartData() : fetchProduct(productId),
+          fetchDeliveryRates(),
+          fetchSettings()
+        ]);
+        setupLocationSelectors();
+        await prefillCustomerDetails();
+        updateCalculations();
+      } catch (err) {
+        console.error('Checkout init error:', err);
+        showToast('Failed to load checkout details. Please check your connection.', 'danger');
+      } finally {
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
+      }
+    }
+
+    async function prefillCustomerDetails() {
+      try {
+        const status = await authStatus();
+        if (status && status.isLoggedIn && status.profile) {
+          const nameInput = document.getElementById('name');
+          const emailInput = document.getElementById('email');
+          const phoneInput = document.getElementById('phone');
+          
+          if (nameInput) nameInput.value = (status.profile.first_name ? `${status.profile.first_name} ${status.profile.last_name}` : status.profile.username) || '';
+          if (emailInput) emailInput.value = status.profile.email || '';
+          if (phoneInput) phoneInput.value = status.profile.mobile || '';
+          
+          // Prefill province and district (city)
+          const userCity = status.profile.city || '';
+          if (userCity && deliveryRates && deliveryRates.length > 0) {
+            const matchedRate = deliveryRates.find(r => r.district && r.district.toLowerCase() === userCity.toLowerCase());
+            if (matchedRate) {
+              const provinceSelect = document.getElementById('province');
+              const districtSelect = document.getElementById('district');
+              
+              if (provinceSelect) provinceSelect.value = matchedRate.province;
+              
+              if (districtSelect) {
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+                districtSelect.disabled = false;
+                deliveryRates.filter(r => r.province === matchedRate.province).forEach(d => {
+                  const opt = document.createElement('option');
+                  opt.value = d.district;
+                  opt.textContent = d.district;
+                  if (d.district.toLowerCase() === userCity.toLowerCase()) {
+                    opt.selected = true;
+                  }
+                  districtSelect.appendChild(opt);
+                });
+                districtSelect.value = matchedRate.district;
+              }
+              selectedDeliveryCharge = parseFloat(matchedRate.rate || 0);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("prefillCustomerDetails error:", err);
+      }
+    }
+
+    async function fetchCartData() {
+      try {
+        let items = [];
+        
+        // 1. Read from localStorage immediately
+        try {
+          items = JSON.parse(localStorage.getItem('guestCart') || '[]');
+        } catch (e) {
+          items = [];
+        }
+
+        // 2. Check if logged-in user has saved items in Firestore
+        try {
+          const status = await authStatus();
+          if (status && status.isLoggedIn && status.userId) {
+            const remoteItems = await getCartItems(status.userId);
+            if (remoteItems && remoteItems.length > 0) {
+              items = remoteItems;
+            }
+          }
+        } catch (authErr) {
+          console.warn("Auth check in fetchCartData:", authErr);
+        }
+
+        if (!items || items.length === 0) {
+          renderEmptyCartNotice("Your cart is currently empty.");
+          return;
+        }
+
+        let allProds = [];
+        try {
+          allProds = await getProducts();
+        } catch (e) {
+          allProds = [];
+        }
+
+        cartItemsList = [];
+        for (const item of items) {
+          let prod = (allProds || []).find(p => String(p.id) === String(item.product_id));
+          if (!prod) {
+            try {
+              prod = await getProduct(item.product_id);
+            } catch (e) {}
+          }
+          if (prod) {
+            cartItemsList.push({
+              product: prod,
+              quantity: item.quantity || 1
+            });
+          }
+        }
+
+        if (cartItemsList.length === 0) {
+          renderEmptyCartNotice("Cart items could not be loaded. Please re-add them from shop.");
+          return;
+        }
+
+        renderCartSummary();
+      } catch (err) {
+        console.error("Cart loading error:", err);
+        renderEmptyCartNotice("An error occurred while loading your cart.");
+      }
+    }
+
+    function renderEmptyCartNotice(msg) {
+      const summaryCard = document.getElementById('productSummary');
+      if (!summaryCard) return;
+      summaryCard.innerHTML = `
+        <h3 class="h4 mb-4 border-bottom border-secondary pb-3" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-shopping-basket me-2 text-accent"></i>ORDER SUMMARY</h3>
+        <div class="text-center py-4">
+          <i class="fas fa-shopping-cart fa-2x mb-3 text-white-50"></i>
+          <p class="text-white mb-3">${msg}</p>
+          <a href="index.html" class="btn btn-outline-warning btn-sm rounded-0"><i class="fas fa-arrow-left me-1"></i> Return to Shop</a>
+        </div>`;
+      
+      const submitBtn = document.getElementById('submitBtn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+        submitBtn.style.cursor = 'not-allowed';
+      }
+    }
+
+    function renderCartSummary() {
+      const summaryCard = document.getElementById('productSummary');
+      if (!summaryCard) return;
+
+      let html = `
+        <h3 class="h4 mb-4 border-bottom border-secondary pb-3" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-shopping-basket me-2 text-accent"></i>ORDER SUMMARY</h3>
+        <div class="cart-items-summary-list mb-4" style="max-height: 250px; overflow-y: auto;">`;
+
+      cartItemsList.forEach(item => {
+        const price = parseFloat(item.product.price || 0);
+        const discount = parseFloat(item.product.discount || 0);
+        
+        html += `
+          <div class="d-flex align-items-center gap-3 mb-3 border-bottom border-secondary pb-3 pe-2">
+            <img src="${item.product.image_url}" alt="${item.product.title}" class="rounded" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid rgba(255,255,255,0.15);">
+            <div class="flex-grow-1 min-w-0">
+              <h5 class="small mb-1 text-white text-truncate fw-bold">${item.product.title}</h5>
+              <small class="text-white-50">LKR ${price.toLocaleString()} x ${item.quantity}</small>
+            </div>
+            <div class="text-end text-accent fw-bold small">
+              LKR ${(price * item.quantity).toLocaleString()}
+            </div>
+          </div>`;
+      });
+
+      html += `
+        </div>
+        <div class="price-details">
+          <div class="price-row">
+            <span>Subtotal</span>
+            <span id="subtotal">LKR 0.00</span>
+          </div>
+          <div class="price-row">
+            <span>Discount</span>
+            <span id="discount" class="text-success">- LKR 0.00</span>
+          </div>
+          <div class="price-row">
+            <span>Delivery Fee</span>
+            <span id="deliveryCharge">LKR 0.00</span>
+          </div>
+          <div class="price-row total">
+            <span>Total</span>
+            <span id="totalAmount">LKR 0.00</span>
+          </div>
+        </div>`;
+
+      summaryCard.innerHTML = html;
+    }
+
+    async function fetchProduct(productId) {
+      try {
+        currentProduct = await getProduct(productId);
+        if (!currentProduct) throw new Error('Not found');
+        
+        // Product loaded successfully
+        renderProduct();
+      } catch (err) {
+        console.error("fetchProduct error:", err);
+        const summaryCard = document.getElementById('productSummary');
+        if (summaryCard) {
+          summaryCard.innerHTML = `
+            <h3 class="h4 mb-4 border-bottom border-secondary pb-3" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-exclamation-triangle me-2 text-warning"></i>PRODUCT NOTICE</h3>
+            <div class="text-center py-4">
+              <i class="fas fa-box-open fa-2x mb-3 text-white-50"></i>
+              <p class="text-white mb-3">Product details could not be found or are currently unavailable.</p>
+              <a href="index.html" class="btn btn-outline-warning btn-sm rounded-0"><i class="fas fa-arrow-left me-1"></i> Return to Shop</a>
+            </div>`;
+        }
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.5';
+          submitBtn.style.cursor = 'not-allowed';
+        }
+      }
+    }
+
+    async function fetchDeliveryRates() {
+      try { deliveryRates = await getDeliveryRates(); }
+      catch (e) { console.error('Failed to fetch delivery rates'); }
+    }
+
+
+    async function fetchSettings() {
+      try {
+        // Direct Firestore read — NO cache at all — always gets the latest admin settings
+        const snapshot = await db.collection('site_settings').get();
+        siteSettings = {};
+        snapshot.forEach(doc => { siteSettings[doc.id] = doc.data().value; });
+        // Also update sessionStorage so other functions (delivery rates etc) get fresh data
+        sessionStorage.setItem('cache_settings', JSON.stringify(siteSettings));
+
+        const codContainer          = document.getElementById('codContainer');
+        const bankTransferContainer = document.getElementById('bankTransferContainer');
+        const payNowContainer       = document.getElementById('payNowContainer');
+        const paymentMethods        = document.getElementById('paymentMethods');
+
+        const codEnabled    = siteSettings.cod_enabled          === '1';
+        const bankEnabled   = siteSettings.bank_transfer_enabled === '1';
+        const onlineEnabled = siteSettings.online_pay_enabled    === '1';
+
+        if (codEnabled)    codContainer.classList.remove('d-none');
+        else               codContainer.classList.add('d-none');
+
+        if (bankEnabled)   bankTransferContainer.classList.remove('d-none');
+        else               bankTransferContainer.classList.add('d-none');
+
+        if (onlineEnabled) payNowContainer.classList.remove('d-none');
+        else               payNowContainer.classList.add('d-none');
+
+        // Bank details
+        if (siteSettings.bank_name)     document.getElementById('bankName').textContent    = siteSettings.bank_name;
+        if (siteSettings.bank_branch)   document.getElementById('bankBranch').textContent  = siteSettings.bank_branch;
+        if (siteSettings.bank_acc_name) document.getElementById('bankAccName').textContent = siteSettings.bank_acc_name;
+        if (siteSettings.bank_acc_no)   document.getElementById('bankAccNo').textContent   = siteSettings.bank_acc_no;
+
+        selectedDeliveryCharge = parseFloat(siteSettings.default_delivery_charge || 350);
+
+        // Clear all radio selections first, then auto-select first enabled method
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(r => r.checked = false);
+
+        if (codEnabled)         selectPayment('COD');
+        else if (bankEnabled)   selectPayment('BANK');
+        else if (onlineEnabled) selectPayment('ONLINE');
+        else {
+          if (paymentMethods) {
+            paymentMethods.innerHTML = '<div class="alert alert-warning text-dark"><i class="fas fa-exclamation-triangle me-2"></i>No payment methods are currently available. Please contact us.</div>';
+          }
+          const submitBtn = document.getElementById('submitBtn');
+          if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; }
+        }
+      } catch (e) { console.error('Failed to fetch settings from Firestore:', e); }
+    }
+
+    function selectPayment(method) {
+      document.querySelectorAll('.payment-radio-card').forEach(c => c.classList.remove('selected'));
+      const bankPanel = document.getElementById('bankDetailsPanel');
+      const submitBtn = document.getElementById('submitBtn');
+
+      if (method === 'COD') {
+        document.getElementById('payCod').checked = true;
+        document.getElementById('codContainer').classList.add('selected');
+        bankPanel.classList.remove('show');
+        submitBtn.textContent = 'Place Order Now';
+      } else if (method === 'BANK') {
+        document.getElementById('payBank').checked = true;
+        document.getElementById('bankTransferContainer').classList.add('selected');
+        bankPanel.classList.add('show');
+        updateBankAmount();
+        submitBtn.textContent = 'Confirm Bank Transfer Order';
+      } else if (method === 'ONLINE') {
+        document.getElementById('payNow').checked = true;
+        document.getElementById('payNowContainer').classList.add('selected');
+        bankPanel.classList.remove('show');
+        submitBtn.textContent = 'Pay Now';
+      }
+    }
+
+    function updateBankAmount() {
+      let subtotal = 0;
+      let discount = 0;
+      let delivery = selectedDeliveryCharge;
+
+      if (isCartCheckout) {
+        cartItemsList.forEach(item => {
+          subtotal += parseFloat(item.product.price || 0) * (item.quantity || 1);
+          discount += parseFloat(item.product.discount || 0) * (item.quantity || 1);
+        });
+      } else {
+        if (!currentProduct) return;
+        subtotal = (parseFloat(currentProduct.price) || 0) * qty;
+        discount = (parseFloat(currentProduct.discount) || 0) * qty;
+      }
+      
+      const total = subtotal - discount + delivery;
+      const bankAmountEl = document.getElementById('bankTransferAmount');
+      if (bankAmountEl) {
+        bankAmountEl.textContent = `LKR ${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      }
+    }
+
+    function copyToClipboard(elementId) {
+      const text = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard!', 'success');
+      }).catch(() => {
+        const input = document.createElement('input');
+        input.value = text;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast('Copied!', 'success');
+      });
+    }
+
+    function setupLocationSelectors() {
+      const provinceSelect = document.getElementById('province');
+      const districtSelect = document.getElementById('district');
+      const provinces = [...new Set(deliveryRates.map(r => r.province))];
+      provinces.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p; opt.textContent = p;
+        provinceSelect.appendChild(opt);
+      });
+
+      provinceSelect.addEventListener('change', () => {
+        const province = provinceSelect.value;
+        districtSelect.innerHTML = '<option value="">Select District</option>';
+        districtSelect.disabled = !province;
+        if (province) {
+          deliveryRates.filter(r => r.province === province).forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.district; opt.textContent = d.district;
+            districtSelect.appendChild(opt);
+          });
+        }
+        updateCalculations();
+      });
+
+      districtSelect.addEventListener('change', () => {
+        const rateObj = deliveryRates.find(r => r.district === districtSelect.value);
+        selectedDeliveryCharge = rateObj ? parseFloat(rateObj.rate) : parseFloat(siteSettings.default_delivery_charge || 350);
+        updateCalculations();
+      });
+    }
+
+    function renderProduct() {
+      document.getElementById('productImg').src = currentProduct.image_url;
+      document.getElementById('productTitle').innerText = currentProduct.title;
+      document.getElementById('productDesc').innerText = currentProduct.short_desc;
+      document.getElementById('stockQty').innerText = currentProduct.stock_quantity;
+      if (currentProduct.stock_quantity <= 0) {
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true; btn.innerText = 'OUT OF STOCK'; btn.style.background = '#666';
+      }
+    }
+
+    function changeQty(delta) {
+      if (!currentProduct) return;
+      qty = Math.max(1, Math.min(currentProduct.stock_quantity, qty + delta));
+      document.getElementById('quantity').value = qty;
+      updateCalculations();
+    }
+
+    function updateCalculations() {
+      let subtotal = 0;
+      let discount = 0;
+      let delivery = selectedDeliveryCharge;
+
+      if (isCartCheckout) {
+        cartItemsList.forEach(item => {
+          subtotal += parseFloat(item.product.price) * item.quantity;
+          discount += parseFloat(item.product.discount || 0) * item.quantity;
+        });
+      } else {
+        if (!currentProduct) return;
+        subtotal = currentProduct.price * qty;
+        discount = (parseFloat(currentProduct.discount) || 0) * qty;
+      }
+
+      const total = subtotal - discount + delivery;
+      document.getElementById('subtotal').innerText = `LKR ${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      document.getElementById('discount').innerText = `- LKR ${discount.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      document.getElementById('deliveryCharge').innerText = `LKR ${delivery.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      document.getElementById('totalAmount').innerText = `LKR ${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      updateBankAmount();
+    }
+
+    document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD';
+
+      // Validate bank ref if bank transfer
+      if (paymentMethod === 'BANK') {
+        const bankRef = document.getElementById('bankRefNo').value.trim();
+        if (!bankRef) {
+          showToast('Please enter the bank transfer reference number.', 'danger');
+          document.getElementById('bankRefNo').focus();
+          return;
+        }
+      }
+
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      loadingOverlay.style.display = 'flex';
+
+      let orderData = {
+        customer_name: document.getElementById('name').value,
+        customer_email: document.getElementById('email').value,
+        customer_phone: document.getElementById('phone').value,
+        shipping_address: document.getElementById('address').value,
+        province: document.getElementById('province').value,
+        district: document.getElementById('district').value,
+        payment_method: paymentMethod,
+        bank_reference: paymentMethod === 'BANK' ? document.getElementById('bankRefNo').value.trim() : null,
+        delivery_charge: selectedDeliveryCharge
+      };
+
+      if (isCartCheckout) {
+        let subtotal = 0;
+        let discount_total = 0;
+        let orderItems = [];
+
+        cartItemsList.forEach(item => {
+          subtotal += parseFloat(item.product.price) * item.quantity;
+          discount_total += parseFloat(item.product.discount || 0) * item.quantity;
+          orderItems.push({
+            product_id:   item.product.id,
+            product_name: item.product.title,
+            quantity:     item.quantity,
+            unit_price:   parseFloat(item.product.price)
+          });
+        });
+
+        orderData.subtotal = subtotal;
+        orderData.discount_total = discount_total;
+        orderData.total_amount = subtotal - discount_total + selectedDeliveryCharge;
+        orderData.order_items = orderItems;
+      } else {
+        orderData.product_id = currentProduct.id;
+        orderData.quantity = qty;
+        orderData.subtotal = currentProduct.price * qty;
+        orderData.discount_total = (parseFloat(currentProduct.discount) || 0) * qty;
+        orderData.total_amount = (currentProduct.price * qty) - ((parseFloat(currentProduct.discount) || 0) * qty) + selectedDeliveryCharge;
+        orderData.product_name = currentProduct.title;
+        orderData.unit_price = currentProduct.price;
+      }
+
+      try {
+        const result = await placeOrder(orderData);
+        if (result.success) {
+          // Clear cart items automatically
+          const status = await authStatus();
+          if (isCartCheckout) {
+            if (status && status.isLoggedIn && status.userId) {
+              await saveCartItems(status.userId, []);
+            }
+            localStorage.removeItem('guestCart');
+          } else if (currentProduct) {
+            // Remove single purchased product from cart if present
+            const prodId = String(currentProduct.id);
+            if (status && status.isLoggedIn && status.userId) {
+              try {
+                const currentCart = await getCartItems(status.userId);
+                const updatedCart = currentCart.filter(item => String(item.product_id || item.product?.id) !== prodId);
+                await saveCartItems(status.userId, updatedCart);
+              } catch (e) { console.warn(e); }
+            }
+            try {
+              let guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+              guestCart = guestCart.filter(item => String(item.product_id || item.product?.id) !== prodId);
+              localStorage.setItem('guestCart', JSON.stringify(guestCart));
+            } catch (e) { console.warn(e); }
+          }
+
+          // Save latest placed order info for guest / customer tracking
+          localStorage.setItem('latest_order_id', result.order_id);
+          localStorage.setItem('customer_order_email', orderData.customer_email || '');
+
+          showToast('Order placed successfully! Redirecting to order tracking...', 'success');
+          setTimeout(() => {
+            window.location.href = `index.html?order_placed=${encodeURIComponent(result.order_id)}`;
+          }, 1500);
+        } else {
+          showToast(result.error || 'Failed to place order', 'danger');
+        }
+      } catch (err) {
+        showToast('Network error. Please try again.', 'danger');
+      } finally {
+        loadingOverlay.style.display = 'none';
+      }
+    });
+
+    function showToast(message, type = 'info') {
+      const toastEl = document.getElementById('checkoutToast');
+      const toastBody = toastEl.querySelector('.toast-body');
+      toastEl.className = `toast align-items-center border-0 bg-${type} text-white show`;
+      toastBody.innerText = message;
+      new bootstrap.Toast(toastEl).show();
+    }
+
+    initCheckout();
+  </script>
+</body>
+</html>
