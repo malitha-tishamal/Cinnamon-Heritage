@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cinnamon Heritage | Full Detailed Project Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:#fff;color:#1a1a2e;font-size:13px;line-height:1.7}
+  .cover{background:linear-gradient(135deg,#a65d25 0%,#d4873a 50%,#e0a96d 100%);color:#fff;padding:80px 60px;min-height:320px;display:flex;flex-direction:column;justify-content:center;page-break-after:always}
+  .cover h1{font-size:42px;font-weight:800;letter-spacing:-1px;margin-bottom:8px}
+  .cover .subtitle{font-size:18px;font-weight:300;opacity:.85;margin-bottom:32px}
+  .cover-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+  .cover-item{background:rgba(255,255,255,.15);border-radius:10px;padding:12px 16px;backdrop-filter:blur(8px)}
+  .cover-item .label{font-size:10px;text-transform:uppercase;letter-spacing:1px;opacity:.7}
+  .cover-item .value{font-size:13px;font-weight:600;margin-top:2px}
+  .badge-row{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+  .badge{background:rgba(255,255,255,.2);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:500;border:1px solid rgba(255,255,255,.3)}
+  .content{padding:40px 60px}
+  h2{font-size:20px;font-weight:700;color:#a65d25;border-bottom:3px solid #a65d25;padding-bottom:8px;margin:32px 0 16px}
+  h3{font-size:16px;font-weight:700;color:#1a1a2e;margin:28px 0 10px}
+  h4{font-size:13px;font-weight:600;color:#a65d25;margin:16px 0 8px}
+  p{margin-bottom:12px;color:#2d2d44; text-align: justify;}
+  ul,ol{margin:8px 0 12px 20px;color:#2d2d44}
+  li{margin-bottom:4px}
+  pre{background:#fff8f0;border:1px solid #f0e6dc;border-radius:8px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:11px;overflow-x:auto;margin:12px 0;color:#2d2d44;white-space:pre-wrap;word-break:break-word}
+  code{background:#fff8f0;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#a65d25}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:12px}
+  th{background:#a65d25;color:#fff;padding:10px 12px;text-align:left;font-weight:600}
+  td{padding:9px 12px;border-bottom:1px solid #fcf9f5;color:#2d2d44; vertical-align: top;}
+  tr:nth-child(even) td{background:#fdfaf6}
+  tr:hover td{background:#faf3eb}
+  .section-block{background:#fdfaf6;border-left:4px solid #d4873a;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0}
+  .highlight{color:#a65d25;font-weight:600}
+  .footer{text-align:center;padding:24px;color:#888;font-size:11px;border-top:1px solid #eee;margin-top:32px}
+  @media print{
+    body{font-size:11px}
+    .cover{padding:60px 40px}
+    .content{padding:30px 40px}
+    h2{page-break-before:auto}
+    pre{font-size:10px}
+    table{font-size:11px}
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <h1>Cinnamon Heritage</h1>
+  <div class="subtitle">Ultimate System Breakdown — Full Detailed Project Report</div>
+  <p style="color: rgba(255,255,255,0.85); font-size: 15px; margin-bottom: 30px;">Complete documentation of every page, every section, and every function across the User, Admin, and Backend environments.</p>
+  <div class="cover-grid">
+    <div class="cover-item"><div class="label">Platform</div><div class="value">Web (Responsive HTML/CSS/JS)</div></div>
+    <div class="cover-item"><div class="label">Backend</div><div class="value">Node.js (Express) &amp; MySQL</div></div>
+    <div class="cover-item"><div class="label">Version</div><div class="value">1.0.0</div></div>
+    <div class="cover-item"><div class="label">Developer</div><div class="value">Malitha Tishamal</div></div>
+    <div class="cover-item"><div class="label">Institution</div><div class="value">Cinnamon Heritage</div></div>
+    <div class="cover-item"><div class="label">SDK</div><div class="value">Node.js ≥ 18.0.0</div></div>
+  </div>
+  <div class="badge-row">
+    <span class="badge">Windows</span><span class="badge">Linux</span><span class="badge">macOS</span>
+    <span class="badge">May 2026</span>
+  </div>
+</div>
+
+<div class="content">
+
+<h2>1. Project Overview</h2>
+<p>The Cinnamon Heritage platform is a high-end, role-based web application designed to digitize the agricultural supply chain and retail operations of a Ceylon Cinnamon estate. It bridges the gap between traditional processing and modern digital commerce. The system features an immersive public storytelling interface, an automated e-commerce checkout with real-time stock management, and a robust administrative dashboard managing products, content (CMS), orders, and site settings.</p>
+
+<h2>2. Public Facing / User Pages</h2>
+
+<h3>2.1 Main Landing Page (index.html)</h3>
+<p><strong>Purpose:</strong> The primary storefront and brand showcase for customers.</p>
+
+<h4>Sections Breakdown:</h4>
+<ul>
+<li><strong>Preloader:</strong> A spinning loader that masks the screen while data is fetched.</li>
+<li><strong>Navbar:</strong> Sticky glassmorphism header with smooth-scroll anchor links.</li>
+<li><strong>Hero (Slider/Banner):</strong> The main visual entrance. Contains dynamic titles and subtitles loaded from the database.</li>
+<li><strong>About Us:</strong> Details the history of the Galle estate with an immersive background.</li>
+<li><strong>Factory:</strong> Highlights processing capabilities and ISO certifications.</li>
+<li><strong>Process Steps:</strong> 5 interactive cards (Harvesting, Washing, Peeling, Drying, Packing).</li>
+<li><strong>Products (Shop):</strong> The core e-commerce grid showing available cinnamon products.</li>
+<li><strong>Quality Assurance:</strong> Static section detailing lab testing and purity.</li>
+<li><strong>Contact:</strong> A communication form and contact details (Address, Phone, Email).</li>
+<li><strong>Floating WhatsApp:</strong> A fixed button for instant chat routing.</li>
+</ul>
+
+<h4>Frontend Functions (js/main.js):</h4>
+<table>
+<tr><th>Function Name</th><th>Detailed Explanation</th></tr>
+<tr><td><code>dataPromises</code></td><td>Fires immediately on load to fetch <code>/api/content</code>, <code>/api/products</code>, and <code>/api/settings</code> concurrently to speed up rendering.</td></tr>
+<tr><td><code>applyHeroContent()</code></td><td>Extracts text from the DB content payload, injects it into the Hero DOM elements, and triggers CSS fade-in animations. Uses fallback text if DB fails.</td></tr>
+<tr><td><code>renderProducts(products)</code></td><td>Iterates through inventory data. Builds HTML cards dynamically. Calculates original prices if discounts exist. Appends "Low Stock", "Out of Stock", or "Top Seller" badges based on <code>stock_quantity</code> and <code>total_sales</code>.</td></tr>
+<tr><td><code>showSkeletons()</code></td><td>Renders placeholder UI skeleton cards while waiting for product data from the server.</td></tr>
+<tr><td><code>applySettings(settings)</code></td><td>Injects dynamic Footer details (Social media links, physical addresses) fetched from site settings.</td></tr>
+<tr><td><code>Modal Listeners</code></td><td>Attaches click events to Process Cards and Product Cards. When clicked, it populates <code>processModal</code> with full descriptions, high-res images, and pricing info, then displays the overlay with a hidden scrollbar.</td></tr>
+<tr><td><code>Contact Form Submit</code></td><td>Intercepts the standard HTML form submission. Collects name, email, subject, and message. Sends a POST request to <code>/api/contact</code> (or EmailJS). Displays a success/error Toast notification.</td></tr>
+<tr><td><code>showToast()</code></td><td>Utility function utilizing Bootstrap's Toast API to show temporary alerts on screen.</td></tr>
+<tr><td><code>initScrollAnimations()</code></td><td>Uses JavaScript <code>IntersectionObserver</code>. It watches specific DOM elements and adds a <code>visible</code> class when they enter the viewport, triggering CSS slide-up/fade-in effects.</td></tr>
+</table>
+
+<h3>2.2 Order &amp; Checkout Page (checkout.html)</h3>
+<p><strong>Purpose:</strong> The transactional portal where users finalize purchases.</p>
+
+<h4>Sections Breakdown:</h4>
+<ul>
+<li><strong>Product Summary:</strong> Displays the selected item, image, available stock, and a quantity selector (+/-).</li>
+<li><strong>Financial Breakdown:</strong> Shows Subtotal, Discount deductions, Delivery Fee, and Final Total.</li>
+<li><strong>Shipping Form:</strong> Captures critical customer data (Name, Email, Phone, Province, District, Address).</li>
+<li><strong>Payment Selector:</strong> Radio buttons to choose between Cash on Delivery (COD), Bank Transfer, or Online Pay. Dynamically hidden based on Admin settings.</li>
+<li><strong>Bank Details Panel:</strong> Appears only if "Bank Transfer" is selected. Displays account numbers and a field for a reference slip dynamically from the database.</li>
+</ul>
+
+<h4>Frontend Functions (Inline Script):</h4>
+<table>
+<tr><th>Function Name</th><th>Detailed Explanation</th></tr>
+<tr><td><code>initCheckout()</code></td><td>The master bootstrapper. Parses the <code>product_id</code> from the URL, then fetches product details, delivery rates, and site settings simultaneously.</td></tr>
+<tr><td><code>fetchProduct()</code></td><td>Calls <code>/api/products/:id</code>. If the product doesn't exist, it alerts the user and redirects back to <code>index.html</code>.</td></tr>
+<tr><td><code>fetchDeliveryRates()</code></td><td>Calls <code>/api/delivery-rates</code> to pull Sri Lankan province/district delivery charges from the DB.</td></tr>
+<tr><td><code>fetchSettings()</code></td><td>Calls <code>/api/settings</code>. Uses the data to toggle visibility of payment methods (COD, Bank Transfer, Online) and populate Bank Account details in the Bank Panel.</td></tr>
+<tr><td><code>setupLocationSelectors()</code></td><td>Populates the Province dropdown. When a Province is chosen, it filters the <code>deliveryRates</code> array to populate the District dropdown specific to that province. Updates delivery charge on change.</td></tr>
+<tr><td><code>selectPayment(method)</code></td><td>Toggles UI elements based on the payment choice. If <code>BANK</code> is selected, it unhides the Bank Details panel and changes the submit button text.</td></tr>
+<tr><td><code>changeQty(delta)</code></td><td>Fired by +/- buttons. Increases or decreases the order quantity. Enforces rules: Quantity cannot be less than 1, and cannot exceed <code>stock_quantity</code>. Triggers recalculation.</td></tr>
+<tr><td><code>updateCalculations()</code></td><td>The financial engine. Multiplies price by quantity, subtracts discounts, reads the delivery charge based on the selected District, and calculates the Final Total. Updates the UI immediately.</td></tr>
+<tr><td><code>Form Submission</code></td><td>Intercepts the "Place Order" click. Validates inputs (like Bank Reference if applicable). Constructs a JSON payload. Sends POST to <code>/api/orders</code>. Shows loading spinner. Redirects to Home on success.</td></tr>
+<tr><td><code>copyToClipboard()</code></td><td>Utility allowing users to click a button to copy the Bank Account Number directly to their device clipboard.</td></tr>
+</table>
+
+<h2>3. Admin Portal &amp; Management Pages</h2>
+
+<h3>3.1 Dashboard &amp; Navigation (admin.html)</h3>
+<p><strong>Purpose:</strong> The secure backend interface for the factory owner to manage all operations.</p>
+
+<h4>Sections Breakdown:</h4>
+<ul>
+<li><strong>Auth Screens:</strong> Independent views for Login, Initial Setup, Signup, and Password Recovery.</li>
+<li><strong>Sidebar Navigation:</strong> The main menu to switch between management modules.</li>
+<li><strong>Stats Dashboard:</strong> Displays total earnings, order counts, unread messages, and a table showing best-selling products.</li>
+<li><strong>CMS Editor:</strong> Input forms corresponding to every text section on the public site (Hero, About, Factory, Quality, Contact Info).</li>
+<li><strong>Process Manager:</strong> Interface to alter the 5-step industrial process descriptions and images.</li>
+<li><strong>Inventory/Product Manager:</strong> The core CRUD interface to add new cinnamon products, set prices, apply discounts, default delivery fees, and update stock limits.</li>
+<li><strong>Order Tracking:</strong> A tabular view of all historical and pending orders. Includes tools to view customer details and update delivery status.</li>
+<li><strong>Message Center:</strong> An inbox to read, mark as read, and delete inquiries sent via the public Contact form.</li>
+<li><strong>Site Settings:</strong> Advanced settings module to update Bank Details, Low Stock Thresholds, Enable/Disable Payment Methods, and edit Footer texts.</li>
+</ul>
+
+<h4>Admin Functions (js/admin.js):</h4>
+<table>
+<tr><th>Function Name</th><th>Detailed Explanation</th></tr>
+<tr><td><code>checkAuth()</code></td><td>An IIFE (Immediately Invoked Function Expression) that fires on load. Pings <code>/api/auth/status</code>. If valid, it reveals the dashboard. If not, it checks if the DB is empty (<code>/needs-setup</code>) to show the Setup screen or Login screen.</td></tr>
+<tr><td><code>Login/Setup/Signup/Forgot Submit</code></td><td>Handles all auth forms. Sends credentials to <code>/api/auth/*</code> routes. Displays success/error states securely.</td></tr>
+<tr><td><code>loadDashboard()</code></td><td>Fetches <code>/api/admin/stats</code>. Updates the UI cards for "Earnings Today", "Earnings Month". Maps the <code>productSales</code> array to a table, calculating "Low Stock" warnings dynamically based on settings. Fetches 5 recent messages.</td></tr>
+<tr><td><code>loadSection(section)</code></td><td>Fired by sidebar clicks. Hides all panels and shows the requested one. Fetches the required data (e.g., if "Products" is clicked, it calls <code>loadProducts()</code>).</td></tr>
+<tr><td><code>saveContent(section)</code></td><td>The CMS engine. Reads values from the input forms. Loops through each field and sends a PUT request to <code>/api/admin/content</code> to update the DB.</td></tr>
+<tr><td><code>uploadImage(fileInput)</code></td><td>Reads a selected file, appends it to a <code>FormData</code> object, and sends a POST to <code>/api/admin/upload</code> (handled by Multer backend). Returns the URL path to save in the DB.</td></tr>
+<tr><td><code>loadProcessSteps() / saveStep()</code></td><td>Fetches the processing steps. Creates edit forms for step numbers, titles, and descriptions. Sends updates to <code>/api/admin/process/:id</code>.</td></tr>
+<tr><td><code>loadProducts()</code></td><td>Fetches all inventory. Generates complex HTML blocks for each product containing editable input fields for Title, Price, Discount, Stock, and Descriptions. Highlights low-stock items in yellow.</td></tr>
+<tr><td><code>saveProduct(id) / submitNewProduct()</code></td><td>Gathers data from the generated product forms. Sends PUT (for update) or POST (for new) requests to the products API endpoint.</td></tr>
+<tr><td><code>deleteProduct(id)</code></td><td>Issues a DELETE request to remove a product from the database permanently. Requires confirmation.</td></tr>
+<tr><td><code>loadOrders() / viewOrder(id)</code></td><td>Fetches all orders. Builds a table. Dynamically applies CSS classes based on status (e.g., Green for Delivered, Yellow for Pending). <code>viewOrder</code> opens a detailed customer invoice summary.</td></tr>
+<tr><td><code>updateOrderStatus(id, val)</code></td><td>Triggered by a dropdown change in the order view. Sends a PUT request to update the order's state (Pending -> Shipped -> Delivered).</td></tr>
+<tr><td><code>loadMessages() / markAsRead() / deleteMessage()</code></td><td>Message CRM. Fetches contact form submissions. Updates `is_read` status in DB or deletes row entirely.</td></tr>
+<tr><td><code>loadSettings() / saveSettings()</code></td><td>Fetches key-value pairs from `site_settings` table. Populates forms for bank info, thresholds, and payment toggles. Saves via PUT request.</td></tr>
+</table>
+
+<h2>4. Backend Infrastructure &amp; API (server.js)</h2>
+<p><strong>Purpose:</strong> The Node.js/Express engine that processes logic, connects to MySQL, and enforces security.</p>
+
+<h4>Core Middlewares:</h4>
+<ul>
+<li><code>express.json()</code> Parses incoming request bodies (like order forms) into readable JSON.</li>
+<li><code>express-session</code> Generates a secure HTTP-only cookie (<code>maxAge: 1 year</code>) to keep the admin logged in safely without passing passwords continually.</li>
+<li><code>multer</code> Configured via <code>diskStorage</code> to intercept image uploads, rename them with timestamps to prevent overwrites, and save them securely to the <code>/images</code> folder.</li>
+</ul>
+
+<h4>Backend Functions &amp; Routes:</h4>
+<table>
+<tr><th>Route / Function</th><th>Detailed Backend Logic Execution</th></tr>
+<tr><td><code>requireAuth()</code></td><td>Custom middleware. Checks if <code>req.session.isAdmin</code> is true. If false, returns HTTP 401 Unauthorized, blocking access to all <code>/api/admin/*</code> routes.</td></tr>
+<tr><td><code>POST /api/auth/login</code></td><td>Queries the <code>admin_users</code> table by email. If found, uses <code>bcrypt.compare()</code> to securely verify the hashed password. If true, sets <code>req.session.isAdmin = true</code>.</td></tr>
+<tr><td><code>POST /api/auth/setup</code></td><td>Uses <code>bcrypt.hash(password, 10)</code> to encrypt the master password before inserting the first administrator into the database.</td></tr>
+<tr><td><code>POST /api/auth/signup & /forgot-password</code></td><td>Signup allows adding new admins. Forgot password implements a secure reset loop.</td></tr>
+<tr><td><code>GET /api/content & /api/settings</code></td><td>Queries <code>SELECT * FROM site_content</code> and <code>site_settings</code>. Restructures the flat SQL rows into nested JSON objects for easy frontend consumption.</td></tr>
+<tr><td><code>GET /api/products</code></td><td>Executes an advanced SQL query featuring a <code>LEFT JOIN</code> on the <code>order_items</code> table. It uses <code>SUM(quantity)</code> to dynamically calculate how many units of a product have been sold (<code>total_sales</code>) alongside basic product data.</td></tr>
+<tr><td><code>POST /api/orders</code></td><td><strong>The most complex logic (Database Transaction):</strong><br>1. Requests a dedicated connection (<code>pool.getConnection</code>).<br>2. Starts a MySQL <code>beginTransaction()</code>.<br>3. Checks <code>products</code> table to ensure <code>stock_quantity >= requested_quantity</code>.<br>4. Inserts into <code>orders</code> table to get the master <code>order_id</code>.<br>5. Inserts into <code>order_items</code> table for itemized tracking.<br>6. Executes <code>UPDATE products SET stock_quantity = stock_quantity - qty</code>.<br>7. Calls <code>connection.commit()</code>. If any step fails, calls <code>connection.rollback()</code> to prevent ghost data or negative stock.</td></tr>
+<tr><td><code>PUT /api/admin/content & /settings</code></td><td>Uses a dual approach: Attempts an <code>UPDATE</code> query. If <code>affectedRows === 0</code> (meaning the content key doesn't exist yet), it executes an <code>INSERT</code> query. Ensures data always saves.</td></tr>
+<tr><td><code>GET /api/admin/stats</code></td><td>Runs 6 separate SQL queries concurrently to count total messages, active products, and total orders. Calculates earnings specifically for "Today" (<code>CURDATE()</code>), "This Month", and "Total Lifetime" while excluding "Cancelled" orders.</td></tr>
+<tr><td><code>POST /api/contact</code></td><td>Inserts customer inquiries into the `contact_messages` table and optionally triggers EmailJS.</td></tr>
+</table>
+
+<h2>5. Database Schema (MySQL)</h2>
+<p>The entire system is backed by a robust, relational SQL structure.</p>
+<table>
+<tr><th>Table Name</th><th>Purpose</th><th>Key Columns</th></tr>
+<tr><td><code>admin_users</code></td><td>Authentication & Access</td><td>id, username, password (hashed), email, created_at</td></tr>
+<tr><td><code>site_content</code></td><td>CMS Dynamic Content</td><td>id, section_name, field_name, field_value, updated_at</td></tr>
+<tr><td><code>site_settings</code></td><td>Advanced Admin Toggles</td><td>setting_key, setting_value</td></tr>
+<tr><td><code>process_steps</code></td><td>Industrial Process Info</td><td>id, step_number, title, short_desc, full_desc, image_url, display_order</td></tr>
+<tr><td><code>products</code></td><td>Retail Inventory Data</td><td>id, title, short_desc, full_desc, image_url, price, discount, stock_quantity, delivery_charge, is_active</td></tr>
+<tr><td><code>orders</code></td><td>Master Transaction Ledger</td><td>id, customer_name, customer_email, customer_phone, shipping_address, province, district, payment_method, bank_reference, total_amount, status, created_at</td></tr>
+<tr><td><code>order_items</code></td><td>Itemized Order Details</td><td>id, order_id, product_id, product_name, quantity, unit_price</td></tr>
+<tr><td><code>delivery_rates</code></td><td>District Shipping Costs</td><td>id, province, district, rate</td></tr>
+<tr><td><code>contact_messages</code></td><td>Customer CRM Inquiries</td><td>id, name, email, phone, subject, message, is_read, created_at</td></tr>
+</table>
+
+<div class="footer">
+  Report generated: May 2026 &nbsp;|&nbsp; Cinnamon Heritage v1.0.0 &nbsp;|&nbsp; Developed by Malitha Tishamal &nbsp;|&nbsp; Cinnamon Heritage
+</div>
+
+</div>
+</body>
+</html>

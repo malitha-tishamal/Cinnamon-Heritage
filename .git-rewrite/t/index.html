@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cinnamon Heritage | Pure Ceylon Cinnamon</title>
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <link rel="preload" as="image" href="images/cinnamon_spices.jpg">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Preloader -->
+  <div id="preloader" class="preloader">
+    <div class="preloader-spinner"></div>
+    <div class="preloader-text">Loading...</div>
+  </div>
+  <!-- Header and Navigation -->
+  <header>
+    <div class="fixed-top" style="z-index: 1040;">
+      <!-- Announcement Bar -->
+      <div class="announcement-bar" id="announcementBar">
+        <div class="announcement-bar-inner">
+          <span class="announcement-bar-text" id="announcementTextWrap">
+            <i class="fas fa-leaf announcement-bar-icon pulse-anim"></i>
+            <span id="announcementText" class="slide-text-anim">Authentic Ceylon Cinnamon from Southern Sri Lanka</span>
+          </span>
+          <div class="announcement-bar-links">
+            <a href="#products" class="announcement-bar-btn" id="announcementBtn1">
+              <span id="announcementBtn1Text">Explore Products</span> <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+            <a href="#b2b" class="announcement-bar-btn" id="announcementBtn2">
+              <span id="announcementBtn2Text">Partner With Us</span> <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <nav class="navbar navbar-dark navbar-balanced">
+      <div class="container-fluid navbar-container">
+        <!-- Row 1: Logo + Nav Links -->
+        <div class="navbar-row-top d-none d-xl-flex">
+          <a class="navbar-brand navbar-brand-logo" href="#hero-section">
+            <img src="images/logo.png" alt="Cinnamon Heritage" class="navbar-logo" width="40" height="40">
+            <span class="navbar-brand-text">Cinnamon&nbsp;Heritage</span>
+          </a>
+          <ul class="navbar-nav navbar-nav-main text-uppercase nav-links">
+            <li class="nav-item"><a class="nav-link text-white" href="#hero-section">Home</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#heritage">Heritage</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#ceylon-cinnamon">Ceylon</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#villa">Villa</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#products">Products</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#essential-oils">Essential Oils</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#b2b">B2B</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#experience">Experience</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#process">Process</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#faq">FAQ</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#contact">Contact</a></li>
+          </ul>
+        </div>
+
+        <!-- Row 2: Action Buttons (right-aligned) -->
+        <div class="navbar-row-bottom d-none d-xl-flex">
+          <div class="navbar-actions">
+            <a class="btn nav-btn-primary text-white" href="#b2b">
+              <span class="nav-btn-full">B2B Discussion</span>
+            </a>
+
+            <div class="navbar-utilities">
+              <a class="nav-link text-white position-relative navbar-cart" href="#" id="cartBtn" aria-label="Shopping cart">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger d-none" id="cartBadge">0</span>
+              </a>
+
+              <div id="navAuthButtons" class="nav-auth-buttons">
+                <a class="btn nav-login-btn text-white text-uppercase fw-bold" href="#" id="navLoginBtn">Login</a>
+                <a class="btn nav-signup-btn text-white text-uppercase fw-bold" href="#" id="navSignupBtn">Sign Up</a>
+              </div>
+
+              <div id="userProfileMenu" class="d-none dropdown">
+                <a class="nav-link text-white dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <img id="navProfilePic" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d4873a'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Avatar" class="rounded-circle nav-avatar">
+                  <span id="navUsername" class="small">Profile</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark navbar-dropdown">
+                  <span id="navAdminPanelLink" class="d-none">
+                    <li><a class="dropdown-item" href="admin.html" target="_blank"><i class="fas fa-shield-alt me-2" style="color: var(--accent);"></i> Admin Panel</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                  </span>
+                  <li><a class="dropdown-item" href="#" id="profileDetailsBtn"><i class="fas fa-user-cog me-2" style="color: var(--accent);"></i> My Profile</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="#" id="clientLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logo for mobile (visible only on mobile) -->
+        <a class="navbar-brand navbar-brand-logo d-xl-none" href="#hero-section">
+          <img src="images/logo.png" alt="Cinnamon Heritage" class="navbar-logo" width="40" height="40">
+          <span class="navbar-brand-text">Cinnamon&nbsp;Heritage</span>
+        </a>
+
+        <!-- Mobile: cart + hamburger -->
+        <div class="navbar-mobile-tools d-flex d-xl-none">
+          <a class="nav-link text-white position-relative navbar-cart navbar-cart-mobile" href="#" id="cartBtnMobile" aria-label="Shopping cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger d-none" id="cartBadgeMobile">0</span>
+          </a>
+          <button class="navbar-toggler nav-drawer-toggle" type="button" id="navDrawerToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navDrawer">
+            <span class="nav-drawer-toggle-bar"></span>
+            <span class="nav-drawer-toggle-bar"></span>
+            <span class="nav-drawer-toggle-bar"></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+    </div>
+
+    <!-- Mobile nav drawer (~70% width) -->
+    <div class="nav-drawer-overlay" id="navDrawerOverlay"></div>
+    <aside class="nav-drawer" id="navDrawer" aria-hidden="true">
+      <div class="nav-drawer-header">
+        <div class="nav-drawer-brand">
+          <img src="images/logo.png" alt="" class="nav-drawer-logo" width="32" height="32">
+          <span>Menu</span>
+        </div>
+        <button class="nav-drawer-close" id="navDrawerClose" aria-label="Close menu">&times;</button>
+      </div>
+
+      <nav class="nav-drawer-body">
+        <ul class="nav-drawer-links">
+          <li><a class="nav-drawer-link" href="#hero-section">Home</a></li>
+          <li><a class="nav-drawer-link" href="#heritage">Heritage</a></li>
+          <li><a class="nav-drawer-link" href="#ceylon-cinnamon">Ceylon</a></li>
+          <li><a class="nav-drawer-link" href="#products">Products</a></li>
+          <li><a class="nav-drawer-link" href="#essential-oils">Essential Oils</a></li>
+          <li><a class="nav-drawer-link" href="#b2b">B2B</a></li>
+          <li><a class="nav-drawer-link" href="#experience">Experience</a></li>
+          <li><a class="nav-drawer-link" href="#process">Process</a></li>
+          <li><a class="nav-drawer-link" href="#faq">FAQ</a></li>
+          <li><a class="nav-drawer-link" href="#contact">Contact</a></li>
+        </ul>
+
+        <div class="nav-drawer-actions">
+          <a class="btn nav-btn-secondary w-100" href="#products">Explore Products</a>
+          <a class="btn nav-btn-primary text-white w-100" href="#b2b">B2B Discussion</a>
+          <a href="https://wa.me/94771234567?text=Hello%20Cinnamon%20Heritage%2C%20I%20would%20like%20to%20inquire%20about%20your%20products." target="_blank" rel="noopener noreferrer" class="btn nav-whatsapp-mobile w-100 text-white text-uppercase fw-bold">
+            <i class="fab fa-whatsapp"></i> WhatsApp Us
+          </a>
+          <div id="navDrawerAuthButtons" class="nav-drawer-auth">
+            <a class="btn nav-login-btn text-white text-uppercase fw-bold flex-fill" href="#" id="navLoginBtnMobile">Login</a>
+            <a class="btn nav-signup-btn text-white text-uppercase fw-bold flex-fill" href="#" id="navSignupBtnMobile">Sign Up</a>
+          </div>
+          <div id="userProfileMenuMobile" class="d-none nav-drawer-profile">
+            <div class="nav-drawer-user d-flex align-items-center gap-3">
+              <img id="navProfilePicMobile" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d4873a'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Avatar" class="rounded-circle nav-avatar">
+              <span id="navUsernameMobile" class="text-white fw-bold"></span>
+            </div>
+            <a class="nav-drawer-link" href="#" id="profileDetailsBtnMobile"><i class="fas fa-user-cog me-2"></i> My Profile</a>
+            <a class="nav-drawer-link text-danger" href="#" id="clientLogoutBtnMobile"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+    <!-- Hero section -->
+    <section id="hero-section" class="hero d-flex align-items-center position-relative min-vh-100 w-100" style="background: linear-gradient(rgba(10,10,15,0.55), rgba(10,10,15,0.7)), url('images/cinnamon_spices.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
+      <div class="container position-relative z-2">
+          <div class="col-lg-7 col-md-9">
+            <div class="hero-content-box">
+              <h1 id="hero-title" class="display-3 fw-bold mb-4"></h1>
+              <p id="hero-subtitle" class="lead-text mb-5"></p>
+              <a id="hero-cta" class="btn btn-lg rounded-0 text-white text-uppercase fw-bold px-5 py-3 cta-btn" href="#heritage" style="display: none;"></a>
+            </div>
+          </div>
+      </div>
+      <div class="position-absolute bottom-0 start-0 w-100 h-25" style="background: linear-gradient(to top, var(--bg-primary), transparent);"></div>
+    </section>
+  </header>
+
+  <!-- Main content -->
+  <main>
+    <!-- About section -->
+    <section id="heritage" class="about estate-immersive position-relative overflow-hidden py-0 reveal">
+      <div class="estate-bg-overlay"></div>
+      <div class="container position-relative z-2 py-5 my-5">
+        <div class="row align-items-center gx-lg-5">
+          <div class="col-lg-6 text-content mb-4 mb-lg-0 reveal-left">
+            <div class="glass-card p-4 p-md-5">
+              <div class="accent-badge mb-3">Since 1982</div>
+              <h2 id="about-title" class="display-5 fw-bold mb-4" style="font-family: 'Oswald', sans-serif; color: #fff;">From Our Own Estate</h2>
+              <div id="about-text-container" style="font-size: 1.15rem; line-height: 1.8; color: #ffffff !important;"></div>
+            </div>
+          </div>
+          <div class="col-lg-6 image-content reveal-right">
+            <div class="estate-image-wrapper p-2 bg-white shadow-lg">
+              <img id="about-image" src="images/cinnamon_plantlings.jpg" alt="Cinnamon plantlings in our estate" class="img-fluid w-100" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Factory section -->
+    <section id="factory" class="factory factory-immersive position-relative overflow-hidden py-0 reveal">
+      <div class="factory-bg-overlay"></div>
+      <div class="container position-relative z-2 py-5 my-5">
+        <div class="row align-items-center gx-lg-5 flex-lg-row-reverse">
+          <div class="col-lg-6 text-content mb-4 mb-lg-0 reveal-right">
+            <div class="glass-card p-4 p-md-5">
+              <div class="accent-badge mb-3">ISO 22000 & HACCP</div>
+              <h2 id="factory-title" class="display-5 fw-bold mb-4" style="font-family: 'Oswald', sans-serif; color: #fff;">Our Modern Facility</h2>
+              <div id="factory-text-container" style="font-size: 1.15rem; line-height: 1.8; color: #ffffff !important;"></div>
+            </div>
+          </div>
+          <div class="col-lg-6 image-content reveal-left">
+            <div class="estate-image-wrapper p-2 bg-white shadow-lg">
+              <img id="factory-image" src="images/cinnamon_srilanka.jpg" alt="Bundles of cinnamon quills" class="img-fluid w-100" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Process section -->
+    <section id="process" class="process process-immersive position-relative overflow-hidden py-0 reveal">
+      <div class="process-bg-overlay"></div>
+      <div class="container position-relative z-2 py-5 my-5">
+        <div class="section-title">
+          <h2>Industrial Process</h2>
+        </div>
+        <div class="row g-4 stagger-children" id="processRow">
+          <!-- Process steps are loaded dynamically from Firebase -->
+          <div class="col-12 text-center py-5">
+            <div class="spinner-border text-warning opacity-25" role="status"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Products section -->
+    <section id="products" class="products products-immersive position-relative overflow-hidden py-0 reveal">
+      <div class="products-bg-overlay"></div>
+      <div class="container position-relative z-2 py-5 my-5">
+        <div class="section-title">
+          <h2>Product Range</h2>
+        </div>
+        <div class="row g-4" id="productsRow">
+          <!-- Products will be loaded from the database -->
+
+        </div>
+      </div>
+    </section>
+
+    <!-- B2B Partnerships section -->
+    <section id="b2b" class="b2b reveal py-5">
+      <div class="container py-4">
+        <div class="row justify-content-center mb-5 text-center">
+          <div class="col-lg-8">
+            <span class="text-uppercase fw-bold" style="color: var(--accent); letter-spacing: 2px; font-size: 0.9rem;">Business Partnerships</span>
+            <h2 id="b2bSectionTitle" class="text-white mt-2 mb-3" style="font-size: 2.5rem; font-family: 'Oswald', sans-serif;">B2B Partnerships</h2>
+            <h3 id="b2bSubtitle" class="text-white mb-4" style="font-size: 1.8rem;">Partner With Cinnamon Heritage</h3>
+            <p id="b2bDescription" class="text-white-50" style="font-size: 1.1rem;">We provide authentic Ceylon Cinnamon solutions for global businesses, supporting industries with premium products, reliable supply and customized services from our family estate in Galle, Sri Lanka.</p>
+          </div>
+        </div>
+
+        <!-- Who We Work With -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h4 class="text-white text-center mb-4" style="font-size: 1.5rem;">Who We Work With</h4>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-5" id="partnerTypesRow">
+          <div class="col-md-6 col-lg-4">
+            <div class="b2b-card h-100">
+              <div class="b2b-icon">
+                <i class="fas fa-industry"></i>
+              </div>
+              <h5 class="text-white">Manufacturers</h5>
+              <p class="text-white-50">Premium Ceylon Cinnamon ingredients for food, beverage, wellness and cosmetic manufacturers.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="b2b-card h-100">
+              <div class="b2b-icon">
+                <i class="fas fa-ship"></i>
+              </div>
+              <h5 class="text-white">Importers</h5>
+              <p class="text-white-50">Export-quality cinnamon supply with consistent quality and reliable sourcing.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="b2b-card h-100">
+              <div class="b2b-icon">
+                <i class="fas fa-truck"></i>
+              </div>
+              <h5 class="text-white">Distributors</h5>
+              <p class="text-white-50">Wholesale partnerships with flexible supply options and premium product ranges.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="b2b-card h-100">
+              <div class="b2b-icon">
+                <i class="fas fa-store"></i>
+              </div>
+              <h5 class="text-white">Retailers</h5>
+              <p class="text-white-50">Authentic cinnamon products including quills, powder, tea and gift collections.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="b2b-card h-100">
+              <div class="b2b-icon">
+                <i class="fas fa-hotel"></i>
+              </div>
+              <h5 class="text-white">Hospitality</h5>
+              <p class="text-white-50">Custom cinnamon solutions for hotels, resorts, restaurants and cafés.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="b2b-card h-100">
+              <div class="b2b-icon">
+                <i class="fas fa-lightbulb"></i>
+              </div>
+              <h5 class="text-white">Product Developers</h5>
+              <p class="text-white-50">Collaborate with us to create innovative cinnamon-based products and concepts.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Our B2B Solutions -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h4 class="text-white text-center mb-4" style="font-size: 1.5rem;">Our B2B Solutions</h4>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-5" id="solutionsRow">
+          <div class="col-md-6 col-lg-3">
+            <div class="b2b-solution-card h-100">
+              <div class="b2b-solution-icon">
+                <i class="fas fa-boxes"></i>
+              </div>
+              <h5 class="text-white">Bulk Supply</h5>
+              <p class="text-white-50">Large-scale supply of premium Ceylon Cinnamon products for local and international markets.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="b2b-solution-card h-100">
+              <div class="b2b-solution-icon">
+                <i class="fas fa-tag"></i>
+              </div>
+              <h5 class="text-white">Private Label</h5>
+              <p class="text-white-50">Create your own branded cinnamon products with our manufacturing and packaging support.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="b2b-solution-card h-100">
+              <div class="b2b-solution-icon">
+                <i class="fas fa-handshake"></i>
+              </div>
+              <h5 class="text-white">Co-Development</h5>
+              <p class="text-white-50">Work with our team to develop unique cinnamon products tailored to your market.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="b2b-solution-card h-100">
+              <div class="b2b-solution-icon">
+                <i class="fas fa-flask"></i>
+              </div>
+              <h5 class="text-white">Custom Ingredient Solutions</h5>
+              <p class="text-white-50">Customized cinnamon formats including quills, powder, chips and essential oils based on your requirements.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Become a Partner CTA -->
+        <div class="row justify-content-center">
+          <div class="col-lg-8 text-center">
+            <div class="b2b-cta">
+              <h4 id="b2bCtaTitle" class="text-white mb-3">Become a Partner</h4>
+              <p id="b2bCtaDescription" class="text-white-50 mb-4">Partner with Cinnamon Heritage for authentic Ceylon Cinnamon products and tailored business solutions.</p>
+              <button id="b2bCtaButton" class="btn btn-primary btn-lg" style="background-color: var(--accent); border: none;" data-bs-toggle="modal" data-bs-target="#b2bEnquiryModal">Partner With Us</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cinnamon Experience section -->
+    <section id="experience" class="experience reveal py-5">
+      <div class="container py-4">
+        <div class="row justify-content-center mb-5 text-center">
+          <div class="col-lg-8">
+            <span class="text-uppercase fw-bold" style="color: var(--accent); letter-spacing: 2px; font-size: 0.9rem;">Estate Experiences</span>
+            <h2 id="experienceSectionTitle" class="text-white mt-2 mb-3" style="font-size: 2.5rem; font-family: 'Oswald', sans-serif;">Cinnamon Experience</h2>
+            <h3 id="experienceSubtitle" class="text-white mb-4" style="font-size: 1.8rem;">Discover the Heart of Ceylon Cinnamon</h3>
+            <p id="experienceDescription" class="text-white-50" style="font-size: 1.1rem;">Step into our family estate in Galle and experience the authentic journey of Ceylon Cinnamon—from plantation to finished product.</p>
+          </div>
+        </div>
+
+        <!-- Our Experiences -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h4 class="text-white text-center mb-4" style="font-size: 1.5rem;">Our Experiences</h4>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-5" id="experiencesRow">
+          <div class="col-md-6 col-lg-4">
+            <div class="experience-card h-100">
+              <div class="experience-icon">
+                <i class="fas fa-leaf"></i>
+              </div>
+              <h5 class="text-white">Guided Cinnamon Estate Walk</h5>
+              <p class="text-white-50">Explore our lush cinnamon estate and learn about traditional cultivation methods.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="experience-card h-100">
+              <div class="experience-icon">
+                <i class="fas fa-cut"></i>
+              </div>
+              <h5 class="text-white">Harvesting & Peeling Demonstration</h5>
+              <p class="text-white-50">Watch skilled artisans harvest and peel cinnamon using centuries-old techniques.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="experience-card h-100">
+              <div class="experience-icon">
+                <i class="fas fa-hands"></i>
+              </div>
+              <h5 class="text-white">Hands-on Cinnamon Activity</h5>
+              <p class="text-white-50">Take part in interactive cinnamon preparation and quill-making activities.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="experience-card h-100">
+              <div class="experience-icon">
+                <i class="fas fa-mug-hot"></i>
+              </div>
+              <h5 class="text-white">Cinnamon Tea & Product Tasting</h5>
+              <p class="text-white-50">Enjoy premium cinnamon tea and sample our signature cinnamon products.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="experience-card h-100">
+              <div class="experience-icon">
+                <i class="fas fa-utensils"></i>
+              </div>
+              <h5 class="text-white">Sri Lankan Spice & Food Experience</h5>
+              <p class="text-white-50">Experience authentic Sri Lankan spices and traditional local cuisine.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="experience-card h-100">
+              <div class="experience-icon">
+                <i class="fas fa-graduation-cap"></i>
+              </div>
+              <h5 class="text-white">Educational Visits</h5>
+              <p class="text-white-50">Special tours and educational programs for schools, universities and research groups.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="experience-card h-100">
+              <div class="experience-icon">
+                <i class="fas fa-briefcase"></i>
+              </div>
+              <h5 class="text-white">Business Visits</h5>
+              <p class="text-white-50">Customized visits for importers, distributors and business partners.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="experience-card h-100">
+              <div class="experience-icon">
+                <i class="fas fa-shopping-bag"></i>
+              </div>
+              <h5 class="text-white">Cinnamon Heritage Shop</h5>
+              <p class="text-white-50">Purchase authentic Ceylon cinnamon products directly from our estate.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="experience-card h-100">
+              <div class="experience-icon">
+                <i class="fas fa-home"></i>
+              </div>
+              <h5 class="text-white">Cinnamon Villa — Coming Soon</h5>
+              <p class="text-white-50">Stay immersed in the beauty of Sri Lanka with our upcoming Cinnamon Villa experience.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Book Experience CTA -->
+        <div class="row justify-content-center">
+          <div class="col-lg-8 text-center">
+            <div class="experience-cta">
+              <h4 id="experienceCtaTitle" class="text-white mb-3">Book Your Experience</h4>
+              <p id="experienceCtaDescription" class="text-white-50 mb-4">Discover the heritage, craftsmanship and flavours of authentic Ceylon Cinnamon.</p>
+              <button id="experienceCtaButton" class="btn btn-primary btn-lg" style="background-color: var(--accent); border: none;" data-bs-toggle="modal" data-bs-target="#experienceBookingModal">Book a Visit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cinnamon Villa section -->
+    <section id="villa" class="villa reveal position-relative overflow-hidden" style="background-color: #121212; padding: 100px 0;">
+      <div id="villa-bg-overlay" class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.7); z-index: 1;"></div>
+      <div class="container position-relative z-2">
+        <div class="row align-items-center mb-5 gx-lg-5">
+          <div class="col-lg-6 mb-5 mb-lg-0 reveal-left">
+            <div class="d-inline-flex align-items-center px-3 py-2 rounded-pill mb-4" style="background: rgba(212, 163, 115, 0.15); border: 1px solid rgba(212, 163, 115, 0.3);">
+              <i class="fas fa-clock text-accent me-2"></i>
+              <span class="text-accent fw-bold" style="font-size: 0.85rem; letter-spacing: 1px;">COMING SOON / IN DEVELOPMENT</span>
+            </div>
+            <h2 id="villa-title" class="text-white display-4 fw-bold mb-3" style="font-family: 'Oswald', sans-serif;">Cinnamon Villa</h2>
+            <h3 id="villa-subtitle" class="text-white-50 mb-4" style="font-size: 1.4rem; font-weight: 300;">A Unique Cinnamon Estate Stay Experience</h3>
+            <div id="villa-text-container" class="text-white" style="font-size: 1.15rem; line-height: 1.8;">
+              <p>Experience the beauty of Sri Lanka's cinnamon country through our upcoming nature-inspired accommodation concept.</p>
+              <p>Nestled within our family cinnamon estate in Galle, Cinnamon Villa is being developed to offer guests an authentic connection with nature, local traditions and the heritage of Ceylon Cinnamon.</p>
+            </div>
+          </div>
+          <div class="col-lg-6 reveal-right">
+            <div class="position-relative p-2 bg-white shadow-lg rounded" style="transform: rotate(2deg); transition: transform 0.3s ease;">
+              <img id="villa-image" src="images/cinnamon_plantlings.jpg" alt="Cinnamon Villa Preview" class="img-fluid rounded w-100" style="object-fit: cover; height: 450px;">
+              <div class="position-absolute bottom-0 start-0 w-100 p-4 text-center rounded-bottom" style="background: linear-gradient(transparent, rgba(0,0,0,0.9)); margin-left: 2px; margin-bottom: 2px; width: calc(100% - 4px) !important;">
+                <h4 class="text-white mb-1" style="font-family: 'Oswald', sans-serif; letter-spacing: 1px;">COMING SOON</h4>
+                <p class="text-accent small mb-0 fw-bold">Currently Under Development</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="row g-4 mt-5 stagger-children">
+          <!-- Nature -->
+          <div class="col-md-6 col-lg-4">
+            <div class="glass-card p-4 h-100 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;">
+              <div class="mb-4 text-accent">
+                <i class="fas fa-leaf fa-2x"></i>
+              </div>
+              <h4 class="text-white mb-3" style="font-family: 'Oswald', sans-serif;">A Stay Surrounded by Nature</h4>
+              <p class="text-white-50 mb-4">Wake up among the peaceful landscapes of our cinnamon-growing estate and enjoy the natural beauty of Southern Sri Lanka.</p>
+              <p class="text-white small mb-3 fw-bold">Guests will have the opportunity to experience:</p>
+              <ul class="text-white-50 small list-unstyled mb-0" style="line-height: 2;">
+                <li><i class="fas fa-check text-accent me-2"></i>Scenic estate surroundings</li>
+                <li><i class="fas fa-check text-accent me-2"></i>Tropical nature and peaceful environments</li>
+                <li><i class="fas fa-check text-accent me-2"></i>Authentic Sri Lankan countryside atmosphere</li>
+                <li><i class="fas fa-check text-accent me-2"></i>A closer connection with cinnamon cultivation</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Estate Views & Food -->
+          <div class="col-md-6 col-lg-4">
+            <div class="d-flex flex-column h-100 gap-4">
+              <!-- Views -->
+              <div class="glass-card p-4 flex-grow-1 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;">
+                <div class="mb-3 text-accent">
+                  <i class="fas fa-mountain fa-2x"></i>
+                </div>
+                <h4 class="text-white mb-3" style="font-family: 'Oswald', sans-serif;">Estate Views</h4>
+                <p class="text-white-50 small mb-2">Enjoy the charm of a traditional cinnamon estate surrounded by greenery, fresh air and the natural landscapes of Galle.</p>
+                <p class="text-white-50 small mb-0">The villa experience is designed to showcase the beauty of Sri Lanka's cinnamon-growing heritage.</p>
+              </div>
+              <!-- Food -->
+              <div class="glass-card p-4 flex-grow-1 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;">
+                <div class="mb-3 text-accent">
+                  <i class="fas fa-utensils fa-2x"></i>
+                </div>
+                <h4 class="text-white mb-3" style="font-family: 'Oswald', sans-serif;">Local Food Experience</h4>
+                <p class="text-white-50 small mb-3">Discover authentic Sri Lankan flavours prepared using fresh local ingredients and traditional culinary practices.</p>
+                <p class="text-white small mb-2 fw-bold">Future experiences will focus on:</p>
+                <ul class="text-white-50 small list-unstyled mb-0" style="line-height: 1.8;">
+                  <li><i class="fas fa-check text-accent me-2"></i>Traditional Sri Lankan cuisine</li>
+                  <li><i class="fas fa-check text-accent me-2"></i>Cinnamon-inspired food concepts</li>
+                  <li><i class="fas fa-check text-accent me-2"></i>Local flavours and beverages</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Experiences -->
+          <div class="col-md-12 col-lg-4">
+            <div class="glass-card p-4 h-100 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;">
+              <div class="mb-4 text-accent">
+                <i class="fas fa-star fa-2x"></i>
+              </div>
+              <h4 class="text-white mb-3" style="font-family: 'Oswald', sans-serif;">Cinnamon Experiences</h4>
+              <p class="text-white-50 mb-4">A unique opportunity to explore the story behind authentic Ceylon Cinnamon.</p>
+              <p class="text-white small mb-3 fw-bold">Planned experiences include:</p>
+              <ul class="text-white-50 small list-unstyled mb-0" style="line-height: 2;">
+                <li><i class="fas fa-check text-accent me-2"></i>Cinnamon estate walks</li>
+                <li><i class="fas fa-check text-accent me-2"></i>Traditional cinnamon knowledge sharing</li>
+                <li><i class="fas fa-check text-accent me-2"></i>Harvesting and processing demonstrations</li>
+                <li><i class="fas fa-check text-accent me-2"></i>Cinnamon product tasting experiences</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Personalized Hospitality Banner -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="p-5 rounded-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(212, 163, 115, 0.15) 0%, rgba(0,0,0,0.5) 100%); border: 1px solid rgba(212, 163, 115, 0.2);">
+              <div class="row align-items-center">
+                <div class="col-lg-7 mb-4 mb-lg-0">
+                  <h4 class="text-white mb-3" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-heart text-accent me-3"></i>Personalized Hospitality</h4>
+                  <p class="text-white-50 mb-4" style="font-size: 1.1rem;">Every guest experience will be designed around authentic Sri Lankan hospitality, personal attention and meaningful connections with local culture.</p>
+                  <p class="text-white small mb-2 fw-bold">Our goal is to create a memorable stay that combines:</p>
+                  <div class="d-flex flex-wrap gap-3">
+                    <span class="badge bg-dark border border-secondary px-3 py-2 text-white-50"><i class="fas fa-check text-accent me-1"></i> Nature</span>
+                    <span class="badge bg-dark border border-secondary px-3 py-2 text-white-50"><i class="fas fa-check text-accent me-1"></i> Heritage</span>
+                    <span class="badge bg-dark border border-secondary px-3 py-2 text-white-50"><i class="fas fa-check text-accent me-1"></i> Craftsmanship</span>
+                    <span class="badge bg-dark border border-secondary px-3 py-2 text-white-50"><i class="fas fa-check text-accent me-1"></i> Local experiences</span>
+                  </div>
+                </div>
+                <div class="col-lg-5 text-lg-end border-lg-start border-secondary ps-lg-4">
+                  <h5 class="text-white mb-2" style="font-family: 'Oswald', sans-serif; letter-spacing: 1px;">COMING SOON</h5>
+                  <p class="text-accent mb-3">Cinnamon Villa is currently under development.</p>
+                  <p class="text-white-50 small mb-0">More details about availability and experiences will be announced in the future.</p>
+                  <div class="mt-4">
+                    <a href="#contact" class="btn btn-outline-light rounded-pill px-4 py-2" style="border-color: var(--accent); color: var(--accent);">Stay Connected</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Essential Oils section -->
+    <section id="essential-oils" class="essential-oils reveal py-5">
+      <div class="container py-4">
+        <div class="row justify-content-center mb-5 text-center">
+          <div class="col-lg-8">
+            <span class="text-uppercase fw-bold" style="color: var(--accent); letter-spacing: 2px; font-size: 0.9rem;">Premium Essential Oils</span>
+            <h2 id="essentialOilsTitle" class="text-white mt-2 mb-3" style="font-size: 2.5rem; font-family: 'Oswald', sans-serif;">Essential Oils</h2>
+            <h3 id="essentialOilsSubtitle" class="text-white mb-4" style="font-size: 1.8rem;">Pure Ceylon Cinnamon Essential Oils</h3>
+            <p id="essentialOilsDescription" class="text-white-50" style="font-size: 1.1rem;">Steam Distilled From Authentic Ceylon Cinnamon</p>
+            <p id="essentialOilsText" class="text-white-50" style="font-size: 1rem;">Experience the natural power of authentic Ceylon Cinnamon through our premium essential oils, carefully extracted from cinnamon leaves and bark harvested from our family estate in Galle, Sri Lanka.</p>
+          </div>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div class="row justify-content-center mb-5">
+          <div class="col-lg-8 text-center">
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+              <button id="essentialOilsSampleBtn" class="btn btn-primary" style="background-color: var(--accent); border: none;" data-bs-toggle="modal" data-bs-target="#essentialOilsSampleModal">Request B2B Sample</button>
+              <button id="essentialOilsTechBtn" class="btn btn-outline-primary" style="border-color: var(--accent); color: var(--accent);" data-bs-toggle="modal" data-bs-target="#essentialOilsTechModal">Technical Discussion</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cinnamon Leaf Oil -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <div class="essential-oil-card">
+              <div class="row">
+                <div class="col-lg-4">
+                  <div class="essential-oil-icon">
+                    <i class="fas fa-leaf"></i>
+                  </div>
+                  <h4 id="leafOilTitle" class="text-white">Cinnamon Leaf Oil</h4>
+                  <p id="leafOilSubtitle" class="text-white-50">Pure Ceylon Cinnamon Leaf Oil</p>
+                </div>
+                <div class="col-lg-8">
+                  <p id="leafOilDescription" class="text-white-50">Our Cinnamon Leaf Oil is produced through steam distillation of carefully selected cinnamon leaves from our sustainable plantations. Rich in natural eugenol, this essential oil delivers a warm, spicy and clove-like aroma, making it ideal for fragrance, wellness, cosmetic and personal care applications.</p>
+                  
+                  <h6 class="text-white fw-bold mb-3">Key Features</h6>
+                  <ul id="leafOilFeatures" class="text-white-50 mb-3">
+                    <li>✓ Steam distilled from authentic Ceylon cinnamon leaves</li>
+                    <li>✓ High natural eugenol content</li>
+                    <li>✓ Warm spicy aroma profile</li>
+                    <li>✓ Suitable for industrial and commercial applications</li>
+                    <li>✓ Available for bulk export supply</li>
+                  </ul>
+
+                  <h6 class="text-white fw-bold mb-2">Main Constituents</h6>
+                  <p id="leafOilConstituents" class="text-white-50 mb-3">Eugenol, Benzyl Benzoate, Linalool, Cinnamaldehyde (minor component)</p>
+
+                  <h6 class="text-white fw-bold mb-2">Applications</h6>
+                  <p id="leafOilApplications" class="text-white-50">Aromatherapy products, Natural fragrances, Cosmetic formulations, Personal care products, Wellness products, Home fragrance solutions</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cinnamon Bark Oil -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <div class="essential-oil-card">
+              <div class="row">
+                <div class="col-lg-4">
+                  <div class="essential-oil-icon">
+                    <i class="fas fa-tree"></i>
+                  </div>
+                  <h4 id="barkOilTitle" class="text-white">Cinnamon Bark Oil</h4>
+                  <p id="barkOilSubtitle" class="text-white-50">Premium Ceylon Cinnamon Bark Oil</p>
+                </div>
+                <div class="col-lg-8">
+                  <p id="barkOilDescription" class="text-white-50">Cinnamon Bark Oil is one of the most valuable essential oils produced from authentic Ceylon cinnamon. Extracted from carefully selected inner cinnamon bark through steam distillation, it contains high levels of natural cinnamaldehyde, creating the rich, sweet and traditional cinnamon aroma recognized worldwide.</p>
+                  
+                  <h6 class="text-white fw-bold mb-3">Key Features</h6>
+                  <ul id="barkOilFeatures" class="text-white-50 mb-3">
+                    <li>✓ Produced from premium Ceylon cinnamon bark</li>
+                    <li>✓ High cinnamaldehyde content</li>
+                    <li>✓ Strong sweet cinnamon fragrance</li>
+                    <li>✓ Premium ingredient for international markets</li>
+                    <li>✓ Suitable for food, fragrance and wellness industries</li>
+                  </ul>
+
+                  <h6 class="text-white fw-bold mb-2">Main Constituents</h6>
+                  <p id="barkOilConstituents" class="text-white-50 mb-3">Cinnamaldehyde, Eugenol, Benzyl Benzoate, Linalool</p>
+
+                  <h6 class="text-white fw-bold mb-2">Applications</h6>
+                  <p id="barkOilApplications" class="text-white-50">Premium fragrances, Food flavouring solutions, Beverage concepts, Wellness products, Natural aroma formulations, Cosmetic industries</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Difference Section -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h4 class="text-white text-center mb-4" style="font-size: 1.5rem;">Difference Between Cinnamon Leaf Oil & Cinnamon Bark Oil</h4>
+            <p id="differenceDescription" class="text-white-50 text-center mb-4">Understanding the Two Essential Oils</p>
+            
+            <div class="table-responsive">
+              <table class="table table-dark table-hover">
+                <thead>
+                  <tr>
+                    <th>Characteristic</th>
+                    <th>Cinnamon Leaf Oil</th>
+                    <th>Cinnamon Bark Oil</th>
+                  </tr>
+                </thead>
+                <tbody id="differenceTable">
+                  <tr>
+                    <td>Source</td>
+                    <td>Cinnamon Leaves</td>
+                    <td>Inner Cinnamon Bark</td>
+                  </tr>
+                  <tr>
+                    <td>Extraction</td>
+                    <td>Steam Distillation</td>
+                    <td>Steam Distillation</td>
+                  </tr>
+                  <tr>
+                    <td>Main Component</td>
+                    <td>Eugenol</td>
+                    <td>Cinnamaldehyde</td>
+                  </tr>
+                  <tr>
+                    <td>Aroma</td>
+                    <td>Warm, spicy, clove-like</td>
+                    <td>Sweet, rich cinnamon</td>
+                  </tr>
+                  <tr>
+                    <td>Strength</td>
+                    <td>Mild to medium</td>
+                    <td>Strong and premium</td>
+                  </tr>
+                  <tr>
+                    <td>Main Uses</td>
+                    <td>Cosmetics, fragrance, wellness</td>
+                    <td>Food, luxury fragrance, premium products</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aroma Profiles -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h4 class="text-white text-center mb-4" style="font-size: 1.5rem;">Aroma Profiles</h4>
+            
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="aroma-card">
+                  <h5 id="leafAromaTitle" class="text-white">Cinnamon Leaf Oil Aroma</h5>
+                  <p id="leafAromaDescription" class="text-white-50 mb-3">Warm and spicy with a distinctive clove-like character.</p>
+                  <h6 class="text-white fw-bold mb-2">Aroma Notes</h6>
+                  <ul id="leafAromaNotes" class="text-white-50">
+                    <li>Herbal</li>
+                    <li>Spicy</li>
+                    <li>Woody</li>
+                    <li>Slightly sweet</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="aroma-card">
+                  <h5 id="barkAromaTitle" class="text-white">Cinnamon Bark Oil Aroma</h5>
+                  <p id="barkAromaDescription" class="text-white-50 mb-3">A powerful traditional cinnamon fragrance with a sweet and luxurious character.</p>
+                  <h6 class="text-white fw-bold mb-2">Aroma Notes</h6>
+                  <ul id="barkAromaNotes" class="text-white-50">
+                    <li>Sweet</li>
+                    <li>Rich</li>
+                    <li>Warm</li>
+                    <li>Intense cinnamon</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Industrial Applications -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h4 class="text-white text-center mb-4" style="font-size: 1.5rem;">Industrial Applications</h4>
+            
+            <div class="row g-4">
+              <div class="col-md-4">
+                <div class="application-card">
+                  <div class="application-icon">
+                    <i class="fas fa-utensils"></i>
+                  </div>
+                  <h5 id="foodAppTitle" class="text-white">Food & Beverage Industry</h5>
+                  <p id="foodAppDescription" class="text-white-50 mb-2">Our cinnamon essential oils are used for:</p>
+                  <ul id="foodAppList" class="text-white-50">
+                    <li>✓ Natural flavour development</li>
+                    <li>✓ Tea and beverage concepts</li>
+                    <li>✓ Food ingredient solutions</li>
+                    <li>✓ Cinnamon-based product innovation</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="application-card">
+                  <div class="application-icon">
+                    <i class="fas fa-pump-soap"></i>
+                  </div>
+                  <h5 id="cosmeticAppTitle" class="text-white">Cosmetics & Personal Care</h5>
+                  <p id="cosmeticAppDescription" class="text-white-50 mb-2">Applications include:</p>
+                  <ul id="cosmeticAppList" class="text-white-50">
+                    <li>✓ Perfumes</li>
+                    <li>✓ Body care products</li>
+                    <li>✓ Natural fragrance products</li>
+                    <li>✓ Cosmetic formulations</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="application-card">
+                  <div class="application-icon">
+                    <i class="fas fa-spa"></i>
+                  </div>
+                  <h5 id="wellnessAppTitle" class="text-white">Wellness Industry</h5>
+                  <p id="wellnessAppDescription" class="text-white-50 mb-2">Used in:</p>
+                  <ul id="wellnessAppList" class="text-white-50">
+                    <li>✓ Aromatherapy products</li>
+                    <li>✓ Spa products</li>
+                    <li>✓ Relaxation blends</li>
+                    <li>✓ Natural wellness solutions</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manufacturing Support -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <div class="manufacturing-card">
+              <h5 id="manufacturingTitle" class="text-white">Manufacturing & Product Development</h5>
+              <p id="manufacturingDescription" class="text-white-50 mb-3">Supporting businesses with:</p>
+              <ul id="manufacturingList" class="text-white-50">
+                <li>✓ Custom ingredient solutions</li>
+                <li>✓ Private label products</li>
+                <li>✓ Product development partnerships</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality Documentation -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <div class="documentation-card">
+              <h5 id="docTitle" class="text-white">Quality Documentation</h5>
+              <p id="docSubtitle" class="text-white-50 mb-3">COA / GC-MS / Technical Documents</p>
+              <p id="docDescription" class="text-white-50 mb-3">Every essential oil batch can be supported with detailed quality documentation to ensure transparency and international compliance.</p>
+              <h6 class="text-white fw-bold mb-2">Available documents include:</h6>
+              <ul id="docList" class="text-white-50">
+                <li>✓ Certificate of Analysis (COA)</li>
+                <li>✓ GC-MS Analysis Reports</li>
+                <li>✓ Safety Data Sheet (SDS)</li>
+                <li>✓ Product Specifications</li>
+                <li>✓ Batch Traceability Information</li>
+                <li>✓ Export Documentation</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Safety Warning -->
+        <div class="row">
+          <div class="col-12">
+            <div class="safety-warning-card">
+              <div class="safety-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <h5 id="safetyTitle" class="text-white">Essential Oil Safety</h5>
+              <p id="safetySubtitle" class="text-white-50 mb-3">Professional Use / Safety Disclaimer</p>
+              <ul id="safetyWarnings" class="text-white-50">
+                <li>⚠️ Do not consume directly</li>
+                <li>⚠️ Do not apply undiluted to skin</li>
+                <li>⚠️ For professional use only</li>
+                <li>⚠️ Always follow proper dilution guidelines</li>
+                <li>⚠️ Keep out of reach of children</li>
+                <li>⚠️ Store in a cool, dark place</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Statement -->
+        <div class="row">
+          <div class="col-12 text-center">
+            <p id="essentialOilsFooter" class="text-white-50 fst-italic">Authentic Ceylon Cinnamon Quality - From our family estate in Galle, Sri Lanka, every drop represents generations of cinnamon craftsmanship, sustainable farming and uncompromising quality. Pure. Natural. Authentic Ceylon Cinnamon.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quality section -->
+    <section class="quality reveal-scale">
+      <div class="container">
+        <div class="quality-content">
+          <h2>QUALITY ASSURANCE</h2>
+          <p>Every batch of Cinnamon Heritage products undergoes rigorous laboratory testing for purity, moisture content and coumarin levels. We hold ISO 22000, HACCP and Sri Lanka Standards Institution certifications. Our sustainable farming practices protect the environment, empower our local community and guarantee that our cinnamon reaches you 100% natural &mdash; free of additives, preservatives and artificial colouring.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq py-5 reveal">
+      <div class="container py-4">
+        <div class="row justify-content-center mb-5 text-center">
+          <div class="col-lg-8">
+            <span class="text-uppercase fw-bold" style="color: var(--accent); letter-spacing: 2px; font-size: 0.9rem;">Common Enquiries</span>
+            <h2 class="text-white mt-2 mb-3" style="font-size: 2.5rem; font-family: 'Oswald', sans-serif;">Frequently Asked Questions</h2>
+            <p class="text-white-50" style="font-size: 1.1rem;">Got questions about Ceylon Cinnamon, our estate visits, or wholesale partnerships? Find all your answers below.</p>
+          </div>
+        </div>
+        
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <div class="accordion faq-accordion" id="faqAccordion">
+              <div class="text-center py-4 text-white-50">
+                <div class="spinner-border text-accent mb-2" role="status"></div>
+                <div>Loading FAQ directory...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact section -->
+    <section id="contact" class="contact py-5 reveal">
+      <div class="container py-4">
+        <div class="row justify-content-center mb-5 text-center">
+          <div class="col-lg-8">
+            <h2 class="text-white mb-3" style="font-size: 2.5rem; font-family: 'Oswald', sans-serif;">Contact Us</h2>
+            <p class="text-white-50" style="font-size: 1.1rem;">Whether you're a wholesaler, retailer or artisan brand looking for authentic Ceylon cinnamon, we'd love to hear from you. Reach out to discuss bulk orders, private labelling or any enquiries about our products.</p>
+          </div>
+        </div>
+
+        <div class="row g-5 justify-content-center align-items-stretch">
+          <!-- Contact Info Column -->
+          <div class="col-lg-5">
+            <div class="contact-info-list d-flex flex-column gap-5 px-3 h-100 justify-content-center">
+              <!-- Address -->
+              <div class="d-flex align-items-center gap-4">
+                <div class="contact-icon bg-white rounded-circle d-flex justify-content-center align-items-center flex-shrink-0" style="width: 60px; height: 60px; color: #1a1a1a;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                </div>
+                <div>
+                  <h5 class="mb-1" style="color: var(--accent); font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600;">Address</h5>
+                  <p class="text-white mb-0" style="font-size: 0.95rem; line-height: 1.5;">Galle Unanwitiya,<br>Sri Lanka</p>
+                </div>
+              </div>
+              
+              <!-- Phone -->
+              <div class="d-flex align-items-center gap-4">
+                <div class="contact-icon bg-white rounded-circle d-flex justify-content-center align-items-center flex-shrink-0" style="width: 60px; height: 60px; color: #1a1a1a;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                </div>
+                <div>
+                  <h5 class="mb-1" style="color: var(--accent); font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600;">Phone</h5>
+                  <p class="text-white mb-0" style="font-size: 0.95rem;">+94 77 123 4567</p>
+                </div>
+              </div>
+
+              <!-- Email -->
+              <div class="d-flex align-items-center gap-4">
+                <div class="contact-icon bg-white rounded-circle d-flex justify-content-center align-items-center flex-shrink-0" style="width: 60px; height: 60px; color: #1a1a1a;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                </div>
+                <div>
+                  <h5 class="mb-1" style="color: var(--accent); font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600;">Email</h5>
+                  <p class="text-white mb-0" style="font-size: 0.95rem; word-break: break-all;">info@cinnamonheritage.com</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="card border-0 rounded-0 shadow-lg p-5">
+              <h3 class="mb-4" style="color: #333; font-family: 'Inter', sans-serif; font-weight: 600; text-transform: none;">Send Message</h3>
+              <form id="contactForm" novalidate>
+                <div class="form-floating mb-3">
+                  <select class="form-select rounded-0 border-0 border-bottom" id="contactEnquiryType" required style="background: transparent;">
+                    <option value="general">General Enquiry</option>
+                    <option value="b2b">B2B Partnership Enquiry</option>
+                  </select>
+                  <label for="contactEnquiryType">Enquiry Type</label>
+                </div>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control rounded-0 border-0 border-bottom" id="contactName" name="from_name" placeholder="Full Name" required style="background: transparent;">
+                      <label for="contactName">Full Name</label>
+                      <div class="invalid-feedback">Please enter your name.</div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="tel" class="form-control rounded-0 border-0 border-bottom" id="contactPhone" name="phone" placeholder="Phone Number" style="background: transparent;">
+                      <label for="contactPhone">Phone Number</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-floating mb-3">
+                  <input type="email" class="form-control rounded-0 border-0 border-bottom" id="contactEmail" name="from_email" placeholder="Email Address" required style="background: transparent;">
+                  <label for="contactEmail">Email Address</label>
+                  <div class="invalid-feedback">Please enter a valid email.</div>
+                </div>
+                <div class="form-floating mb-3">
+                  <input type="text" class="form-control rounded-0 border-0 border-bottom" id="contactSubject" name="subject" placeholder="Subject" style="background: transparent;">
+                  <label for="contactSubject">Subject</label>
+                </div>
+                <div class="form-floating mb-4">
+                  <textarea class="form-control rounded-0 border-0 border-bottom" id="contactMessage" name="message" placeholder="Your Message" required style="height: 120px; background: transparent; resize: none;"></textarea>
+                  <label for="contactMessage">Your Message</label>
+                  <div class="invalid-feedback">Please enter your message.</div>
+                </div>
+                <div id="contactFormError" class="alert alert-danger py-2 small d-none mb-3" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+                <button type="submit" id="contactSubmitBtn" class="btn text-white rounded-0 px-5 py-3 fw-bold text-uppercase w-100" style="background-color: var(--accent); font-family: 'Oswald', sans-serif; letter-spacing: 1px; transition: all 0.3s ease;">
+                  <span id="submitBtnText">Send Message</span>
+                  <span id="submitBtnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Process Modal -->
+  <div id="processModal" class="modal-overlay">
+    <div class="modal-content">
+      <span class="modal-close" id="closeModal">&times;</span>
+      <div class="modal-image" id="modalImg"></div>
+      <div class="modal-info">
+        <span class="step-num" id="modalNum">01</span>
+        <h2 id="modalTitle">Harvesting</h2>
+        <div id="modalPriceContainer" class="mb-3 d-none">
+          <span class="fs-3 fw-bold" style="color: #a65d25;" id="modalPrice"></span>
+          <span class="text-muted text-decoration-line-through ms-2 small" id="modalOldPrice"></span>
+        </div>
+        <div id="modalStockContainer" class="mb-2 d-none">
+          <small class="text-muted">Available Stock: <span id="modalStock"></span></small>
+        </div>
+        <p id="modalDesc">Detailed description...</p>
+        <div id="modalActionContainer" class="mt-4 d-none">
+          <button id="modalBuyBtn" class="btn btn-dark rounded-0 fw-bold px-4 py-2 text-uppercase" style="background: #a65d25; border: none; letter-spacing: 1px;">Buy Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer-glass mt-5 pt-5 pb-3">
+    <div class="container">
+      <div class="row g-4 mb-4 pb-4 border-bottom" style="border-color: rgba(255,255,255,0.1) !important;">
+        <!-- Column 1: Brand Information -->
+        <div class="col-lg-3 col-md-6">
+          <h4 class="text-white fw-bold mb-4" style="font-family: 'Oswald', sans-serif;" id="footerTitle">CINNAMON <span style="color: #d4873a;">HERITAGE</span></h4>
+          <p class="text-white-50 small mb-4" id="footerDescription">Premium Ceylon Cinnamon straight from our family estate in Galle, Sri Lanka. Discover authentic cinnamon, essential oils and unforgettable experiences inspired by Sri Lankan heritage.</p>
+          <ul class="list-unstyled text-white-50 small" id="footerContactInfo">
+            <!-- Contact info loaded dynamically -->
+          </ul>
+        </div>
+        
+        <!-- Column 2: Explore -->
+        <div class="col-lg-3 col-md-6">
+          <h5 class="text-white mb-4 fw-bold text-uppercase" style="letter-spacing: 1px;">Explore</h5>
+          <ul class="list-unstyled footer-links" id="footerExploreLinks">
+            <!-- Explore links loaded dynamically -->
+          </ul>
+        </div>
+        
+        <!-- Column 3: Policies -->
+        <div class="col-lg-3 col-md-6">
+          <h5 class="text-white mb-4 fw-bold text-uppercase" style="letter-spacing: 1px;">Policies</h5>
+          <ul class="list-unstyled footer-links" id="footerPolicyLinks">
+            <!-- Policy links loaded dynamically -->
+          </ul>
+        </div>
+        
+        <!-- Column 4: Follow Us -->
+        <div class="col-lg-3 col-md-6">
+          <h5 class="text-white mb-4 fw-bold text-uppercase" style="letter-spacing: 1px;">Follow Us</h5>
+          <div class="d-flex gap-3 flex-wrap" id="footerSocialIcons">
+            <!-- Social media icons loaded dynamically -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Bottom Bar -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center pt-3">
+        <p class="mb-0 text-white-50 small" id="footerCopyright">© 2026 CINNAMON HERITAGE. ALL RIGHTS RESERVED.</p>
+        <p class="mb-0 text-white-50 small text-center" id="footerCertifications">100% Organic • Pure Ceylon • ISO 22000 • HACCP</p>
+        <div class="mt-3 mt-md-0 d-flex align-items-center gap-3" id="footerDeveloperCredits">
+          <a href="https://www.malithatishamal.42web.io" target="_blank" rel="noopener noreferrer" class="text-white-50 small text-decoration-none hover-accent" id="developerWebsiteLink">
+            Designed & Developed by Malitha Tishamal
+          </a>
+          <a href="https://linkedin.com/in/malithatishamal" target="_blank" rel="noopener noreferrer" class="text-white-50 small text-decoration-none hover-accent" id="developerLinkedinLink">
+            <i class="bi bi-linkedin"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- WhatsApp Floating Button -->
+  <a href="https://wa.me/94771234567?text=Hello%20Cinnamon%20Heritage%2C%20I%20would%20like%20to%20inquire%20about%20your%20products." target="_blank" id="whatsappBtn" class="position-fixed d-flex justify-content-center align-items-center rounded-circle shadow-lg text-white text-decoration-none" style="bottom: 30px; right: 30px; width: 60px; height: 60px; background-color: #25D366; z-index: 999; transition: transform 0.3s ease;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+  <!-- Toast Notification -->
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+    <div id="contactToast" class="toast align-items-center border-0 rounded-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body fw-bold" id="toastMessage">Message sent successfully!</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <!-- Floating Promo Alert — populated dynamically by JS -->
+  <div id="promoAlert" class="promo-alert-card"></div>
+
+  <!-- Cart Drawer -->
+  <div id="cartDrawer" class="cart-drawer">
+    <div class="cart-drawer-header">
+      <h4 class="mb-0 text-white" style="font-family: 'Oswald', sans-serif; letter-spacing: 1px;"><i class="fas fa-shopping-cart me-2" style="color: var(--accent);"></i>YOUR CART</h4>
+      <button class="cart-close-btn" id="closeCartBtn">&times;</button>
+    </div>
+    <div class="cart-drawer-body" id="cartDrawerItems">
+      <!-- Loaded dynamically via JS -->
+    </div>
+    <div class="cart-drawer-footer">
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-white-50">Subtotal</span>
+        <span id="cartSubtotal" class="fw-bold text-white">LKR 0.00</span>
+      </div>
+      <div class="d-flex justify-content-between mb-3">
+        <span class="text-white-50">Discount</span>
+        <span id="cartDiscount" class="fw-bold text-success">- LKR 0.00</span>
+      </div>
+      <div class="d-flex justify-content-between border-top border-secondary pt-3 mb-4">
+        <span class="h5 mb-0 text-white" style="font-family: 'Oswald', sans-serif;">TOTAL</span>
+        <span id="cartTotal" class="h5 mb-0 fw-bold text-accent" style="font-family: 'Oswald', sans-serif;">LKR 0.00</span>
+      </div>
+      <button class="btn w-100 py-3 fw-bold text-uppercase rounded-0" id="cartCheckoutBtn" style="background: var(--accent); color: #fff; font-family: 'Oswald', sans-serif; letter-spacing: 1px; border: none; transition: background 0.3s;">Proceed to Checkout</button>
+    </div>
+  </div>
+  <div class="cart-overlay" id="cartOverlay"></div>
+
+  <!-- Glassmorphic Auth Modal -->
+  <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-auth-card">
+        <div class="modal-header border-0 pb-0">
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body px-4 px-md-5 pb-5">
+          <!-- Auth Form Toggles -->
+          <div class="d-flex justify-content-center gap-4 mb-4 auth-tabs">
+            <a href="#" class="auth-tab-link active" id="toggleLoginTab">Login</a>
+            <a href="#" class="auth-tab-link" id="toggleSignupTab">Sign Up</a>
+          </div>
+
+          <!-- Login Tab -->
+          <div id="authLoginTab">
+            <h3 class="text-center mb-4 text-white" style="font-family: 'Oswald', sans-serif; letter-spacing: 1.5px;">WELCOME BACK</h3>
+            <form id="clientLoginForm">
+              <div class="mb-3">
+                <label class="form-label text-white-50 small">Email Address</label>
+                <input type="email" class="form-control glass-input" id="clientLoginEmail" placeholder="name@example.com" required>
+              </div>
+              <div class="mb-4">
+                <label class="form-label text-white-50 small">Password</label>
+                <input type="password" class="form-control glass-input" id="clientLoginPassword" placeholder="••••••••" required>
+              </div>
+              <div id="clientLoginError" class="alert alert-danger py-2 small d-none" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+              <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0 mb-3" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">Sign In</button>
+            </form>
+          </div>
+
+          <!-- Signup Tab -->
+          <div id="authSignupTab" class="d-none">
+            <h3 class="text-center mb-4 text-white" style="font-family: 'Oswald', sans-serif; letter-spacing: 1.5px;">CREATE ACCOUNT</h3>
+            <form id="clientSignupForm">
+              
+              <!-- Role Selector -->
+              <div class="mb-4 text-center">
+                <label class="form-label text-white-50 small d-block mb-2">Register As</label>
+                <div class="btn-group w-100" role="group">
+                  <input type="radio" class="btn-check" name="signupRole" id="signupRoleUser" value="customer" checked autocomplete="off">
+                  <label class="btn btn-outline-light rounded-0" for="signupRoleUser" style="font-size:0.85rem; letter-spacing:0.5px;">Customer / User</label>
+
+                  <input type="radio" class="btn-check" name="signupRole" id="signupRoleAdmin" value="admin" autocomplete="off">
+                  <label class="btn btn-outline-light rounded-0" for="signupRoleAdmin" style="font-size:0.85rem; letter-spacing:0.5px;">Admin / Agent</label>
+                </div>
+              </div>
+
+              <!-- Profile Pic Upload Section -->
+              <div class="text-center mb-3" id="signupPicUploadSection">
+                <div class="position-relative d-inline-block">
+                  <img id="signupPicPreview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Profile Picture" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid var(--accent); background: rgba(255,255,255,0.05);">
+                  <label for="signupPicInput" class="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center cursor-pointer" style="width: 28px; height: 28px; border: 1.5px solid var(--accent); cursor: pointer;">
+                    <i class="fas fa-camera" style="font-size: 0.75rem;"></i>
+                  </label>
+                  <input type="file" id="signupPicInput" accept="image/*" class="d-none">
+                  <input type="hidden" id="signupPicUrl" value="">
+                </div>
+                <div id="picUploadSpinner" class="spinner-border spinner-border-sm text-accent d-none mt-1" role="status"></div>
+                <div class="text-white-50 small mt-1" style="font-size: 0.75rem;">Upload Profile Photo (Optional)</div>
+              </div>
+
+              <div class="row g-2" id="signupNameRow">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">First Name</label>
+                  <input type="text" class="form-control glass-input" id="signupFirstName" placeholder="John" required>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">Last Name</label>
+                  <input type="text" class="form-control glass-input" id="signupLastName" placeholder="Doe" required>
+                </div>
+              </div>
+              <div class="row g-2">
+                <div class="col-md-12 mb-2 d-none" id="signupUsernameRow">
+                  <label class="form-label text-white-50 small">Username <span class="text-white-25" style="font-size:0.7rem;">(auto-generated)</span></label>
+                  <input type="text" class="form-control glass-input" id="signupUsername" placeholder="johndoe">
+                </div>
+                <div class="col-md-12 mb-2">
+                  <label class="form-label text-white-50 small">NIC Number</label>
+                  <input type="text" class="form-control glass-input" id="signupNic" placeholder="1999XXXXXXXX" required>
+                </div>
+              </div>
+              <div class="row g-2" id="signupMobileRow">
+                <div class="col-md-12 mb-2">
+                  <label class="form-label text-white-50 small">Mobile Number</label>
+                  <input type="tel" class="form-control glass-input" id="signupMobile" placeholder="07XXXXXXXX" required>
+                </div>
+              </div>
+              <div class="row g-2" id="signupLocationRow">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">Province</label>
+                  <select class="form-control glass-input" id="signupProvince" required>
+                    <option value="">Select Province</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label text-white-50 small">District (City)</label>
+                  <select class="form-control glass-input" id="signupCity" required disabled>
+                    <option value="">Select District</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label text-white-50 small">Email Address</label>
+                <input type="email" class="form-control glass-input" id="signupEmail" placeholder="john@example.com" required>
+              </div>
+              <div class="mb-2">
+                <label class="form-label text-white-50 small">Password</label>
+                <input type="password" class="form-control glass-input" id="signupPassword" placeholder="•••••••• (Min 6 chars)" required minlength="6">
+              </div>
+              <div class="mb-4" id="signupConfirmPasswordGroup">
+                <label class="form-label text-white-50 small">Confirm Password</label>
+                <input type="password" class="form-control glass-input" id="signupConfirmPassword" placeholder="••••••••" required>
+              </div>
+              <div id="clientSignupError" class="alert alert-danger py-2 small d-none" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+              <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">Sign Up</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile Modal -->
+  <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-auth-card">
+        <div class="modal-header border-0 pb-0">
+          <h4 class="modal-title text-white fw-bold" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-user-circle me-2 text-accent"></i>MY PROFILE</h4>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body px-4 px-md-5 pb-5 text-center">
+          <div class="mb-4 position-relative d-inline-block">
+            <img id="profilePicPreview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a6a6a6'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Profile" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--accent); background: rgba(255,255,255,0.05);">
+            <label for="profilePicInput" class="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center cursor-pointer" style="width: 32px; height: 32px; border: 1.5px solid var(--accent); cursor: pointer;">
+              <i class="fas fa-camera" style="font-size: 0.85rem;"></i>
+            </label>
+            <input type="file" id="profilePicInput" accept="image/*" class="d-none">
+            <div id="profilePicSpinner" class="spinner-border spinner-border-sm text-accent d-none mt-2" role="status"></div>
+            <input type="hidden" id="profilePicUrl" value="">
+          </div>
+          
+          <form id="profileUpdateForm" class="text-start">
+            <div class="row g-2">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">First Name</label>
+                <input type="text" class="form-control glass-input" id="profileFirstName" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Last Name</label>
+                <input type="text" class="form-control glass-input" id="profileLastName" required>
+              </div>
+            </div>
+            <div class="row g-2" id="profileMobileRow">
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Mobile Number</label>
+                <input type="tel" class="form-control glass-input" id="profileMobile" required>
+              </div>
+            </div>
+            <div class="row g-2" id="profileLocationRow">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Province</label>
+                <select class="form-control glass-input" id="profileProvince" required>
+                  <option value="">Select Province</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">District (City)</label>
+                <select class="form-control glass-input" id="profileCity" required disabled>
+                  <option value="">Select District</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-white-50 small">NIC Number</label>
+              <input type="text" class="form-control glass-input" id="profileNic" required>
+            </div>
+            <div class="mb-4">
+              <label class="form-label text-white-50 small">Email Address (Read Only)</label>
+              <input type="email" class="form-control glass-input" id="profileEmail" readonly style="opacity: 0.6; cursor: not-allowed;">
+            </div>
+            <div id="profileUpdateError" class="alert alert-danger py-2 small d-none" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+            <div id="profileUpdateSuccess" class="alert alert-success py-2 small d-none" style="background: rgba(40,167,69,0.2); border: 1px solid rgba(40,167,69,0.4); color: #85ff93;">Profile updated successfully!</div>
+            <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">Save Settings</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B2B Enquiry Modal -->
+  <div class="modal fade" id="b2bEnquiryModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content glass-auth-card">
+        <div class="modal-header border-0 pb-0">
+          <h4 class="modal-title text-white fw-bold" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-handshake me-2" style="color: var(--accent);"></i>Request a Partnership</h4>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body px-4 px-md-5 pb-5">
+          <p class="text-white-50 mb-4">Tell us about your business requirements and our team will get back to you with tailored Ceylon Cinnamon solutions.</p>
+          
+          <form id="b2bEnquiryForm">
+            <!-- Company Information -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Company Information</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Company Name *</label>
+                <input type="text" class="form-control glass-input" id="b2bCompanyName" placeholder="ABC Foods Ltd." required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Company Website</label>
+                <input type="url" class="form-control glass-input" id="b2bWebsite" placeholder="www.company.com">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Country *</label>
+                <input type="text" class="form-control glass-input" id="b2bCountry" placeholder="United Kingdom" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Destination Market *</label>
+                <input type="text" class="form-control glass-input" id="b2bDestinationMarket" placeholder="United Kingdom" required>
+              </div>
+            </div>
+
+            <!-- Contact Details -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Contact Details</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Contact Person *</label>
+                <input type="text" class="form-control glass-input" id="b2bContactPerson" placeholder="John Smith" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Position / Job Title</label>
+                <input type="text" class="form-control glass-input" id="b2bPosition" placeholder="Purchasing Manager">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Email Address *</label>
+                <input type="email" class="form-control glass-input" id="b2bEmail" placeholder="john@company.com" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Phone Number *</label>
+                <input type="tel" class="form-control glass-input" id="b2bPhone" placeholder="+44 20 1234 5678" required>
+              </div>
+            </div>
+
+            <!-- Business Information -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Business Information</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Industry *</label>
+                <select class="form-control glass-input" id="b2bIndustry" required>
+                  <option value="">Select Industry</option>
+                  <option value="Manufacturer">Manufacturer</option>
+                  <option value="Importer">Importer</option>
+                  <option value="Distributor">Distributor</option>
+                  <option value="Retailer">Retailer</option>
+                  <option value="Hospitality">Hospitality</option>
+                  <option value="Product Developer">Product Developer</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Product Requirements -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Product Requirements</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Intended Product *</label>
+                <input type="text" class="form-control glass-input" id="b2bIntendedProduct" placeholder="Ceylon Cinnamon Powder" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Ingredient Required *</label>
+                <input type="text" class="form-control glass-input" id="b2bIngredientRequired" placeholder="Ceylon Cinnamon Powder" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Trial Quantity</label>
+                <input type="text" class="form-control glass-input" id="b2bTrialQuantity" placeholder="100 kg">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Estimated Annual Volume</label>
+                <input type="text" class="form-control glass-input" id="b2bAnnualVolume" placeholder="5,000 kg">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Preferred Pack Size</label>
+                <input type="text" class="form-control glass-input" id="b2bPackSize" placeholder="25 kg">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Packaging Type</label>
+                <input type="text" class="form-control glass-input" id="b2bPackagingType" placeholder="Kraft Bag / Vacuum Pack">
+              </div>
+            </div>
+
+            <!-- Documentation & Certifications -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Documentation & Certifications</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Required Documentation / Certifications</label>
+                <div class="d-flex flex-wrap gap-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="b2bDocISO" value="ISO 22000">
+                    <label class="form-check-label text-white-50 small" for="b2bDocISO">ISO 22000</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="b2bDocHACCP" value="HACCP">
+                    <label class="form-check-label text-white-50 small" for="b2bDocHACCP">HACCP</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="b2bDocOrganic" value="Organic Certificate">
+                    <label class="form-check-label text-white-50 small" for="b2bDocOrganic">Organic Certificate</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="b2bDocCOA" value="Certificate of Analysis (COA)">
+                    <label class="form-check-label text-white-50 small" for="b2bDocCOA">Certificate of Analysis (COA)</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="b2bDocExport" value="Export Documents">
+                    <label class="form-check-label text-white-50 small" for="b2bDocExport">Export Documents</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="b2bDocOther" value="Other">
+                    <label class="form-check-label text-white-50 small" for="b2bDocOther">Other</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Project Information -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Project Information</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Target Launch Date</label>
+                <input type="date" class="form-control glass-input" id="b2bTargetLaunchDate">
+              </div>
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Message / Technical Requirements</label>
+                <textarea class="form-control glass-input" id="b2bMessage" rows="3" placeholder="Any specific requirements or technical specifications..."></textarea>
+              </div>
+            </div>
+
+            <div id="b2bEnquiryError" class="alert alert-danger py-2 small d-none" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+            <div id="b2bEnquirySuccess" class="alert alert-success py-2 small d-none" style="background: rgba(40,167,69,0.2); border: 1px solid rgba(40,167,69,0.4); color: #85ff93;">Thank you for your enquiry. Our B2B team will contact you within 2–3 business days.</div>
+            
+            <div class="d-flex gap-2 mt-4">
+              <button type="submit" class="btn flex-grow-1 py-3 fw-bold text-uppercase rounded-0" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">
+                <span id="b2bSubmitText">Submit Enquiry</span>
+                <span id="b2bSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+              </button>
+              <button type="button" class="btn py-3 fw-bold text-uppercase rounded-0" style="background: rgba(255,255,255,0.1); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:1px solid rgba(255,255,255,0.2);" onclick="document.getElementById('b2bEnquiryForm').reset();">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Experience Booking Modal -->
+  <div class="modal fade" id="experienceBookingModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content glass-auth-card">
+        <div class="modal-header border-0 pb-0">
+          <h4 class="modal-title text-white fw-bold" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-calendar-alt me-2" style="color: var(--accent);"></i>Book Your Experience</h4>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body px-4 px-md-5 pb-5">
+          <p class="text-white-50 mb-4">Plan your visit to Cinnamon Heritage and immerse yourself in the authentic world of Ceylon Cinnamon.</p>
+          
+          <form id="experienceBookingForm">
+            <!-- Personal Information -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Personal Information</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Full Name *</label>
+                <input type="text" class="form-control glass-input" id="experienceName" placeholder="Your Name" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Email Address *</label>
+                <input type="email" class="form-control glass-input" id="experienceEmail" placeholder="your@email.com" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Phone Number *</label>
+                <input type="tel" class="form-control glass-input" id="experiencePhone" placeholder="+94 XX XXX XXXX" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Country / Region *</label>
+                <input type="text" class="form-control glass-input" id="experienceCountry" placeholder="Sri Lanka" required>
+              </div>
+            </div>
+
+            <!-- Visit Details -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Visit Details</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Visit Type *</label>
+                <select class="form-control glass-input" id="experienceVisitType" required>
+                  <option value="">Select Visit Type</option>
+                  <option value="Guided Estate Tour">Guided Estate Tour</option>
+                  <option value="Educational Visit">Educational Visit</option>
+                  <option value="Business Visit">Business Visit</option>
+                  <option value="Family Experience">Family Experience</option>
+                  <option value="Group Tour">Group Tour</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Preferred Visit Date *</label>
+                <input type="date" class="form-control glass-input" id="experienceDate" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Preferred Time *</label>
+                <input type="time" class="form-control glass-input" id="experienceTime" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Number of Visitors *</label>
+                <input type="number" class="form-control glass-input" id="experienceVisitors" placeholder="2" min="1" required>
+              </div>
+            </div>
+
+            <!-- Experience Selection -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Experience Selection</h6>
+            <div class="mb-4">
+              <label class="form-label text-white-50 small">Select the experiences you would like to enjoy:</label>
+              <div class="d-flex flex-wrap gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expGuidedWalk" value="Guided Cinnamon Estate Walk">
+                  <label class="form-check-label text-white-50 small" for="expGuidedWalk">Guided Cinnamon Estate Walk</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expHarvesting" value="Harvesting & Peeling Demonstration">
+                  <label class="form-check-label text-white-50 small" for="expHarvesting">Harvesting & Peeling Demonstration</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expHandsOn" value="Hands-on Cinnamon Activity">
+                  <label class="form-check-label text-white-50 small" for="expHandsOn">Hands-on Cinnamon Activity</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expTeaTasting" value="Cinnamon Tea & Product Tasting">
+                  <label class="form-check-label text-white-50 small" for="expTeaTasting">Cinnamon Tea & Product Tasting</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expFoodExperience" value="Sri Lankan Spice & Food Experience">
+                  <label class="form-check-label text-white-50 small" for="expFoodExperience">Sri Lankan Spice & Food Experience</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expShopVisit" value="Cinnamon Heritage Shop Visit">
+                  <label class="form-check-label text-white-50 small" for="expShopVisit">Cinnamon Heritage Shop Visit</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Business Information (Optional) -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Business / Organization Information (Optional)</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Company / Organization Name</label>
+                <input type="text" class="form-control glass-input" id="experienceCompany" placeholder="Company Name">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Position / Designation</label>
+                <input type="text" class="form-control glass-input" id="experiencePosition" placeholder="Your Position">
+              </div>
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Industry / Institution</label>
+                <input type="text" class="form-control glass-input" id="experienceIndustry" placeholder="Your Industry">
+              </div>
+            </div>
+
+            <!-- Additional Information -->
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Additional Information</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Special Requirements</label>
+                <input type="text" class="form-control glass-input" id="experienceSpecialRequirements" placeholder="Dietary restrictions, accessibility needs, etc.">
+              </div>
+              <div class="col-md-12 mb-2">
+                <label class="form-label text-white-50 small">Message / Notes</label>
+                <textarea class="form-control glass-input" id="experienceMessage" rows="3" placeholder="Any additional information or requests..."></textarea>
+              </div>
+            </div>
+
+            <div id="experienceBookingError" class="alert alert-danger py-2 small d-none mb-3" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+            <div id="experienceBookingSuccess" class="alert alert-success py-2 small d-none mb-3" style="background: rgba(40,167,69,0.2); border: 1px solid rgba(40,167,69,0.4); color: #85ff93;">Thank you for your booking request. Our team will contact you within 24–48 hours to confirm your visit.</div>
+            
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn flex-grow-1 py-3 fw-bold text-uppercase rounded-0" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">
+                <span id="experienceSubmitText">Book Now</span>
+                <span id="experienceSubmitSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+              </button>
+              <button type="button" class="btn py-3 fw-bold text-uppercase rounded-0" style="background: rgba(255,255,255,0.1); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:1px solid rgba(255,255,255,0.2);" onclick="document.getElementById('experienceBookingForm').reset();">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Essential Oils Sample Request Modal -->
+  <div class="modal fade" id="essentialOilsSampleModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-auth-card">
+        <div class="modal-header border-0 pb-0">
+          <h4 class="modal-title text-white fw-bold" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-vial me-2" style="color: var(--accent);"></i>Request Essential Oil Sample</h4>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body px-4 px-md-5 pb-5">
+          <p class="text-white-50 mb-4">We support international buyers, manufacturers and product developers with sample quantities and technical consultation.</p>
+          
+          <form id="essentialOilsSampleForm">
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Available Oils</h6>
+            <div class="mb-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="sampleLeafOil" value="Cinnamon Leaf Oil">
+                <label class="form-check-label text-white-50" for="sampleLeafOil">Cinnamon Leaf Oil</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="sampleBarkOil" value="Cinnamon Bark Oil">
+                <label class="form-check-label text-white-50" for="sampleBarkOil">Cinnamon Bark Oil</label>
+              </div>
+            </div>
+
+            <h6 class="text-white fw-bold mb-3" style="color: var(--accent);">Sample Sizes</h6>
+            <div class="mb-4">
+              <select class="form-control glass-input" id="sampleSize">
+                <option value="10ml">10ml Laboratory Sample</option>
+                <option value="50ml">50ml Evaluation Sample</option>
+                <option value="custom">Custom Bulk Requirements</option>
+              </select>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Full Name *</label>
+                <input type="text" class="form-control glass-input" id="sampleName" placeholder="Your Name" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Company *</label>
+                <input type="text" class="form-control glass-input" id="sampleCompany" placeholder="Company Name" required>
+              </div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Email *</label>
+                <input type="email" class="form-control glass-input" id="sampleEmail" placeholder="your@email.com" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Phone *</label>
+                <input type="tel" class="form-control glass-input" id="samplePhone" placeholder="+94 XX XXX XXXX" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-white-50 small">Country *</label>
+              <input type="text" class="form-control glass-input" id="sampleCountry" placeholder="Your Country" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-white-50 small">Message</label>
+              <textarea class="form-control glass-input" id="sampleMessage" rows="3" placeholder="Any specific requirements..."></textarea>
+            </div>
+
+            <div id="sampleError" class="alert alert-danger py-2 small d-none mb-3" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+            <div id="sampleSuccess" class="alert alert-success py-2 small d-none mb-3" style="background: rgba(40,167,69,0.2); border: 1px solid rgba(40,167,69,0.4); color: #85ff93;">Thank you! Our team will contact you regarding your sample request.</div>
+            
+            <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">
+              <span id="sampleSubmitText">Request Sample</span>
+              <span id="sampleSubmitSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Essential Oils Technical Discussion Modal -->
+  <div class="modal fade" id="essentialOilsTechModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-auth-card">
+        <div class="modal-header border-0 pb-0">
+          <h4 class="modal-title text-white fw-bold" style="font-family: 'Oswald', sans-serif;"><i class="fas fa-flask me-2" style="color: var(--accent);"></i>Technical Discussion</h4>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body px-4 px-md-5 pb-5">
+          <p class="text-white-50 mb-4">Our specialists provide support for businesses requiring detailed information about our essential oils.</p>
+          
+          <div class="mb-4">
+            <h6 class="text-white fw-bold mb-2" style="color: var(--accent);">We can discuss:</h6>
+            <ul class="text-white-50">
+              <li>✓ Product specifications</li>
+              <li>✓ Available quantities</li>
+              <li>✓ Packaging options</li>
+              <li>✓ Private label solutions</li>
+              <li>✓ Custom formulations</li>
+              <li>✓ Export requirements</li>
+            </ul>
+          </div>
+
+          <form id="essentialOilsTechForm">
+            <div class="row g-2 mb-3">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Full Name *</label>
+                <input type="text" class="form-control glass-input" id="techName" placeholder="Your Name" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Company *</label>
+                <input type="text" class="form-control glass-input" id="techCompany" placeholder="Company Name" required>
+              </div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Email *</label>
+                <input type="email" class="form-control glass-input" id="techEmail" placeholder="your@email.com" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label text-white-50 small">Phone *</label>
+                <input type="tel" class="form-control glass-input" id="techPhone" placeholder="+94 XX XXX XXXX" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-white-50 small">Industry *</label>
+              <input type="text" class="form-control glass-input" id="techIndustry" placeholder="Your Industry" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-white-50 small">Technical Requirements</label>
+              <textarea class="form-control glass-input" id="techRequirements" rows="3" placeholder="Describe your technical requirements..."></textarea>
+            </div>
+
+            <div id="techError" class="alert alert-danger py-2 small d-none mb-3" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: #ff858d;"></div>
+            <div id="techSuccess" class="alert alert-success py-2 small d-none mb-3" style="background: rgba(40,167,69,0.2); border: 1px solid rgba(40,167,69,0.4); color: #85ff93;">Thank you! Our technical team will contact you shortly.</div>
+            
+            <button type="submit" class="btn w-100 py-3 fw-bold text-uppercase rounded-0" style="background: var(--accent); color:#fff; font-family:'Oswald',sans-serif; letter-spacing: 1px; border:none;">
+              <span id="techSubmitText">Contact Technical Team</span>
+              <span id="techSubmitSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Script -->
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/footer.js"></script>
+</body>
+</html>

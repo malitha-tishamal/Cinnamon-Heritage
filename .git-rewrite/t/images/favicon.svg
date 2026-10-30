@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#0a0a0f"/>
+  <g transform="translate(12, 8)">
+    <!-- Stylized CH monogram with cinnamon swirl -->
+    <text x="20" y="36" font-family="Georgia, serif" font-size="32" font-weight="bold" fill="#d4873a" text-anchor="middle">CH</text>
+    <!-- Decorative cinnamon curl -->
+    <path d="M8 42 Q20 48 32 42" stroke="#d4873a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M12 46 Q20 50 28 46" stroke="#d4873a" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+  </g>
+</svg>
