@@ -49,3 +49,8 @@ desktop.ini
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# 8. Git Rewrite Artifacts & Shell Scripts
+.git-rewrite/
+*.sh
+scripts/inspect-*.js

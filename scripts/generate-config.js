@@ -37,15 +37,16 @@ function parseEnvFile(filePath) {
 
 const fileEnv = parseEnvFile(envPath);
 
-// Helper to get variable with fallback
+// Helper to get variable with fallback, trimming accidental whitespace/tabs
 function getEnv(key, fallback = '') {
-  return process.env[key] || fileEnv[key] || fallback;
+  const val = process.env[key] || fileEnv[key] || fallback;
+  return typeof val === 'string' ? val.trim() : val;
 }
 
 const config = {
   CLOUDINARY_CLOUD_NAME: getEnv('CLOUDINARY_CLOUD_NAME', 'dqeptzlsb'),
   CLOUDINARY_UPLOAD_PRESET: getEnv('CLOUDINARY_UPLOAD_PRESET', 'flutter_mediq_upload'),
-  FIREBASE_API_KEY: getEnv('FIREBASE_API_KEY', 'AIzaSyCxwS4oCfB4b2vQniNoSjNOq_G_2GvAkdg'),
+  FIREBASE_API_KEY: getEnv('FIREBASE_API_KEY', ''),
   FIREBASE_AUTH_DOMAIN: getEnv('FIREBASE_AUTH_DOMAIN', 'authspark-pq68d.firebaseapp.com'),
   FIREBASE_PROJECT_ID: getEnv('FIREBASE_PROJECT_ID', 'authspark-pq68d'),
   FIREBASE_STORAGE_BUCKET: getEnv('FIREBASE_STORAGE_BUCKET', 'authspark-pq68d.firebasestorage.app'),
