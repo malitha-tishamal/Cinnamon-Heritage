@@ -885,6 +885,14 @@ a.ch-info:hover { border-color: var(--ch-copper); transform: translateX(5px); }
   .ch-tab { flex: 1; padding: 11px 10px; }
   .ch-modal-card { padding: 26px 20px; }
   .ch-panel-content { padding: 22px 20px 30px; }
+  #chLoginBtn { padding: 8px 10px; }
+  #chLoginBtn span { display: none; }
+  .ch-brand { gap: 8px; }
+  .ch-brand-name { font-size: 0.86rem; }
+}
+
+@media (max-width: 420px) {
+  .ch-nav-inner .ch-brand-text { display: none; }
 }
 
 /* ---------- motion preferences ---------- */
