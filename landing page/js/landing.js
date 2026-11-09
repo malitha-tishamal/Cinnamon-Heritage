@@ -418,7 +418,7 @@
     var step = CRAFT[craftIndex];
     var frame = $('#chCraftFrame');
     var img = $('#chCraftImg');
-    img.src = '../images/step' + (craftIndex + 1) + '.png';
+    img.src = 'images/step' + (craftIndex + 1) + '.png';
     img.alt = 'Stage ' + step.n + ' — ' + step.t + ': ' + step.s;
     $('#chCraftBig').textContent = step.n;
     $('#chCraftName').textContent = step.t;
@@ -430,7 +430,7 @@
     void frame.offsetWidth;
     frame.classList.add('is-swapping');
     var next = new Image();
-    next.src = '../images/step' + ((craftIndex + 1) % CRAFT.length + 1) + '.png';
+    next.src = 'images/step' + ((craftIndex + 1) % CRAFT.length + 1) + '.png';
   }
   $('#chCraftPrev').addEventListener('click', function () { setCraft(craftIndex - 1); });
   $('#chCraftNext').addEventListener('click', function () { setCraft(craftIndex + 1); });
@@ -643,7 +643,7 @@
   loginForm.addEventListener('submit', function (e) {
     e.preventDefault();
     clearAuthMsg();
-    if (!firebaseReady()) { showAuthMsg('Sign-in is unavailable offline. Please use the main store sign-in.', false); return; }
+    if (!firebaseReady()) { showAuthMsg('Sign-in is managed securely on the main store portal. Please visit the Cinnamon Heritage store to log in.', false); return; }
     var email = $('#chLoginEmail').value.trim();
     var pass = $('#chLoginPassword').value;
     if (!email || !pass) { showAuthMsg('Enter your email and password to continue.', false); return; }
@@ -666,7 +666,7 @@
   signupForm.addEventListener('submit', function (e) {
     e.preventDefault();
     clearAuthMsg();
-    if (!firebaseReady()) { showAuthMsg('Account creation is unavailable offline. Please use the main store.', false); return; }
+    if (!firebaseReady()) { showAuthMsg('Account creation is managed on the main store portal. Please visit the store to register.', false); return; }
     var name = $('#chSignupName').value.trim();
     var email = $('#chSignupEmail').value.trim();
     var pass = $('#chSignupPassword').value;
@@ -689,7 +689,7 @@
 
   function googleAuth(role) {
     clearAuthMsg();
-    if (!firebaseReady() || typeof window.authGoogleSignIn !== 'function') { showAuthMsg('Google sign-in is unavailable offline.', false); return; }
+    if (!firebaseReady() || typeof window.authGoogleSignIn !== 'function') { showAuthMsg('Google sign-in is managed securely on the main store portal.', false); return; }
     window.authGoogleSignIn(role).then(function (res) {
       if (res && res.success) {
         applySession({ isLoggedIn: true, userId: res.userId || (res.user && res.user.id), username: res.username || (res.user && res.user.username), isAdmin: res.role === 'admin' });
@@ -706,7 +706,7 @@
   $('#chForgotBtn').addEventListener('click', function () {
     var email = $('#chLoginEmail').value.trim();
     if (!email) { showAuthMsg('Enter your email above first, then tap forgot password.', false); $('#chLoginEmail').focus(); return; }
-    if (!firebaseReady() || typeof window.authForgotPassword !== 'function') { showAuthMsg('Password reset is unavailable offline.', false); return; }
+    if (!firebaseReady() || typeof window.authForgotPassword !== 'function') { showAuthMsg('Password reset is managed securely on the main store portal.', false); return; }
     window.authForgotPassword(email).then(function (res) {
       showAuthMsg(res.success ? res.message : friendlyError(res.error), !!res.success);
     });

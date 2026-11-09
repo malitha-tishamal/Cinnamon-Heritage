@@ -55,6 +55,8 @@ html.ch-html { scroll-behavior: smooth; scroll-padding-top: calc(var(--ch-nav-h)
 
 body.ch-page {
   margin: 0;
+  overflow-x: hidden;
+  overflow-x: clip;
   background: var(--ch-espresso);
   color: var(--ch-cream);
   font-family: var(--ch-font-body);
